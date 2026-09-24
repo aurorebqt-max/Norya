@@ -508,3 +508,67 @@ test("modifier date, fuseau, spécialités et année préserve toutes les action
     ),
   );
 });
+
+test("projection incohérente refusée sans écraser les données", async () => {
+  const s = complete(state(), objectives[0]);
+  s.progress["cardio-1"].status = "mastered";
+  const storage = new MemoryStorage();
+  storage.value = JSON.stringify(s);
+  const original = storage.value;
+  const repository = new PreparationRepository(storage, objectives);
+  await assert.rejects(
+    repository.load(() => state()),
+    /incohérents/,
+  );
+  assert.equal(storage.value, original);
+});
+test("rappel et deuxième tour partiels sont repris sans doubler leur durée", () => {
+  let s = complete(state(), objectives[0]);
+  const o = objectives[0];
+  s = recordWork(s, o, {
+    id: "r-part",
+    objectiveId: o.id,
+    on: "2026-09-25",
+    kind: "review",
+    minutes: 4,
+    completed: false,
+    source: "self",
+  });
+  assert.equal(s.progress[o.id].reviewMinutes, 4);
+  assert.equal(s.progress[o.id].reviewCycle, 0);
+  const plan = buildPlan([o], s, "2026-09-25");
+  const first = plan.tasks.find((t) => t.kind === "review");
+  assert.equal(first.minutes, 6);
+  s = complete(s, o, "2026-09-25", "r-finish", "review", "good");
+  assert.equal(s.progress[o.id].reviewCycle, 1);
+  s = recordWork(s, o, {
+    id: "s-part",
+    objectiveId: o.id,
+    on: "2026-10-10",
+    kind: "second",
+    minutes: 5,
+    completed: false,
+    source: "self",
+  });
+  const second = buildPlan([o], s, "2026-10-10").tasks.filter(
+    (t) => t.kind === "second",
+  );
+  assert.equal(
+    second.reduce((n, t) => n + t.minutes, 0),
+    15,
+  );
+});
+test("premier tour terminé après la cible n'est pas présenté comme J−30 réussi", () => {
+  const s = complete(
+    state({
+      year: "2026",
+      examDate: { provisional: "2026-10-20" },
+      firstPassTarget: "2026-09-20",
+    }),
+    objectives[0],
+  );
+  const p = buildPlan([objectives[0]], s, TODAY);
+  assert.equal(p.remainingInitialMinutes, 0);
+  assert.equal(p.feasible, false);
+  assert.equal(p.firstPassForecast, TODAY);
+});

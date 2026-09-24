@@ -1,4 +1,5 @@
 import type { LocalState, Objective } from "../../domain/preparation/types";
+import { recordWork, emptyProgress } from "../../domain/preparation/progress";
 import { isDay } from "../../domain/preparation/dates";
 import { validateProfile } from "../../domain/preparation/profile";
 import { Action, reduceState } from "../../domain/preparation/state";
@@ -59,7 +60,9 @@ export function decodeState(raw: string): LocalState {
   const candidate = parsed as unknown as LocalState;
   const validation = validateProfile({
     ...candidate.profile,
-    name: candidate.profile.name || "Profil non configuré",
+    name: candidate.onboarded
+      ? candidate.profile.name
+      : candidate.profile.name || "Profil non configuré",
   });
   if (validation.length) throw new Error(validation.join(" "));
   if (
@@ -143,6 +146,25 @@ export class PreparationRepository {
       )
         throw new Error(
           "Progression incompatible avec le programme. Les données sont conservées.",
+        );
+    }
+    // Progress is a materialized projection of the append-only work journal.
+    // Verify it on load so a partial/corrupt snapshot cannot claim false completion.
+    let replay: LocalState = { ...state, progress: {}, events: [] };
+    for (const event of state.events) {
+      const objective = this.program.find((o) => o.id === event.objectiveId);
+      if (objective) replay = recordWork(replay, objective, event);
+    }
+    for (const objective of this.program) {
+      const actual = state.progress[objective.id] ?? emptyProgress();
+      const expected = replay.progress[objective.id] ?? emptyProgress();
+      const normalize = (value: object) =>
+        JSON.stringify(
+          Object.entries(value).sort(([a], [b]) => a.localeCompare(b)),
+        );
+      if (normalize(actual) !== normalize(expected))
+        throw new Error(
+          "Historique et progression incohérents. Les données sont conservées.",
         );
     }
     this.current = state;
