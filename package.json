@@ -1,0 +1,34 @@
+{
+  "name": "norya",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "check": "expo install --check",
+    "export:web": "expo export --platform web"
+  },
+  "dependencies": {
+    "expo": "~55.0.31",
+    "expo-constants": "~55.0.17",
+    "expo-font": "~55.0.8",
+    "expo-linking": "~55.0.17",
+    "expo-router": "~55.0.18",
+    "expo-status-bar": "~55.0.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.10",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-web": "~0.21.0",
+    "@expo/vector-icons": "^15.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}

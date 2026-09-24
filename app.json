@@ -1,0 +1,1 @@
+{"expo":{"name":"Norya","slug":"norya","scheme":"norya","version":"1.0.0","orientation":"default","userInterfaceStyle":"light","ios":{"supportsTablet":true,"bundleIdentifier":"app.norya.mobile"},"android":{"package":"app.norya.mobile"},"web":{"bundler":"metro","output":"static"},"plugins":["expo-router"]}}
