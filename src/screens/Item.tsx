@@ -47,6 +47,7 @@ function NephroticSheetView() {
   const [tab, setTab] = useState<"essential" | "deep">("essential");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [definitionId, setDefinitionId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [paused, setPaused] = useState(false);
   const [elapsed, setElapsed] = useState(audioProgress[nephroticSheet.id] ?? 0);
@@ -105,6 +106,20 @@ function NephroticSheetView() {
       <Card>
         <Txt bold size={22}>{tab === "essential" ? "L’essentiel" : nephroticSheet.deepDive.title}</Txt>
         {tab === "essential" ? nephroticSheet.essentialPoints.map((point) => <Txt key={point}>• {point}</Txt>) : <><Txt>{nephroticSheet.deepDive.content}</Txt>{nephroticSheet.deepDive.recommandations.map((point) => <Txt key={point}>• {point}</Txt>)}<Txt bold>{nephroticSheet.pitfallsSheet.title}</Txt>{nephroticSheet.pitfallsSheet.traps.map((point) => <Txt key={point} color="#9A513C">• {point}</Txt>)}</>}
+      </Card>
+      <Card>
+        <Txt bold>Notions importantes</Txt>
+        <View style={s.wrap}>
+          {nephroticSheet.definitions.map((definition) => <Chip key={definition.id} label={definition.term} selected={definition.id === definitionId} onPress={() => setDefinitionId(definition.id)} />)}
+        </View>
+        {(() => {
+          const definition = nephroticSheet.definitions.find((item) => item.id === definitionId);
+          return definition ? <><Txt bold>{definition.term}</Txt><Txt>{definition.short}</Txt>{definition.details && <Txt size={13} color={c.muted}>{definition.details}</Txt>}<Txt size={11} color={c.muted}>Source : {definition.source}</Txt></> : <Txt size={13} color={c.muted}>Touchez un terme pour afficher sa définition.</Txt>;
+        })()}
+      </Card>
+      <Card>
+        <Txt bold>Plan de la fiche</Txt>
+        {nephroticSheet.sections.filter((section) => tab === "essential" ? ["Définition", "Diagnostic", "Étiologies", "Gravité et complications", "Traitement"].includes(section.title) : true).map((section) => <View key={section.id}><Txt bold size={15}>{section.title}</Txt><Txt size={13}>{section.content}</Txt>{section.content.toLowerCase().includes("attente") && <Txt size={11} color="#9A513C">Validation médicale requise avant publication.</Txt>}</View>)}
       </Card>
       <Card style={{ backgroundColor: c.lavender }}>
         <Txt bold size={19}>Écouter la fiche</Txt>

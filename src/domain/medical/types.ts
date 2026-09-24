@@ -17,6 +17,7 @@ export type MedicalSourceVersion = {
   url?: string;
   status: "verified" | "needs_review" | "deprecated";
   notes?: string;
+  accessStatus?: "accessible" | "inaccessible" | "partial";
 };
 
 export type KnowledgeObjective = {
@@ -24,7 +25,7 @@ export type KnowledgeObjective = {
   itemNumber: number; // e.g. 261, 264, 267
   subject: string; // e.g. "Néphrologie"
   title: string;
-  rank: KnowledgeRank;
+  rank?: KnowledgeRank;
   code: string; // e.g. "NÉPHRO-261-01"
   description: string;
   sourceVersionId: string;
@@ -43,7 +44,7 @@ export type Flashcard = {
   objectiveId: string;
   itemNumber: number;
   subject: string;
-  rank: KnowledgeRank;
+  rank?: KnowledgeRank;
   recto: string;
   verso: string;
   clue?: string;
@@ -127,7 +128,7 @@ export type PracticeQuestion = {
   subject: string;
   specialty: string;
   objectiveId: string;
-  rank: KnowledgeRank;
+  rank?: KnowledgeRank;
   text: string;
   choices: QuestionChoice[];
   generalExplanation: string;

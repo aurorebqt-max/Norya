@@ -94,6 +94,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const completeAudio = async (sheetId: string, cardIds: string[]) => {
     const next: Persisted = {
       ...saved,
+      validatedSheets: saved.validatedSheets.includes(sheetId) ? saved.validatedSheets : [...saved.validatedSheets, sheetId],
       audioCompleted: saved.audioCompleted.includes(sheetId) ? saved.audioCompleted : [...saved.audioCompleted, sheetId],
       cards: { ...saved.cards },
     };
