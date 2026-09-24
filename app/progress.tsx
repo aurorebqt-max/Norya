@@ -1,1 +1,1 @@
-export { default } from '../src/screens/Progress';
+export { default } from "../src/screens/Progress";

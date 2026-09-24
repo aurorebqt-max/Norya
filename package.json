@@ -9,9 +9,12 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "check": "expo install --check",
-    "export:web": "expo export --platform web"
+    "export:web": "expo export --platform web",
+    "test": "tsc -p tsconfig.tests.json && node --test tests/*.test.cjs"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~55.0.31",
     "expo-constants": "~55.0.17",
     "expo-font": "~55.0.8",
@@ -23,8 +26,7 @@
     "react-native": "0.83.10",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
-    "react-native-web": "~0.21.0",
-    "@expo/vector-icons": "^15.0.3"
+    "react-native-web": "~0.21.0"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

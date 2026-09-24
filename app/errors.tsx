@@ -1,1 +1,1 @@
-export { default } from '../src/screens/Errors';
+export { default } from "../src/screens/Errors";

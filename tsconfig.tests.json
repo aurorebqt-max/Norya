@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": ".test-build",
+    "rootDir": "src",
+    "types": []
+  },
+  "include": [
+    "src/domain/preparation/**/*.ts",
+    "src/data/program.ts",
+    "src/services/storage/repository.ts"
+  ]
+}

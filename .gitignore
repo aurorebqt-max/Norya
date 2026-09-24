@@ -5,3 +5,5 @@ web-build/
 *.tsbuildinfo
 .env*
 !.env.example
+
+.test-build/

@@ -1,6 +1,82 @@
-import { View } from 'react-native';
-import { router } from 'expo-router';
-import { Screen, Card, Txt, Icon, Button, RowLink, s } from '../components/ui';
-import { colors as c } from '../design/theme';
-const modes=[{id:'questions',title:'Questions isolées',subtitle:'Un objectif, une question à la fois.',icon:'help-circle-outline'},{id:'dossier',title:'Dossiers progressifs',subtitle:'Avancez étape par étape dans un dossier.',icon:'documents-outline'},{id:'lca',title:'Lecture critique d’article',subtitle:'Structurez votre analyse.',icon:'reader-outline'},{id:'examen',title:'Examens blancs',subtitle:'Prenez vos repères avant le jour J.',icon:'timer-outline'}] as const;
-export default function Practice(){return <Screen title="À vous de jouer" subtitle="S’entraîner, comprendre, recommencer. C’est ainsi qu’on progresse."><Card style={{backgroundColor:c.mint}}><View style={s.row}><Icon name="sparkles-outline" color={c.primary}/><Txt bold size={20}>Une séance pour vous</Txt></View><Txt>Consolidez vos habitudes de révision avec un entraînement guidé.</Txt><Button title="Lancer mon entraînement personnalisé" icon="arrow-forward" onPress={()=>router.push('/session?mode=personnalise')}/></Card><View style={{flexDirection:'row',flexWrap:'wrap',gap:18}}>{modes.map(x=><Card key={x.id} style={{flexBasis:300,flexGrow:1}}><RowLink title={x.title} subtitle={x.subtitle} icon={x.icon} href={'/session?mode='+x.id}/><Txt size={12} color={c.muted}>3 étapes de démonstration · Méthode d’apprentissage</Txt></Card>)}</View><RowLink title="Votre carnet d’erreurs" subtitle="Les points fragiles deviennent des points forts." icon="layers-outline" href="/errors"/><RowLink title="Résultats et historique" subtitle="Retrouvez votre progression illustrative." icon="stats-chart-outline" href="/progress"/></Screen>}
+import { View } from "react-native";
+import { router } from "expo-router";
+import { Screen, Card, Txt, Icon, Button, RowLink, s } from "../components/ui";
+import { colors as c } from "../design/theme";
+const modes = [
+  {
+    id: "questions",
+    title: "Questions isolées",
+    subtitle: "Un objectif, une question à la fois.",
+    icon: "help-circle-outline",
+  },
+  {
+    id: "dossier",
+    title: "Dossiers progressifs",
+    subtitle: "Avancez étape par étape dans un dossier.",
+    icon: "documents-outline",
+  },
+  {
+    id: "lca",
+    title: "Lecture critique d’article",
+    subtitle: "Structurez votre analyse.",
+    icon: "reader-outline",
+  },
+  {
+    id: "examen",
+    title: "Examens blancs",
+    subtitle: "Prenez vos repères avant le jour J.",
+    icon: "timer-outline",
+  },
+] as const;
+export default function Practice() {
+  return (
+    <Screen
+      title="À vous de jouer"
+      subtitle="S’entraîner, comprendre, recommencer. C’est ainsi qu’on progresse."
+    >
+      <Card style={{ backgroundColor: c.mint }}>
+        <View style={s.row}>
+          <Icon name="sparkles-outline" color={c.primary} />
+          <Txt bold size={20}>
+            Une séance pour vous
+          </Txt>
+        </View>
+        <Txt>
+          Consolidez vos habitudes de révision avec un entraînement guidé.
+        </Txt>
+        <Button
+          title="Lancer mon entraînement personnalisé"
+          icon="arrow-forward"
+          onPress={() => router.push("/session?mode=personnalise")}
+        />
+      </Card>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+        {modes.map((x) => (
+          <Card key={x.id} style={{ flexBasis: 300, flexGrow: 1 }}>
+            <RowLink
+              title={x.title}
+              subtitle={x.subtitle}
+              icon={x.icon}
+              href={"/session?mode=" + x.id}
+            />
+            <Txt size={12} color={c.muted}>
+              3 étapes de démonstration · Méthode d’apprentissage
+            </Txt>
+          </Card>
+        ))}
+      </View>
+      <RowLink
+        title="Votre carnet d’erreurs"
+        subtitle="Les points fragiles deviennent des points forts."
+        icon="layers-outline"
+        href="/errors"
+      />
+      <RowLink
+        title="Résultats et historique"
+        subtitle="Retrouvez le travail enregistré dans votre préparation."
+        icon="stats-chart-outline"
+        href="/progress"
+      />
+    </Screen>
+  );
+}

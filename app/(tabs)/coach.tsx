@@ -1,1 +1,1 @@
-export { default } from '../../src/screens/Coach';
+export { default } from "../../src/screens/Coach";

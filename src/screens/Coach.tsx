@@ -1,7 +1,125 @@
-import { useState } from 'react';
-import { TextInput, View, KeyboardAvoidingView, Platform } from 'react-native';
-import { Screen, Card, Txt, Chip, Button, Icon, s } from '../components/ui';
-import { colors as c } from '../design/theme';
-import { useDemo } from '../state/DemoProvider';
-const answer=(q:string)=>/retard|planning|temps/i.test(q)?'Vous pouvez commencer par une seule séance courte. Dans le futur, je pourrai répartir le travail restant tout en préservant l’objectif du premier tour à J−30. Pour cette démo, votre planning reste inchangé.':/erreur|diffic/i.test(q)?'Reprenez une seule hésitation dans votre carnet. Notez ce qui vous a bloqué, puis essayez les questions de consolidation. Un petit objectif suffit pour reprendre confiance.':'Pour aujourd’hui, commencez par les 30 minutes de cardiologie, puis faites une pause. Terminez par une séance courte si votre énergie le permet. Ceci est une réponse de démonstration préécrite, sans analyse médicale.';
-export default function Coach(){const {profile}=useDemo();const [messages,setMessages]=useState([{role:'coach',text:'Bonjour '+profile.name+' ! Je suis Norya, votre compagnon de préparation. On avance ensemble, un objectif à la fois ?'}]);const [input,setInput]=useState('');const [voice,setVoice]=useState(false);const send=(text:string)=>{if(!text.trim())return;setMessages(v=>[...v,{role:'user',text:text.trim()},{role:'coach',text:answer(text)}]);setInput('')};return <Screen title="Un coach à vos côtés" subtitle="Pour trouver le prochain pas, même les jours de doute."><KeyboardAvoidingView behavior={Platform.OS==='ios'?'padding':undefined} style={{gap:20,maxWidth:800,width:'100%',alignSelf:'center'}}><View style={s.between}><View style={s.row}><View style={[s.iconBox,{backgroundColor:c.mint}]}><Icon name="sparkles" color={c.primary}/></View><View><Txt bold>Coach Norya</Txt><Txt size={12} color={c.muted}>Conversation de démonstration · Sans IA</Txt></View></View></View>{messages.map((m,i)=><View key={i} style={{alignSelf:m.role==='user'?'flex-end':'flex-start',maxWidth:'92%',backgroundColor:m.role==='user'?c.primary:c.paper,borderRadius:20,padding:20,borderWidth:1,borderColor:m.role==='user'?c.primary:c.line}}><Txt color={m.role==='user'?'white':c.ink}>{m.text}</Txt></View>)}<View style={s.wrap}>{['Que travailler aujourd’hui ?','J’ai pris du retard','Revoir mes erreurs'].map(x=><Chip key={x} label={x} onPress={()=>send(x)}/>)}</View><TextInput accessibilityLabel="Message au coach" style={[s.input,{minHeight:80}]} multiline placeholder="Ce qui vous passe par la tête…" value={input} onChangeText={setInput} maxLength={1000}/><View style={s.row}><View style={{flex:1}}><Button title="Envoyer" icon="arrow-up" disabled={!input.trim()} onPress={()=>send(input)}/></View><Button title="Mode vocal" secondary icon="mic-outline" onPress={()=>setVoice(!voice)}/></View>{voice&&<Card><Icon name="mic-outline" color={c.primary}/><Txt bold>Une conversation, tout simplement.</Txt><Txt>À terme, posez vos questions à voix haute et révisez en dialoguant. Le mode vocal n’est pas activé dans cette maquette ; aucun microphone n’est utilisé.</Txt><Button title="Revenir à l’écrit" secondary onPress={()=>setVoice(false)}/></Card>}</KeyboardAvoidingView></Screen>}
+import { useState } from "react";
+import { TextInput, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Screen, Card, Txt, Chip, Button, Icon, s } from "../components/ui";
+import { colors as c } from "../design/theme";
+import { usePreparation } from "../state/PreparationProvider";
+const answer = (q: string) =>
+  /retard|planning|temps/i.test(q)
+    ? "Vous pouvez commencer par une seule séance courte. Le calendrier local redistribue déjà votre travail restant selon vos disponibilités. Consultez-le pour voir le prochain créneau ; cette conversation préécrite ne modifie pas votre planning."
+    : /erreur|diffic/i.test(q)
+      ? "Reprenez une seule hésitation dans votre carnet. Notez ce qui vous a bloqué, puis essayez les questions de consolidation. Un petit objectif suffit pour reprendre confiance."
+      : "Pour aujourd’hui, consultez la prochaine séance calculée dans votre accueil, puis prévoyez une pause. Terminez par une séance courte si votre énergie le permet. Ceci est une réponse de démonstration préécrite, sans analyse médicale.";
+export default function Coach() {
+  const { profile } = usePreparation();
+  const [messages, setMessages] = useState([
+    {
+      role: "coach",
+      text:
+        "Bonjour " +
+        profile.name +
+        " ! Je suis Norya, votre compagnon de préparation. On avance ensemble, un objectif à la fois ?",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [voice, setVoice] = useState(false);
+  const send = (text: string) => {
+    if (!text.trim()) return;
+    setMessages((v) => [
+      ...v,
+      { role: "user", text: text.trim() },
+      { role: "coach", text: answer(text) },
+    ]);
+    setInput("");
+  };
+  return (
+    <Screen
+      title="Un coach à vos côtés"
+      subtitle="Pour trouver le prochain pas, même les jours de doute."
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ gap: 20, maxWidth: 800, width: "100%", alignSelf: "center" }}
+      >
+        <View style={s.between}>
+          <View style={s.row}>
+            <View style={[s.iconBox, { backgroundColor: c.mint }]}>
+              <Icon name="sparkles" color={c.primary} />
+            </View>
+            <View>
+              <Txt bold>Coach Norya</Txt>
+              <Txt size={12} color={c.muted}>
+                Conversation de démonstration · Sans IA
+              </Txt>
+            </View>
+          </View>
+        </View>
+        {messages.map((m, i) => (
+          <View
+            key={i}
+            style={{
+              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
+              maxWidth: "92%",
+              backgroundColor: m.role === "user" ? c.primary : c.paper,
+              borderRadius: 20,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: m.role === "user" ? c.primary : c.line,
+            }}
+          >
+            <Txt color={m.role === "user" ? "white" : c.ink}>{m.text}</Txt>
+          </View>
+        ))}
+        <View style={s.wrap}>
+          {[
+            "Que travailler aujourd’hui ?",
+            "J’ai pris du retard",
+            "Revoir mes erreurs",
+          ].map((x) => (
+            <Chip key={x} label={x} onPress={() => send(x)} />
+          ))}
+        </View>
+        <TextInput
+          accessibilityLabel="Message au coach"
+          style={[s.input, { minHeight: 80 }]}
+          multiline
+          placeholder="Ce qui vous passe par la tête…"
+          value={input}
+          onChangeText={setInput}
+          maxLength={1000}
+        />
+        <View style={s.row}>
+          <View style={{ flex: 1 }}>
+            <Button
+              title="Envoyer"
+              icon="arrow-up"
+              disabled={!input.trim()}
+              onPress={() => send(input)}
+            />
+          </View>
+          <Button
+            title="Mode vocal"
+            secondary
+            icon="mic-outline"
+            onPress={() => setVoice(!voice)}
+          />
+        </View>
+        {voice && (
+          <Card>
+            <Icon name="mic-outline" color={c.primary} />
+            <Txt bold>Une conversation, tout simplement.</Txt>
+            <Txt>
+              À terme, posez vos questions à voix haute et révisez en
+              dialoguant. Le mode vocal n’est pas activé dans cette maquette ;
+              aucun microphone n’est utilisé.
+            </Txt>
+            <Button
+              title="Revenir à l’écrit"
+              secondary
+              onPress={() => setVoice(false)}
+            />
+          </Card>
+        )}
+      </KeyboardAvoidingView>
+    </Screen>
+  );
+}

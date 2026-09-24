@@ -1,1 +1,1 @@
-export { default } from '../src/screens/Session';
+export { default } from "../src/screens/Session";
