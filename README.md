@@ -26,8 +26,8 @@ L’accueil s’ouvre directement sur Aurore pour faciliter la découverte. « P
 | Accueil          | Programme partagé, séance immédiate, progression, échéance, accès au coach et aux modules secondaires                       |
 | Calendrier       | Mois précédent/suivant, sélection du jour, vue hebdomadaire, détail du 24 septembre, deux tours, J−30, exemple d’adaptation |
 | Bibliothèque     | Recherche, filtres, six matières, fiches, approfondissements, liens et annotations                                          |
-| Entraînement     | Questions, dossier, LCA, examen blanc, entraînement personnalisé ; parcours illustrés par trois questions de méthode        |
-| Podcasts         | Catalogue, playlists filtrées, lecteur simulé, avance/recul, préférences de style/durée/voix, révision des erreurs          |
+| Entraînement     | Questions, dossier, LCA, examen blanc, entraînement personnalisé ; flashcards et decks locaux de méthode                   |
+| Podcasts         | Catalogue, playlists filtrées, lecteur avec synthèse vocale locale du texte éditorial, avance/recul, préférences, erreurs  |
 | Carnet d’erreurs | Filtres, mini-fiches, consolidation et mise à jour des notions revues                                                       |
 | Progression      | Premier tour, indicateurs fictifs, rangs A/B, matières, spécialités, activité et historique                                 |
 | Coach            | Saisie libre, suggestions, réponses préécrites, présentation du mode vocal                                                  |
@@ -59,7 +59,8 @@ Navigation inférieure sur téléphone/tablette, barre latérale sur grand écra
 - Les préférences d’onboarding sont modifiables ; le planning illustratif reste fixé à 2027. Les autres jours n’ont pas de programme détaillé.
 - Les fiches sont des structures éditoriales, sans recommandations cliniques inventées. Les exercices portent uniquement sur les méthodes d’apprentissage. Les différents formats d’examen partagent ce parcours illustratif ; leurs moteurs spécifiques restent à développer.
 - Les liens entre fiches illustrent la navigation, pas des relations médicales validées.
-- Le lecteur avance sans son. Le mode vocal ne capte rien. Le coach utilise des réponses locales préécrites.
+- Les flashcards actuellement livrées portent uniquement sur les méthodes de travail et leur suivi est local à la session.
+- Le lecteur audio lit localement le titre et le descriptif éditorial via la synthèse vocale de l’appareil ; aucun fichier médical n’est généré ni lu. Le coach utilise des réponses locales préécrites.
 - Notes, profil, préférences et résultats sont perdus au rechargement. Aucun compte, Supabase, paiement, IA, secret ou service distant.
 - La filière roumaine est présentée comme future ; aucun programme de résidanat n’est implémenté.
 

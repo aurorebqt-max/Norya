@@ -15,7 +15,7 @@ import { errors, stats } from "../data/demo";
 import { useDemo } from "../state/DemoProvider";
 import { colors as c } from "../design/theme";
 export default function Errors() {
-  const { resolved } = useDemo();
+  const { resolved, practiceErrors } = useDemo();
   const [filter, setFilter] = useState("À revoir");
   const [open, setOpen] = useState<string | null>(null);
   const visible = errors.filter(
@@ -28,7 +28,7 @@ export default function Errors() {
   return (
     <Screen
       title="Le carnet qui fait progresser"
-      subtitle="Aperçu fictif du futur carnet · non relié à votre progression locale."
+      subtitle={`${practiceErrors.length} erreur(s) issue(s) des entraînements · les autres entrées sont éditoriales.`}
       back
     >
       <Card style={{ backgroundColor: c.lavender }}>

@@ -4,7 +4,13 @@ export type KnowledgeRank = "A" | "B";
 
 export type MedicalSourceVersion = {
   id: string;
-  source: "LiSA/UNESS" | "Collège CUEN" | "HAS" | "ANSM" | "Programme National EDN";
+  source:
+    | "LiSA/UNESS"
+    | "Collège CUEN"
+    | "HAS"
+    | "ANSM"
+    | "Programme National EDN"
+    | "KDIGO";
   version: string;
   verifiedAt: Day; // e.g. "2026-06-01"
   targetExamSession: string; // e.g. "EDN 2026 / 2027"

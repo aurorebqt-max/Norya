@@ -67,6 +67,7 @@ export default function Layout() {
               style={{ height: 1, backgroundColor: c.line, marginVertical: 18 }}
             />
             {[
+              { title: "Mes Decks", path: "/flashcards", icon: "albums-outline" },
               { title: "Podcasts", path: "/podcasts", icon: "headset-outline" },
               {
                 title: "Carnet d’erreurs",
@@ -78,6 +79,8 @@ export default function Layout() {
                 path: "/progress",
                 icon: "stats-chart-outline",
               },
+              { title: "Sources", path: "/sources", icon: "library-outline" },
+              { title: "Stations ECOS", path: "/ecos", icon: "medkit-outline" },
             ].map((l) => (
               <Pressable
                 key={l.path}

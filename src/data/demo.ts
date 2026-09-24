@@ -30,6 +30,13 @@ export const sessions: Session[] = [
 ];
 export const items: StudyItem[] = [
   {
+    id: "nephro",
+    title: "Syndrome néphrotique",
+    subject: "Néphrologie",
+    progress: 0,
+    rank: "A",
+  },
+  {
     id: "cardio",
     title: "Les fondamentaux en cardiologie",
     subject: "Cardiologie",
@@ -121,5 +128,63 @@ export const podcasts = [
     subtitle: "Les essentiels • Ophtalmologie",
     minutes: 10,
     color: "#E1DFF0",
+  },
+];
+
+/** Editorial learning prompts only. No clinical answer is represented here. */
+export const flashcards = [
+  {
+    id: "method-cardio-reperes",
+    objectiveId: "cardio-1",
+    deck: "Repères de fiche",
+    subject: "Cardiologie",
+    prompt: "Quels sont les repères à retrouver dans la fiche avant de commencer ?",
+    answer:
+      "Reformulez l’objectif, repérez les sections attendues et notez ce qui doit être vérifié dans une source validée.",
+  },
+  {
+    id: "method-dermato-organisation",
+    objectiveId: "dermato-1",
+    deck: "Organisation des objectifs",
+    subject: "Dermatologie",
+    prompt: "Comment organiser un objectif en début de séance ?",
+    answer:
+      "Découpez-le en sous-objectifs observables, estimez le temps disponible et prévoyez un rappel actif.",
+  },
+  {
+    id: "method-ophta-structure",
+    objectiveId: "ophta-1",
+    deck: "Structure de fiche",
+    subject: "Ophtalmologie",
+    prompt: "Quelle vérification faire avant de considérer une fiche parcourue ?",
+    answer:
+      "Vérifiez que chaque objectif a été reformulé et identifiez les points qui nécessitent une source officielle.",
+  },
+  {
+    id: "method-neuro-reperes",
+    objectiveId: "neuro-1",
+    deck: "Repères de fiche",
+    subject: "Neurologie",
+    prompt: "Que faire lorsqu’une notion reste ambiguë ?",
+    answer:
+      "La marquer comme à vérifier, conserver la question dans vos annotations et ne pas la transformer en connaissance validée.",
+  },
+  {
+    id: "method-pneumo-rappel",
+    objectiveId: "pneumo-1",
+    deck: "Rappel actif",
+    subject: "Pneumologie",
+    prompt: "Quel est le but d’un rappel actif ?",
+    answer:
+      "Essayer de restituer la structure sans le support, puis comparer avec une source validée et corriger ses annotations.",
+  },
+  {
+    id: "method-gastro-support",
+    objectiveId: "gastro-1",
+    deck: "Support de séance",
+    subject: "Gastro-entérologie",
+    prompt: "Comment terminer une séance de préparation ?",
+    answer:
+      "Consignez le temps réellement effectué, indiquez ce qui reste à travailler et planifiez le prochain passage.",
   },
 ];

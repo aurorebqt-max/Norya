@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { View, Pressable } from "react-native";
+import * as Speech from "expo-speech";
 import {
   Screen,
   Card,
@@ -44,6 +45,11 @@ export default function Podcasts() {
     );
     return () => clearInterval(timer);
   }, [playing, selected]);
+  useEffect(() => {
+    return () => {
+      void Speech.stop();
+    };
+  }, []);
   const time = (n: number) =>
     Math.floor(n / 60) + ":" + String(n % 60).padStart(2, "0");
   return (
@@ -238,7 +244,19 @@ export default function Podcasts() {
               <Button
                 title={playing ? "Pause" : "Lecture"}
                 icon={playing ? "pause" : "play"}
-                onPress={() => setPlaying(!playing)}
+                onPress={() => {
+                  if (playing) {
+                    Speech.stop();
+                    setPlaying(false);
+                  } else {
+                    Speech.stop();
+                    Speech.speak(
+                      `${selected.title}. ${selected.subtitle}. Audio éditorial de démonstration, sans contenu médical validé.`,
+                      { language: "fr-FR", onDone: () => setPlaying(false) },
+                    );
+                    setPlaying(true);
+                  }
+                }}
               />
               <Pressable
                 accessibilityLabel="Avancer de 15 secondes"

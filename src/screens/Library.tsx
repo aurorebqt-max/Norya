@@ -57,7 +57,7 @@ export default function Library() {
         ))}
       </View>
       <Txt size={12} color={c.muted}>
-        6 MATIÈRES DE DÉMONSTRATION · ACCÈS À TOUTES LES SPÉCIALITÉS
+        7 MATIÈRES DE DÉMONSTRATION · ACCÈS À TOUTES LES SPÉCIALITÉS
       </Txt>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
         {filtered.map((x) => (

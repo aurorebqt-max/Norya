@@ -50,6 +50,18 @@ export default function Practice() {
           onPress={() => router.push("/session?mode=personnalise")}
         />
       </Card>
+      <Card>
+        <RowLink
+          title="Flashcards de méthode"
+          subtitle="Decks locaux, rappel actif et suivi de vos cartes vues."
+          icon="layers-outline"
+          href="/flashcards"
+        />
+        <Txt size={12} color={c.muted}>
+          Contenu éditorial non clinique · aucune connaissance médicale validée
+          n’est simulée.
+        </Txt>
+      </Card>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
         {modes.map((x) => (
           <Card key={x.id} style={{ flexBasis: 300, flexGrow: 1 }}>
@@ -57,7 +69,7 @@ export default function Practice() {
               title={x.title}
               subtitle={x.subtitle}
               icon={x.icon}
-              href={"/session?mode=" + x.id}
+              href={"/training?mode=" + x.id}
             />
             <Txt size={12} color={c.muted}>
               3 étapes de démonstration · Méthode d’apprentissage

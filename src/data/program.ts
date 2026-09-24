@@ -1,7 +1,7 @@
 import type { Objective } from "../domain/preparation/types";
 /** Explicit, small editorial fixture. NOT the official EDN curriculum. */
 export const PROGRAM_ID = "norya-editorial-demo-v1";
-export const PROGRAM_LABEL = "Programme de démonstration · 18 objectifs";
+export const PROGRAM_LABEL = "Programme de démonstration · 20 objectifs";
 export const objectives: Objective[] = [
   {
     id: "cardio-1",
@@ -182,5 +182,25 @@ export const objectives: Objective[] = [
     secondMinutes: 15,
     order: 18,
     rank: "A",
+  },
+  {
+    id: "nephro-nephrotic-1",
+    subject: "Néphrologie",
+    title: "Reconnaître et explorer un syndrome néphrotique",
+    initialMinutes: 35,
+    reviewMinutes: 10,
+    secondMinutes: 20,
+    order: 19,
+    rank: "A",
+  },
+  {
+    id: "nephro-nephrotic-2",
+    subject: "Néphrologie",
+    title: "Relier complications, causes et suivi",
+    initialMinutes: 25,
+    reviewMinutes: 10,
+    secondMinutes: 15,
+    order: 20,
+    rank: "B",
   },
 ];
