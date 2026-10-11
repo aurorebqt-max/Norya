@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { View, TextInput } from "react-native";
+import { passProgress } from "../domain/preparation/passes";
+import { useMemo, useState } from "react";
+import { TextInput, View } from "react-native";
+import { router } from "expo-router";
 import {
   Screen,
   Card,
@@ -7,77 +9,138 @@ import {
   Chip,
   RowLink,
   Progress,
+  Button,
   s,
 } from "../components/ui";
 import { colors as c } from "../design/theme";
-import { items as demoItems } from "../data/demo";
+import {
+  examChapters,
+  examProgramSource,
+  referenceBooks,
+} from "../data/rezidentiat2026";
 import { objectives } from "../data/program";
 import { usePreparation } from "../state/PreparationProvider";
+
+const bookLabels = {
+  kumar: "Kumar",
+  lawrence: "Lawrence",
+  sinopsis: "Sinopsis",
+} as const;
+
 export default function Library() {
   const { state } = usePreparation();
-  const items = demoItems.map((item) => {
-    const list = objectives.filter((o) => o.subject === item.subject);
-    return {
-      ...item,
-      progress: Math.round(
-        (list.filter((o) => state.progress[o.id]?.initialCompletedOn).length /
-          list.length) *
-          100,
-      ),
-    };
-  });
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("Toutes");
-  const filtered = items.filter(
-    (x) =>
-      (filter === "Toutes" ||
-        (filter === "En cours" ? x.progress > 0 : x.progress === 0)) &&
-      (x.title + " " + x.subject).toLowerCase().includes(query.toLowerCase()),
+  const [filter, setFilter] = useState("Tous");
+  const filtered = useMemo(
+    () =>
+      examChapters.filter((chapter) => {
+        const book = referenceBooks.find((entry) => entry.id === chapter.bookId)!;
+        return (
+          (filter === "Tous" || bookLabels[chapter.bookId] === filter) &&
+          `${chapter.chapter} ${chapter.pages} ${chapter.scope.join(" ")} ${book.title}`
+            .toLocaleLowerCase()
+            .includes(query.trim().toLocaleLowerCase())
+        );
+      }),
+    [filter, query],
   );
+  const completed = objectives.filter(
+    (objective) => passProgress(state.progress[objective.id],1).completedOn,
+  ).length;
+
   return (
     <Screen
-      title="La bibliothèque"
-      subtitle="Tout le programme, à portée de main."
+      title="Tematica · Medicină 2026"
+      subtitle="Index des chapitres et pages explicitement inclus au concours."
     >
+      <Card style={{ backgroundColor: c.mint }}>
+        <Txt bold size={20}>
+          Programme officiel · sesiunea noiembrie 2026
+        </Txt>
+        <Txt>
+          {examProgramSource.title}. {examChapters.length} chapitres issus des
+          trois ouvrages indiqués dans la bibliographie officielle.
+        </Txt>
+        <Progress value={(completed / examChapters.length) * 100} />
+        <Txt size={12} color={c.muted}>
+          {completed}/{examChapters.length} premiers passages enregistrés dans
+          votre calendrier. Un passage déclaré ne mesure pas la maîtrise.
+        </Txt>
+        <Button
+          title="Référentiel privé · gérer les PDF locaux"
+          icon="lock-closed-outline"
+          onPress={() => router.push("/references")}
+        />
+      </Card>
+      <Card>
+        <Txt bold>Limite du programme</Txt>
+        <Txt size={13} color={c.muted}>
+          {examProgramSource.scopeRule}
+        </Txt>
+      </Card>
       <TextInput
         style={s.input}
-        accessibilityLabel="Rechercher une matière ou un item"
-        placeholder="Rechercher une matière, un item, une notion…"
+        accessibilityLabel="Rechercher un chapitre ou une page"
+        placeholder="Rechercher un chapitre, un thème ou une page…"
         value={query}
         onChangeText={setQuery}
       />
       <View style={s.wrap}>
-        {["Toutes", "En cours", "À découvrir"].map((x) => (
+        {["Tous", "Kumar", "Lawrence", "Sinopsis"].map((label) => (
           <Chip
-            key={x}
-            label={x}
-            selected={filter === x}
-            onPress={() => setFilter(x)}
+            key={label}
+            label={label}
+            selected={filter === label}
+            onPress={() => setFilter(label)}
           />
         ))}
       </View>
-      <Txt size={12} color={c.muted}>
-        7 MATIÈRES DE DÉMONSTRATION · ACCÈS À TOUTES LES SPÉCIALITÉS
-      </Txt>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
-        {filtered.map((x) => (
-          <Card key={x.id} style={{ flexGrow: 1, flexBasis: 300 }}>
-            <RowLink
-              title={x.subject}
-              subtitle={x.title + " · Rang " + x.rank + " illustratif"}
-              icon="book-outline"
-              href={"/item?id=" + x.id}
-            />
-            <Progress value={x.progress} />
-            <Txt size={12} color={c.muted}>
-              {x.progress}% parcourus · Programme démo
+      {filtered.map((chapter) => {
+        const book = referenceBooks.find((entry) => entry.id === chapter.bookId)!;
+        const objective = state.progress[chapter.id];
+        return (
+          <Card key={chapter.id} style={{ padding: 18 }}>
+            <Txt size={11} color={c.primary}>
+              {book.title.toLocaleUpperCase()} · {book.edition} · {book.year}
             </Txt>
+            <Txt bold size={18}>
+              {chapter.chapter}
+            </Txt>
+            <Txt size={13} color={c.muted}>
+              Pages de concours : {chapter.pages}
+            </Txt>
+            {chapter.scope.map((item) => (
+              <Txt key={item} size={13}>
+                · {item}
+              </Txt>
+            ))}
+            <RowLink
+              title="Ouvrir le référentiel privé"
+              subtitle={
+                passProgress(objective,1).completedOn
+                  ? "Premier passage enregistré"
+                  : "Source locale facultative · pages d’origine conservées"
+              }
+              icon="lock-closed-outline"
+              href={{ pathname: "/references", params: { id: chapter.id } }}
+            />
+            <RowLink title="Fiche Norya · Complet / Express / RO–FR" subtitle={chapter.id === 'kum-08' ? 'Module sepsis disponible · couverture partielle' : 'Contenu en préparation · annotations disponibles'} href={{pathname:'/chapter',params:{id:chapter.id}}} />
+            <Button
+              title="Étudier ce chapitre"
+              secondary
+              onPress={() =>
+                router.push({
+                  pathname: "/study",
+                  params: { objectiveId: chapter.id },
+                })
+              }
+            />
           </Card>
-        ))}
-      </View>
+        );
+      })}
       {!filtered.length && (
         <Card>
-          <Txt>Aucun résultat. Essayez une autre matière.</Txt>
+          <Txt>Aucun chapitre trouvé dans cette sélection.</Txt>
         </Card>
       )}
     </Screen>

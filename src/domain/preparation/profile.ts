@@ -5,6 +5,7 @@ export function examDay(profile: PreparationProfile): Day {
   return profile.examDate.official?.date ?? profile.examDate.provisional;
 }
 export function deadline(profile: PreparationProfile): Day {
+  if (!isDay(examDay(profile))) return "";
   const limit = addDays(examDay(profile), -30);
   return profile.firstPassTarget < limit ? profile.firstPassTarget : limit;
 }
@@ -20,21 +21,25 @@ export function createProfile(
   id: string,
   timeZone = "Europe/Paris",
 ): PreparationProfile {
-  const year = String(Number(today.slice(0, 4)) + 1);
-  // Planning hypothesis only; the user must choose/confirm a provisional date.
-  const provisional = year + "-10-01";
+  const currentYear = Number(today.slice(0, 4));
+  const year = String(
+    today.slice(5) < "11-01" ? currentYear : currentYear + 1,
+  );
+  const provisional = "";
   return {
     id,
     name: "",
-    exam: "EDN & ECOS",
+    exam: "Rezidențiat roumain",
     year,
     examDate: { provisional },
     specialties: [],
     weeklyMinutes: [120, 120, 120, 120, 120, 0, 0],
     restDays: [5, 6],
     startsOn: today,
-    firstPassTarget: addDays(provisional, -30),
+    firstPassTarget: "",
     timeZone,
+    targetPasses: 2,
+    minutesPerPage: 8,
     goal: "Avancer avec régularité",
     constraints: { unavailableDates: [], maxSessionMinutes: 30 },
   };
@@ -43,20 +48,23 @@ export function changeExamYear(
   profile: PreparationProfile,
   year: string,
 ): PreparationProfile {
-  const provisional = year + "-10-01";
+  const provisional = "";
   return {
     ...profile,
     year,
     examDate: { provisional },
-    firstPassTarget: addDays(provisional, -30),
+    firstPassTarget: "",
   };
 }
 export function validateProfile(p: PreparationProfile): string[] {
   const problems: string[] = [];
+  if (!Number.isInteger(p.targetPasses ?? 2) || (p.targetPasses ?? 2) < 1 || (p.targetPasses ?? 2) > 10) problems.push("Choisissez de 1 à 10 tours.");
+  if (!Number.isFinite(p.minutesPerPage ?? 8) || (p.minutesPerPage ?? 8) < 1 || (p.minutesPerPage ?? 8) > 60) problems.push("Le rythme doit être compris entre 1 et 60 minutes par page.");
+  if (isDay(p.startsOn) && isDay(examDay(p)) && p.startsOn >= examDay(p)) problems.push("Le début doit précéder le concours.");
   if (!p.id || !p.name.trim() || p.name.length > 60)
     problems.push("Indiquez un prénom (60 caractères maximum).");
-  if (!["EDN & ECOS", "EDN", "ECOS", "Résidanat roumain"].includes(p.exam))
-    problems.push("Concours invalide.");
+  if (p.exam !== "Rezidențiat roumain")
+  problems.push("Le parcours Norya est dédié au rezidențiat roumain.");
   if (!/^20\d{2}$/.test(p.year)) problems.push("Année de concours invalide.");
   if (
     !isDay(p.examDate.provisional) ||
@@ -73,7 +81,7 @@ export function validateProfile(p: PreparationProfile): string[] {
       "Indiquez une date officielle de l’année choisie et le lien HTTPS de sa publication.",
     );
   if (!isDay(p.startsOn) || !isDay(p.firstPassTarget))
-    problems.push("Vérifiez les dates de début et de fin du premier tour.");
+    problems.push("Vérifiez les dates de début et de fin des tours.");
   if (
     isDay(examDay(p)) &&
     isDay(p.startsOn) &&
@@ -85,7 +93,7 @@ export function validateProfile(p: PreparationProfile): string[] {
     isDay(p.firstPassTarget) &&
     p.firstPassTarget > addDays(examDay(p), -30)
   )
-    problems.push("L’objectif du premier tour doit être au plus tard à J−30.");
+    problems.push("L’objectif des tours doit être au plus tard à J−30.");
   if (
     p.weeklyMinutes.length !== 7 ||
     p.weeklyMinutes.some((v) => !Number.isInteger(v) || v < 0 || v > 720)

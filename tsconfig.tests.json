@@ -13,6 +13,8 @@
   "include": [
     "src/domain/preparation/**/*.ts",
     "src/data/program.ts",
+    "src/data/romanianLessons.ts",
+    "src/data/medical.ts",
     "src/services/storage/repository.ts"
   ]
 }

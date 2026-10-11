@@ -42,17 +42,16 @@ export function DateFields({ profile: p, onChange }: Props) {
           />
         ))}
       </View>
-      <Txt size={13}>Date provisoire du concours · AAAA-MM-JJ</Txt>
+      <Txt size={13}>Date du concours saisie · AAAA-MM-JJ</Txt>
       <TextInput
-        accessibilityLabel="Date provisoire du concours"
+        accessibilityLabel="Date du concours saisie"
         style={s.input}
         value={p.examDate.provisional}
         onChangeText={(v) => updateDate(v, false)}
         autoCapitalize="none"
       />
       <Txt size={12} color={c.muted}>
-        Le 1er octobre est une hypothèse initiale à remplacer par votre date de
-        travail. Aucune date officielle n’est préchargée.
+        Saisissez votre date de concours. Aucune date officielle n’est inventée ni préchargée.
       </Txt>
       <Chip
         label={
@@ -150,7 +149,7 @@ export function AvailabilityFields({ profile: p, onChange }: Props) {
         );
       })}
       <Txt size={12} color={c.muted}>
-        Un jour de repos ne reçoit aucune séance. Les minutes déjà effectuées
+        Le programme disponible est celui de la Tematica 2026. Un jour de repos ne reçoit aucune séance. Les minutes déjà effectuées
         aujourd’hui sont déduites du temps disponible.
       </Txt>
       <Txt size={13}>Absences prévues · dates séparées par des virgules</Txt>
@@ -175,9 +174,22 @@ export function AvailabilityFields({ profile: p, onChange }: Props) {
     </>
   );
 }
-export function GoalFields({ profile: p, onChange }: Props) {
+export function PassFields({ profile: p, onChange }: Props) {
+  return <>
+    <Txt bold size={22}>Combien de tours du programme souhaites-tu terminer avant le dernier mois ?</Txt>
+    <Txt>Norya organise ton calendrier pour atteindre cet objectif tout en intégrant les révisions espacées.</Txt>
+    <View style={s.wrap}>{[1,2,3,4].map(n => <Chip key={n} label={`${n} tour${n > 1 ? 's' : ''}`} selected={(p.targetPasses ?? 2) === n} onPress={() => onChange({...p,targetPasses:n})} />)}</View>
+    <Txt>Nombre personnalisé · 1 à 10</Txt>
+    <TextInput accessibilityLabel="Nombre de tours" style={s.input} keyboardType="number-pad" value={String(p.targetPasses ?? 2)} onChangeText={v=>onChange({...p,targetPasses:Number(v)})} />
+    <Txt>Rythme du premier tour · minutes par page</Txt>
+    <TextInput accessibilityLabel="Minutes par page" style={s.input} keyboardType="decimal-pad" value={String(p.minutesPerPage ?? 8)} onChangeText={v=>onChange({...p,minutesPerPage:Number(v.replace(',', '.'))})} />
+    <Txt size={12} color={c.muted}>Estimation provisoire : rythme initial ajustable, puis 65 % au tour 2 et 40 % aux suivants. Ajustez selon votre rythme réel. Les validations précédentes restent conservées.</Txt>
+  </>;
+}
+export function GoalFields({ profile: p, onChange, showPasses = true }: Props & { showPasses?: boolean }) {
   return (
     <>
+      {showPasses && <PassFields profile={p} onChange={onChange} />}
       <Txt size={13}>Début de préparation · AAAA-MM-JJ</Txt>
       <TextInput
         accessibilityLabel="Début de préparation"
@@ -185,9 +197,9 @@ export function GoalFields({ profile: p, onChange }: Props) {
         value={p.startsOn}
         onChangeText={(startsOn) => onChange({ ...p, startsOn })}
       />
-      <Txt size={13}>Fin cible du premier tour · au plus tard J−30</Txt>
+      <Txt size={13}>Fin cible de tous les tours · au plus tard J−30</Txt>
       <TextInput
-        accessibilityLabel="Objectif de fin du premier tour"
+        accessibilityLabel="Objectif de fin des tours"
         style={s.input}
         value={p.firstPassTarget}
         onChangeText={(firstPassTarget) => onChange({ ...p, firstPassTarget })}

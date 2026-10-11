@@ -194,7 +194,7 @@ export default function Calendar() {
             <Card>
               <Txt size={13} color={c.muted}>
                 Disponibilité : {dailyCapacity(profile, selected)} min · Prévu
-                restant : {tasks.reduce((n, t) => n + t.minutes, 0)} min
+                restant : {tasks.reduce((n, t) => n + t.minutes, 0)} min · {new Set(tasks.filter(t=>t.kind === "pass").map(t=>`${t.pass}:${t.objectiveId}`)).size} chapitre(s)/tour(s)
               </Txt>
               {state.onboarded &&
                 tasks.map((t) => <TaskRow key={t.id} task={t} />)}
@@ -251,15 +251,10 @@ export default function Calendar() {
                 }}
               >
                 <Txt bold size={13}>
-                  J−30 · au plus tard {formatDay(addDays(plan.examOn, -30))}
+                  J−30 · au plus tard {formatDay(plan.examOn ? addDays(plan.examOn, -30) : null)}
                 </Txt>
               </View>
-              <Txt bold>02 · Consolider les acquis</Txt>
-              <Txt size={13} color={c.muted}>
-                Deuxième tour : {summary.second}/{summary.total} objectifs. Il
-                débute par objectif à partir de J+14 (J+7 si fragile), dans la
-                capacité laissée par le premier tour.
-              </Txt>
+              {plan.passes.map(p=><View key={p.number} style={{gap:8}}><Txt bold>Tour {p.number} · {p.completed}/{p.total}</Txt><Progress value={p.total ? p.completed/p.total*100 : 0}/><Txt size={13}>Fin prévue : {formatDay(p.forecast)}</Txt></View>)}
               <Txt bold>03 · Concours · {formatDay(plan.examOn)}</Txt>
               <Txt size={11} color={c.muted}>
                 {profile.examDate.official

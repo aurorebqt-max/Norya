@@ -1,10 +1,10 @@
 /** Dates are calendar days in the preparation timezone, never UTC instants. */
 export type Day = string;
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-export type Exam = "EDN & ECOS" | "EDN" | "ECOS" | "Résidanat roumain";
+export type Exam = "Rezidențiat roumain";
 export type KnowledgeStatus =
   "not-studied" | "covered" | "consolidating" | "mastered" | "fragile";
-export type WorkKind = "initial" | "review" | "second";
+export type WorkKind = "initial" | "review" | "second" | "pass";
 export type Performance = "again" | "hard" | "good";
 export type PreparationProfile = {
   id: string;
@@ -19,6 +19,8 @@ export type PreparationProfile = {
   firstPassTarget: Day;
   timeZone: string;
   goal: string;
+  targetPasses?: number;
+  minutesPerPage?: number;
   constraints: { unavailableDates: Day[]; maxSessionMinutes: number };
 };
 export type Objective = {
@@ -29,9 +31,11 @@ export type Objective = {
   reviewMinutes: number;
   secondMinutes: number;
   order: number;
-  rank: "A" | "B";
+  pages?: number;
+  rank?: "A" | "B";
 };
 export type ObjectiveProgress = {
+  passes?: Record<number, { minutes: number; completedOn?: Day }>;
   initialMinutes: number;
   initialCompletedOn?: Day;
   status: KnowledgeStatus;
@@ -48,6 +52,7 @@ export type WorkEvent = {
   objectiveId: string;
   on: Day;
   kind: WorkKind;
+  pass?: number;
   minutes: number;
   completed: boolean;
   performance?: Performance;
@@ -69,12 +74,15 @@ export type PlannedTask = {
   objectiveId: string;
   on: Day;
   kind: WorkKind;
+  pass?: number;
   minutes: number;
   finishesObjective: boolean;
   dueOn?: Day;
   phase: "first-pass" | "second-pass" | "final";
 };
 export type Plan = {
+  passes: { number: number; completed: number; total: number; forecast: Day | null }[];
+  remainingPassMinutes: number;
   today: Day;
   examOn: Day;
   deadline: Day;

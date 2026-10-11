@@ -1,206 +1,28 @@
 import type { Objective } from "../domain/preparation/types";
-/** Explicit, small editorial fixture. NOT the official EDN curriculum. */
-export const PROGRAM_ID = "norya-editorial-demo-v1";
-export const PROGRAM_LABEL = "Programme de démonstration · 20 objectifs";
-export const objectives: Objective[] = [
-  {
-    id: "cardio-1",
-    subject: "Cardiologie",
-    title: "Poser les repères de la fiche de cardiologie",
-    initialMinutes: 45,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 1,
-    rank: "A",
-  },
-  {
-    id: "dermato-1",
-    subject: "Dermatologie",
-    title: "Organiser les objectifs de dermatologie",
-    initialMinutes: 30,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 2,
-    rank: "A",
-  },
-  {
-    id: "ophta-1",
-    subject: "Ophtalmologie",
-    title: "Structurer une fiche d’ophtalmologie",
-    initialMinutes: 40,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 3,
-    rank: "A",
-  },
-  {
-    id: "neuro-1",
-    subject: "Neurologie",
-    title: "Repérer les notions à travailler en neurologie",
-    initialMinutes: 50,
-    reviewMinutes: 15,
-    secondMinutes: 20,
-    order: 4,
-    rank: "A",
-  },
-  {
-    id: "pneumo-1",
-    subject: "Pneumologie",
-    title: "Construire ses repères en pneumologie",
-    initialMinutes: 35,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 5,
-    rank: "A",
-  },
-  {
-    id: "gastro-1",
-    subject: "Gastro-entérologie",
-    title: "Préparer son support de gastro-entérologie",
-    initialMinutes: 45,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 6,
-    rank: "A",
-  },
-  {
-    id: "cardio-2",
-    subject: "Cardiologie",
-    title: "Reformuler les objectifs de cardiologie",
-    initialMinutes: 60,
-    reviewMinutes: 15,
-    secondMinutes: 25,
-    order: 7,
-    rank: "B",
-  },
-  {
-    id: "dermato-2",
-    subject: "Dermatologie",
-    title: "Construire une carte de révision en dermatologie",
-    initialMinutes: 50,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 8,
-    rank: "B",
-  },
-  {
-    id: "ophta-2",
-    subject: "Ophtalmologie",
-    title: "Relier ses supports en ophtalmologie",
-    initialMinutes: 35,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 9,
-    rank: "B",
-  },
-  {
-    id: "neuro-2",
-    subject: "Neurologie",
-    title: "Reformuler ses repères en neurologie",
-    initialMinutes: 65,
-    reviewMinutes: 15,
-    secondMinutes: 25,
-    order: 10,
-    rank: "B",
-  },
-  {
-    id: "pneumo-2",
-    subject: "Pneumologie",
-    title: "Préparer un rappel actif en pneumologie",
-    initialMinutes: 40,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 11,
-    rank: "B",
-  },
-  {
-    id: "gastro-2",
-    subject: "Gastro-entérologie",
-    title: "Organiser un rappel actif en gastro-entérologie",
-    initialMinutes: 55,
-    reviewMinutes: 15,
-    secondMinutes: 20,
-    order: 12,
-    rank: "B",
-  },
-  {
-    id: "cardio-3",
-    subject: "Cardiologie",
-    title: "Vérifier les objectifs parcourus en cardiologie",
-    initialMinutes: 30,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 13,
-    rank: "A",
-  },
-  {
-    id: "dermato-3",
-    subject: "Dermatologie",
-    title: "Vérifier son parcours en dermatologie",
-    initialMinutes: 40,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 14,
-    rank: "A",
-  },
-  {
-    id: "ophta-3",
-    subject: "Ophtalmologie",
-    title: "Vérifier son parcours en ophtalmologie",
-    initialMinutes: 30,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 15,
-    rank: "A",
-  },
-  {
-    id: "neuro-3",
-    subject: "Neurologie",
-    title: "Vérifier son parcours en neurologie",
-    initialMinutes: 45,
-    reviewMinutes: 15,
-    secondMinutes: 20,
-    order: 16,
-    rank: "A",
-  },
-  {
-    id: "pneumo-3",
-    subject: "Pneumologie",
-    title: "Vérifier son parcours en pneumologie",
-    initialMinutes: 25,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 17,
-    rank: "A",
-  },
-  {
-    id: "gastro-3",
-    subject: "Gastro-entérologie",
-    title: "Vérifier son parcours en gastro-entérologie",
-    initialMinutes: 35,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 18,
-    rank: "A",
-  },
-  {
-    id: "nephro-nephrotic-1",
-    subject: "Néphrologie",
-    title: "Reconnaître et explorer un syndrome néphrotique",
-    initialMinutes: 35,
-    reviewMinutes: 10,
-    secondMinutes: 20,
-    order: 19,
-    rank: "A",
-  },
-  {
-    id: "nephro-nephrotic-2",
-    subject: "Néphrologie",
-    title: "Relier complications, causes et suivi",
-    initialMinutes: 25,
-    reviewMinutes: 10,
-    secondMinutes: 15,
-    order: 20,
-    rank: "B",
-  },
-];
+import { examChapters } from "./rezidentiat2026";
+
+export const PROGRAM_ID = "rezidentiat-medicina-2026";
+export const PROGRAM_LABEL = "Rezidențiat Medicină · sesiunea noiembrie 2026";
+
+export function pageCount(ranges: string): number {
+  const pages = new Set<number>();
+  for (const match of ranges.matchAll(/(\d+)(?:[–-](\d+))?/g)) {
+    for (let p = Number(match[1]); p <= Number(match[2] ?? match[1]); p++) pages.add(p);
+  }
+  return pages.size;
+}
+export const objectives: Objective[] = examChapters.map((chapter, index) => ({
+  id: chapter.id,
+  subject:
+    chapter.bookId === "kumar"
+      ? "Kumar și Clark"
+      : chapter.bookId === "lawrence"
+        ? "Lawrence · Chirurgie"
+        : "Sinopsis de medicină",
+  title: chapter.chapter,
+  pages: pageCount(chapter.pages),
+  initialMinutes: 25,
+  reviewMinutes: 10,
+  secondMinutes: 20,
+  order: index + 1,
+}));

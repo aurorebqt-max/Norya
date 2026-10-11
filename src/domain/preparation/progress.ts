@@ -6,6 +6,7 @@ import type {
   Day,
 } from "./types";
 import { addDays, assertDay } from "./dates";
+import { passProgress } from "./passes";
 export const REVIEW_INTERVALS = [1, 3, 7, 14, 30] as const;
 export function emptyProgress(): ObjectiveProgress {
   return {
@@ -37,7 +38,7 @@ export function recordWork(
   )
     throw new Error("Séance invalide.");
   if (
-    !["initial", "review", "second"].includes(event.kind) ||
+    !["initial", "review", "second", "pass"].includes(event.kind) ||
     !["self", "qcm"].includes(event.source)
   )
     throw new Error("Type de séance invalide.");
@@ -53,8 +54,19 @@ export function recordWork(
     throw new Error(
       "Une séance ne peut pas précéder l’historique de cet objectif.",
     );
-  if (event.kind === "initial") {
-    if (p.initialCompletedOn)
+  if (event.kind === "pass") {
+    const pass = event.pass!;
+    if (!Number.isInteger(pass) || pass < 1 || pass > 10 || event.source !== "self") throw new Error("Validation explicite d’un tour de 1 à 10 requise.");
+    const previousPass = passProgress(p, pass);
+    if (previousPass.completedOn) throw new Error("Ce tour est déjà validé.");
+    if (pass > 1 && !passProgress(p, pass - 1).completedOn) throw new Error("Terminez le tour précédent de ce chapitre.");
+    p.passes = { ...p.passes, [pass]: { minutes: previousPass.minutes + event.minutes, ...(event.completed ? { completedOn: event.on } : {}) } };
+    if (event.completed) {
+      if (p.status === "not-studied") p.status = "covered";
+      p.nextReviewOn = addDays(event.on, 1);
+    }
+  } else if (event.kind === "initial") {
+    if (passProgress(p, 1).completedOn)
       throw new Error("Le passage initial de cet objectif est déjà validé.");
     const remaining = objective.initialMinutes - p.initialMinutes;
     if (
@@ -72,8 +84,8 @@ export function recordWork(
       p.nextReviewOn = addDays(event.on, reviewInterval(0));
     }
   } else {
-    if (!p.initialCompletedOn) throw new Error("Parcourez d’abord l’objectif.");
-    if (event.kind === "second" && p.secondCompletedOn)
+    if (!passProgress(p, 1).completedOn) throw new Error("Parcourez d’abord l’objectif.");
+    if (event.kind === "second" && passProgress(p, 2).completedOn)
       throw new Error("Le deuxième tour est déjà validé.");
     const remaining =
       event.kind === "review"
@@ -131,7 +143,7 @@ export function summarize(
   today: Day,
 ) {
   const covered = program.filter(
-    (o) => state.progress[o.id]?.initialCompletedOn,
+    (o) => passProgress(state.progress[o.id], 1).completedOn,
   );
   const fragile = program.filter(
     (o) => state.progress[o.id]?.status === "fragile",
@@ -142,7 +154,7 @@ export function summarize(
   const reviewed = program.filter(
     (o) => (state.progress[o.id]?.reviewCycle ?? 0) > 0,
   );
-  const second = program.filter((o) => state.progress[o.id]?.secondCompletedOn);
+  const second = program.filter((o) => passProgress(state.progress[o.id], 2).completedOn);
   const todaysEvents = state.events.filter((e) => e.on === today);
   return {
     total: program.length,

@@ -25,6 +25,7 @@ export default function Home() {
   const onboarded = state.onboarded;
   const tasks = plan.tasks.filter((t) => t.on === today);
   const next = tasks[0];
+  const activePass = plan.passes.find(p=>p.completed < p.total) ?? plan.passes.at(-1)!;
   const minutes = tasks.reduce((n, t) => n + t.minutes, 0);
   return (
     <Screen
@@ -91,6 +92,7 @@ export default function Home() {
                               params: {
                                 objectiveId: next.objectiveId,
                                 kind: next.kind,
+                                pass: String(next.pass ?? 1),
                                 minutes: String(next.minutes),
                               },
                             }
@@ -155,6 +157,8 @@ export default function Home() {
                 />
               ))}
             </Card>
+            <RowLink title="QCM du jour · Sepsis" subtitle="4 questions originales RO–FR · entraînement libre" href={{pathname:'/chapter',params:{id:'kum-08',tab:'qcm'}}} />
+            <RowLink title="Mes flashcards du jour" subtitle="Rappels espacés du deck personnel" href="/flashcards" />
             <Section title="Apprendre autrement" />
             <View style={{ flexDirection: "row", gap: 14 }}>
               <Pressable
@@ -210,7 +214,7 @@ export default function Home() {
           <>
             <Card>
               <View style={s.between}>
-                <Txt bold>Votre premier tour</Txt>
+                <Txt bold>Tour {activePass.number}</Txt>
                 <Icon name="flag-outline" color={c.primary} />
               </View>
               <View style={{ alignItems: "center", padding: 12 }}>
@@ -228,7 +232,7 @@ export default function Home() {
                   }}
                 >
                   <Txt size={35} bold>
-                    {summary.percent}
+                    {Math.round(activePass.completed / Math.max(1, activePass.total) * 100)}
                     <Txt size={19}> %</Txt>
                   </Txt>
                   <Txt size={11} color={c.muted}>
@@ -237,17 +241,17 @@ export default function Home() {
                 </View>
               </View>
               <Txt size={13} color={c.muted} style={{ textAlign: "center" }}>
-                {summary.covered} objectifs parcourus sur {summary.total}
+                {activePass.completed} chapitres sur {activePass.total}
               </Txt>
               <View style={{ height: 1, backgroundColor: c.line }} />
               <View style={s.between}>
-                <Txt size={13}>Objectif premier tour</Txt>
+                <Txt size={13}>Fin prévue du tour</Txt>
                 <Txt size={12} bold>
-                  {formatDay(plan.deadline)}
+                  {formatDay(activePass.forecast)}
                 </Txt>
               </View>
               <Txt size={11} color={c.muted}>
-                {Math.max(0, daysBetween(today, plan.examOn))} jours avant le
+                {plan.examOn ? Math.max(0, daysBetween(today, plan.examOn)) : "—"} jours avant le
                 concours ·{" "}
                 {profile.examDate.official
                   ? "date déclarée officielle"

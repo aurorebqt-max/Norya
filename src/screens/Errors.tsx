@@ -1,3 +1,4 @@
+import { romanianLessons } from "../data/romanianLessons";
 import { useState } from "react";
 import { View } from "react-native";
 import { router } from "expo-router";
@@ -31,6 +32,7 @@ export default function Errors() {
       subtitle={`${practiceErrors.length} erreur(s) issue(s) des entraînements · les autres entrées sont éditoriales.`}
       back
     >
+      {romanianLessons.flatMap(lesson => lesson.questions.filter(q=>practiceErrors.includes(q.id)).map(q=><Card key={q.id}><Txt bold>Erreur enregistrée · Sepsis</Txt><Txt>{q.prompt.ro} / {q.prompt.fr}</Txt><Txt>{q.explanation.ro} / {q.explanation.fr}</Txt><Txt size={12}>Kumar RO 2021 · p. {q.pages}</Txt><Button title="Reprendre les QCM du chapitre" onPress={()=>router.push({pathname:'/chapter',params:{id:lesson.chapterId,tab:'qcm'}})}/></Card>))}
       <Card style={{ backgroundColor: c.lavender }}>
         <View style={s.row}>
           <Icon name="layers-outline" />

@@ -1,3 +1,4 @@
+import { passProgress } from "../domain/preparation/passes";
 import { useState } from "react";
 import { View } from "react-native";
 import {
@@ -25,16 +26,14 @@ const labels = {
 };
 export default function ProgressScreen() {
   const [tab, setTab] = useState("Vue d’ensemble");
-  const { summary, state, profile, today } = usePreparation();
+  const { summary, state, today, plan } = usePreparation();
+  const historicMax = Math.max(state.profile.targetPasses ?? 2, ...state.events.map(e=>e.pass ?? (e.kind === 'second' ? 2 : 1)));
+  const visiblePasses = Array.from({length:historicMax}, (_,i)=>plan.passes[i] ?? {
+    number:i+1, total:objectives.length,
+    completed:objectives.filter(o=>passProgress(state.progress[o.id],i+1).completedOn).length,
+    forecast:null,
+  });
   const subjects = [...new Set(objectives.map((o) => o.subject))];
-  const rankProgress = (rank: "A" | "B") => {
-    const list = objectives.filter((o) => o.rank === rank);
-    return Math.round(
-      (list.filter((o) => state.progress[o.id]?.initialCompletedOn).length /
-        list.length) *
-        100,
-    );
-  };
   const week = Array.from({ length: 7 }, (_, i) =>
     addDays(today, -weekday(today) + i),
   );
@@ -48,7 +47,7 @@ export default function ProgressScreen() {
       back
     >
       <View style={s.wrap}>
-        {["Vue d’ensemble", "Matières", "Spécialités", "Historique"].map(
+        {["Vue d’ensemble", "Ouvrages", "Historique"].map(
           (x) => (
             <Chip
               key={x}
@@ -64,6 +63,7 @@ export default function ProgressScreen() {
       </Txt>
       {tab === "Vue d’ensemble" && (
         <>
+          {visiblePasses.map(p => <Card key={p.number}><Txt bold>Tour {p.number}{p.number > (state.profile.targetPasses ?? 2) ? " · historique hors objectif actuel" : ""}</Txt><Progress value={p.total ? p.completed/p.total*100 : 0} /><Txt>{p.completed}/{p.total} chapitres · fin prévue : {formatDay(p.forecast)}</Txt></Card>)}
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
             {[
               {
@@ -101,15 +101,12 @@ export default function ProgressScreen() {
             ))}
           </View>
           <Card>
-            <Section title="Des bases qui se renforcent" />
-            <Txt>Rang A · {rankProgress("A")}% parcourus</Txt>
-            <Progress value={rankProgress("A")} />
-            <Txt>Rang B · {rankProgress("B")}% parcourus</Txt>
-            <Progress value={rankProgress("B")} color="#B5A6CC" />
+            <Section title="Votre avancement dans la Tematica" />
+            <Txt>{summary.percent}% des chapitres parcourus</Txt>
+            <Progress value={summary.percent} />
             <Txt size={12} color={c.muted}>
-              Rangs du jeu de démonstration, sans pondération officielle.{" "}
-              {summary.mastered} objectif(s) maîtrisé(s) selon évaluations QCM :
-              les autoévaluations seules ne suffisent pas.
+              {summary.mastered} chapitre(s) évalué(s) comme maîtrisés après
+              exercices ; déclarer un passage terminé ne suffit pas.
             </Txt>
             <Txt>
               {summary.fragile.length} objectif(s) à revoir · {summary.second}{" "}
@@ -157,15 +154,12 @@ export default function ProgressScreen() {
           </Card>
         </>
       )}
-      {(tab === "Matières" || tab === "Spécialités") && (
+      {tab === "Ouvrages" && (
         <>
-          {(tab === "Spécialités"
-            ? subjects.filter((x) => profile.specialties.includes(x))
-            : subjects
-          ).map((subject) => {
+          {subjects.map((subject) => {
             const list = objectives.filter((o) => o.subject === subject),
               done = list.filter(
-                (o) => state.progress[o.id]?.initialCompletedOn,
+                (o) => passProgress(state.progress[o.id],1).completedOn,
               ).length;
             return (
               <Card key={subject}>
@@ -189,15 +183,6 @@ export default function ProgressScreen() {
               </Card>
             );
           })}
-          {tab === "Spécialités" &&
-            !subjects.some((x) => profile.specialties.includes(x)) && (
-              <Card>
-                <Txt>
-                  Aucune spécialité du programme sélectionnée. Toutes les
-                  matières restent accessibles.
-                </Txt>
-              </Card>
-            )}
         </>
       )}
       {tab === "Historique" && (
@@ -216,7 +201,7 @@ export default function ProgressScreen() {
                 " min · " +
                 (e.completed ? "Passage terminé" : "Partiel") +
                 " · " +
-                (e.kind === "initial"
+                (e.kind === "pass" ? `Tour ${e.pass}` : e.kind === "initial"
                   ? "Premier tour"
                   : e.kind === "review"
                     ? "Rappel"

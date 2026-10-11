@@ -17,8 +17,8 @@ export default function Flashcards() {
   const due = cards.filter((card) => (cardProgress[card.id]?.nextReviewOn ?? "") <= todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris")).length;
   if (!current)
     return (
-      <Screen title="Mes Decks" subtitle="Les cartes apparaîtront après la validation d’une fiche." back>
-        <Card><Txt>Validez le premier passage de la fiche du syndrome néphrotique pour débloquer le deck.</Txt><Button title="Ouvrir la bibliothèque" onPress={() => router.replace("/library")} /></Card>
+      <Screen title="Mes Decks" subtitle="Ajoutez les cartes depuis une fiche Norya." back>
+        <Card><Txt>Ouvrez une fiche dans la bibliothèque et ajoutez ses cartes. Cela ne valide aucun tour.</Txt><Button title="Ouvrir la bibliothèque" onPress={() => router.replace("/library")} /></Card>
       </Screen>
     );
   const rate = async (rating: "again" | "hard" | "good" | "easy") => {

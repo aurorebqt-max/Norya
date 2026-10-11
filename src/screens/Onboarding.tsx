@@ -12,6 +12,7 @@ import {
   s,
 } from "../components/ui";
 import {
+  PassFields,
   DateFields,
   AvailabilityFields,
   GoalFields,
@@ -23,13 +24,12 @@ import { validateProfile, weeklyCapacity } from "../domain/preparation/profile";
 import { todayInZone } from "../domain/preparation/dates";
 import { buildPlan } from "../domain/preparation/planner";
 import { objectives, PROGRAM_LABEL } from "../data/program";
-import type { Exam } from "../domain/preparation/types";
 const titles = [
   "Bienvenue chez vous.",
   "Faisons connaissance.",
   "Votre prochain grand cap.",
   "À quel horizon ?",
-  "Ce qui vous inspire.",
+  "Votre objectif de tours.",
   "À votre rythme.",
   "Votre objectif, votre chemin.",
   "Votre parcours vous attend.",
@@ -87,8 +87,7 @@ export default function Onboarding() {
               </Txt>
               <Txt>Votre préparation est conservée sur cet appareil.</Txt>
               <Txt size={12} color={c.muted}>
-                {PROGRAM_LABEL} · Référentiel EDN officiel à intégrer
-                ultérieurement.
+                {PROGRAM_LABEL} · périmètre défini par la Tematica officielle.
               </Txt>
             </>
           )}
@@ -106,64 +105,20 @@ export default function Onboarding() {
           )}
           {step === 2 && (
             <>
-              <Txt>Quel concours préparez-vous ?</Txt>
-              {(
-                ["EDN & ECOS", "EDN", "ECOS", "Résidanat roumain"] as Exam[]
-              ).map((exam) => (
-                <Chip
-                  key={exam}
-                  label={
-                    exam + (exam === "Résidanat roumain" ? " · à venir" : "")
-                  }
-                  selected={draft.exam === exam}
-                  onPress={() => setDraft({ ...draft, exam })}
-                />
-              ))}
+              <Txt>Concours ciblé</Txt>
+              <Chip label="Rezidențiat · Medicină · 2026" selected />
               <Txt size={12} color={c.muted}>
-                Le moteur peut organiser ce programme de démonstration pour
-                chaque parcours. Les référentiels ECOS et roumain ne sont pas
-                encore intégrés.
+                Le programme reste strictement limité aux chapitres et pages
+                indiqués dans la Tematica de novembre 2026.
               </Txt>
             </>
           )}
           {step === 3 && <DateFields profile={draft} onChange={setDraft} />}
-          {step === 4 && (
-            <>
-              <Txt>Spécialités envisagées · facultatif</Txt>
-              <View style={s.wrap}>
-                {[
-                  "Ophtalmologie",
-                  "Dermatologie",
-                  "Cardiologie",
-                  "Médecine générale",
-                  "Pédiatrie",
-                  "Chirurgie",
-                ].map((x) => (
-                  <Chip
-                    key={x}
-                    label={x}
-                    selected={draft.specialties.includes(x)}
-                    onPress={() =>
-                      setDraft({
-                        ...draft,
-                        specialties: draft.specialties.includes(x)
-                          ? draft.specialties.filter((v) => v !== x)
-                          : [...draft.specialties, x],
-                      })
-                    }
-                  />
-                ))}
-              </View>
-              <Txt size={13} color={c.muted}>
-                Vous gardez toujours accès à l’ensemble du programme, même sans
-                spécialité choisie.
-              </Txt>
-            </>
-          )}
+          {step === 4 && <PassFields profile={draft} onChange={setDraft} />}
           {step === 5 && (
             <AvailabilityFields profile={draft} onChange={setDraft} />
           )}
-          {step === 6 && <GoalFields profile={draft} onChange={setDraft} />}
+          {step === 6 && <GoalFields profile={draft} onChange={setDraft} showPasses={false} />}
           {step === 7 && (
             <>
               <Txt>Prêt·e, {draft.name} ?</Txt>

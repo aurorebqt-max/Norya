@@ -1,3 +1,5 @@
+> **État du 11 octobre 2026 : préparation au rezidențiat roumain.** Voir le [bilan de reprise et le guide multi-tours](docs/REPRISE-MULTI-TOURS.md) pour les fonctions utilisables, contenus disponibles et limites actuelles. Les descriptions historiques ci-dessous ne constituent pas une validation de couverture du programme.
+
 # Norya
 
 Maquette interactive d’une application de préparation médicale, développée avec Expo SDK 55, React Native 0.83, React 19.2, TypeScript strict et Expo Router. Une seule base de code iOS, Android et web, sans Vite ni enveloppe WebView.

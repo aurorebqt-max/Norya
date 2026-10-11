@@ -79,8 +79,7 @@ export default function Layout() {
                 path: "/progress",
                 icon: "stats-chart-outline",
               },
-              { title: "Sources", path: "/sources", icon: "library-outline" },
-              { title: "Stations ECOS", path: "/ecos", icon: "medkit-outline" },
+              { title: "Référentiel privé", path: "/references", icon: "lock-closed-outline" },
             ].map((l) => (
               <Pressable
                 key={l.path}
@@ -145,7 +144,7 @@ export default function Layout() {
               }}
             >
               <Txt size={11} color={c.primary}>
-                Programme démo
+                Rezidențiat 2026
               </Txt>
             </View>
             <Pressable

@@ -43,13 +43,20 @@ export function decodeState(raw: string): LocalState {
     !Array.isArray(p.weeklyMinutes) ||
     !Array.isArray(p.restDays) ||
     !isDay(p.startsOn) ||
-    !isDay(p.firstPassTarget) ||
+    (p.firstPassTarget !== "" && !isDay(p.firstPassTarget)) ||
     typeof p.timeZone !== "string" ||
     typeof p.goal !== "string" ||
     !object(p.constraints) ||
     !strings(p.constraints.unavailableDates)
   )
     throw new Error("Profil local invalide.");
+  if (
+    p.exam === "EDN & ECOS" ||
+    p.exam === "EDN" ||
+    p.exam === "ECOS" ||
+    p.exam === "Résidanat roumain"
+  )
+    p.exam = "Rezidențiat roumain";
   if (
     p.examDate.official !== undefined &&
     (!object(p.examDate.official) ||
@@ -64,7 +71,7 @@ export function decodeState(raw: string): LocalState {
       ? candidate.profile.name
       : candidate.profile.name || "Profil non configuré",
   });
-  if (validation.length) throw new Error(validation.join(" "));
+  if (candidate.onboarded && validation.length) throw new Error(validation.join(" "));
   if (
     !integer(parsed.revision) ||
     typeof parsed.onboarded !== "boolean" ||
@@ -94,6 +101,7 @@ export function decodeState(raw: string): LocalState {
       ].includes(String(v.status))
     )
       throw new Error("Progression locale invalide.");
+    if (v.passes !== undefined && (!object(v.passes) || Object.entries(v.passes).some(([key, entry]) => !/^(10|[1-9])$/.test(key) || !object(entry) || !integer(entry.minutes) || (entry.completedOn !== undefined && !isDay(entry.completedOn))))) throw new Error("Passages locaux invalides.");
     for (const key of [
       "initialCompletedOn",
       "nextReviewOn",
@@ -113,12 +121,13 @@ export function decodeState(raw: string): LocalState {
       !integer(e.minutes) ||
       e.minutes === 0 ||
       typeof e.completed !== "boolean" ||
-      !["initial", "review", "second"].includes(String(e.kind)) ||
+      !["initial", "review", "second", "pass"].includes(String(e.kind)) ||
       !["self", "qcm"].includes(String(e.source)) ||
       (e.performance !== undefined &&
         !["again", "hard", "good"].includes(String(e.performance)))
     )
       throw new Error("Historique local invalide.");
+    if (e.kind === "pass" && (!Number.isInteger(e.pass) || Number(e.pass) < 1 || Number(e.pass) > 10)) throw new Error("Tour local invalide.");
     ids.add(e.id);
   }
   return candidate;

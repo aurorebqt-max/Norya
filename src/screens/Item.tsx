@@ -31,7 +31,7 @@ export default function Item() {
           <Txt bold>01 · Poser les repères</Txt>
           <Txt color={c.muted}>Le contenu médical sera intégré après sélection des sources et validation éditoriale.</Txt>
           {objectives.filter((o) => o.subject === item.subject).map((o) => <RowLink key={o.id} title={o.title} subtitle={`${o.initialMinutes} min · ${state.progress[o.id]?.initialCompletedOn ? "Parcouru" : "Premier passage à terminer"}`} href={{ pathname: "/study", params: { objectiveId: o.id } }} />)}
-          <Button title="Démarrer une séance" onPress={() => router.push({ pathname: "/study", params: { objectiveId: objectives.find((o) => o.subject === item.subject)!.id } })} />
+          <Button title="Choisir un chapitre du programme" onPress={() => router.push('/library')} />
         </>}
         {tab === "Approfondir" && <><Txt bold size={22}>Aller plus loin</Txt><Txt>Les explications détaillées, références et recommandations datées prendront place ici. Aucun contenu clinique n’est simulé.</Txt><Button title="Préparer ma méthode avec le coach" secondary onPress={() => router.push("/coach")} /></>}
         {tab === "Notions liées" && items.filter((x) => x.id !== item.id).slice(0, 2).map((x) => <RowLink key={x.id} title={x.subject} subtitle="Autre fiche à explorer" href={"/item?id=" + x.id} />)}
@@ -73,22 +73,14 @@ function NephroticSheetView() {
     setPaused(false);
     await saveAudioProgress(nephroticSheet.id, audioDuration);
     await completeAudio(nephroticSheet.id, nephroticSheet.flashcardIds);
-    for (const objective of medicalObjectives) {
-      if (!state.progress[objective.id]?.initialCompletedOn)
-        await record({ id: `audio-${nephroticSheet.id}-${objective.id}`, objectiveId: objective.id, kind: "initial", minutes: objective.id.endsWith("-1") ? 35 : 25, completed: true, source: "self" });
-    }
-    setMessage("Écoute terminée : premier passage validé, calendrier actualisé et cartes débloquées.");
+    setMessage("Écoute terminée et cartes débloquées. Aucun tour du programme n’est validé.");
   };
   const complete = async () => {
     if (busy || validated) return;
     setBusy(true);
     try {
-      for (const objective of medicalObjectives) {
-        if (!state.progress[objective.id]?.initialCompletedOn)
-          await record({ id: `sheet-${nephroticSheet.id}-${objective.id}-${Date.now().toString(36)}`, objectiveId: objective.id, kind: "initial", minutes: objective.id.endsWith("-1") ? 35 : 25, completed: true, source: "self" });
-      }
       await validateSheet(nephroticSheet.id, nephroticSheet.flashcardIds);
-      setMessage("Premier passage validé : calendrier actualisé et cartes débloquées.");
+      setMessage("Fiche lue et cartes débloquées. Validez séparément le chapitre dans le calendrier.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Validation impossible.");
     } finally {
@@ -143,7 +135,7 @@ function NephroticSheetView() {
           }} />}
           <Button title="Valider après écoute" secondary disabled={audioCompleted.includes(nephroticSheet.id) || elapsed < audioDuration} onPress={() => void finishAudio()} />
         </View>
-        {audioCompleted.includes(nephroticSheet.id) && <Txt color={c.primary}>Écoute terminée et premier passage validé.</Txt>}
+        {audioCompleted.includes(nephroticSheet.id) && <Txt color={c.primary}>Écoute terminée, sans validation de tour.</Txt>}
       </Card>
       <Card>
         <Txt bold>Objectifs de connaissance</Txt>

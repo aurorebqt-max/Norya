@@ -9,3 +9,6 @@ web-build/
 .test-build/
 
 /references-privees/
+
+/build-validation/
+/test-results.log

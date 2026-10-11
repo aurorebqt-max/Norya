@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { Card, Txt } from "../components/ui";
+import { romanianFlashcards } from "../data/romanianLessons";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { addDays, todayInZone } from "../domain/preparation/dates";
 import { medicalFlashcards } from "../data/medical";
@@ -45,7 +47,7 @@ function valid(raw: string | null): Persisted {
       !value.cards ||
       typeof value.cards !== "object"
     )
-      return initial;
+      throw new Error("Données pédagogiques illisibles : conservation sans remplacement.");
     return {
       validatedSheets: value.validatedSheets,
       cards: value.cards as Record<string, CardProgress>,
@@ -55,21 +57,33 @@ function valid(raw: string | null): Persisted {
       practiceErrors: Array.isArray(value.practiceErrors) ? value.practiceErrors : [],
     };
   } catch {
-    return initial;
+    throw new Error("Données pédagogiques illisibles : conservation sans remplacement.");
   }
 }
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [saved, setSaved] = useState<Persisted>(initial);
+  const stored = useRef<Persisted>(initial);
+  const ready = useRef(false);
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+  const [loadError,setLoadError] = useState("");
+  const [loaded,setLoaded] = useState(false);
   const [resolved, setResolved] = useState<string[]>([]);
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((raw) => setSaved(valid(raw)));
+    void AsyncStorage.getItem(STORAGE_KEY).then((raw) => {stored.current=valid(raw);setSaved(stored.current);ready.current=true;setLoaded(true);}).catch(e=>setLoadError(e instanceof Error?e.message:"Lecture impossible. Vos données sont conservées."));
   }, []);
   const persist = async (next: Persisted) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    stored.current=next;
     setSaved(next);
   };
+  const serialized = (action:()=>Promise<void>) => {
+    const task=queue.current.then(()=>{if(!ready.current)throw new Error("Stockage pédagogique indisponible : aucune donnée remplacée.");return action();});
+    queue.current=task.catch(()=>undefined);
+    return task;
+  };
   const validateSheet = async (sheetId: string, cardIds: string[]) => {
+    const saved=stored.current;
     const next: Persisted = { ...saved, validatedSheets: saved.validatedSheets.includes(sheetId) ? saved.validatedSheets : [...saved.validatedSheets, sheetId], cards: { ...saved.cards } };
     const today = todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris");
     for (const cardId of cardIds) {
@@ -79,6 +93,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     await persist(next);
   };
   const reviewCard = async (cardId: string, rating: FlashcardReviewRating = "good") => {
+    const saved=stored.current;
     const current = saved.cards[cardId];
     if (!current) return;
     const today = todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris");
@@ -89,9 +104,11 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     });
   };
   const saveAudioProgress = async (sheetId: string, seconds: number) => {
+    const saved=stored.current;
     await persist({ ...saved, audioProgress: { ...saved.audioProgress, [sheetId]: Math.max(0, Math.floor(seconds)) } });
   };
   const completeAudio = async (sheetId: string, cardIds: string[]) => {
+    const saved=stored.current;
     const next: Persisted = {
       ...saved,
       validatedSheets: saved.validatedSheets.includes(sheetId) ? saved.validatedSheets : [...saved.validatedSheets, sheetId],
@@ -104,6 +121,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     await persist(next);
   };
   const recordPractice = async (questionId: string, objectiveId: string, correct: boolean) => {
+    const saved=stored.current;
     const today = todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris");
     const previous = saved.practiceResults[objectiveId] ?? { correct: 0, total: 0, lastOn: today };
     await persist({
@@ -112,25 +130,26 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       practiceErrors: correct ? saved.practiceErrors : saved.practiceErrors.includes(questionId) ? saved.practiceErrors : [...saved.practiceErrors, questionId],
     });
   };
+  if (loadError || !loaded) return <Card><Txt>{loadError || "Chargement des acquis pédagogiques…"}</Txt></Card>;
   return (
     <Context.Provider value={{
       done: saved.validatedSheets,
-      complete: (id) => void validateSheet(id, []),
+      complete: (id) => void serialized(()=>validateSheet(id, [])),
       resolved,
       resolve: (id) => setResolved((current) => current.includes(id) ? current : [...current, id]),
       reviewedCards: Object.values(saved.cards).filter((card) => card.historyCount > 0).map((card) => card.cardId),
       validatedSheets: saved.validatedSheets,
-      validateSheet,
-      availableCards: medicalFlashcards.filter((card) => Object.prototype.hasOwnProperty.call(saved.cards, card.id)),
+      validateSheet: (id,cards)=>serialized(()=>validateSheet(id,cards)),
+      availableCards: [...medicalFlashcards, ...romanianFlashcards].filter((card) => Object.prototype.hasOwnProperty.call(saved.cards, card.id)),
       cardProgress: saved.cards,
-      reviewCard,
+      reviewCard: (id,rating)=>serialized(()=>reviewCard(id,rating)),
       audioCompleted: saved.audioCompleted,
       audioProgress: saved.audioProgress,
-      saveAudioProgress,
-      completeAudio,
+      saveAudioProgress: (id,seconds)=>serialized(()=>saveAudioProgress(id,seconds)),
+      completeAudio: (id,cards)=>serialized(()=>completeAudio(id,cards)),
       practiceResults: saved.practiceResults,
       practiceErrors: saved.practiceErrors,
-      recordPractice,
+      recordPractice: (id,objective,correct)=>serialized(()=>recordPractice(id,objective,correct)),
     }}>
       {children}
     </Context.Provider>

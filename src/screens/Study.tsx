@@ -1,3 +1,4 @@
+import { passProgress, passRemaining, passSuggestion } from "../domain/preparation/passes";
 import { useRef, useState } from "react";
 import { View, TextInput } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,14 +12,14 @@ export default function Study() {
   const params = useLocalSearchParams<{
     objectiveId: string;
     kind?: string;
+    pass?: string;
     minutes?: string;
   }>();
   const { state, record, busy } = usePreparation();
   const objective = objectives.find((o) => o.id === params.objectiveId);
+  const [pass, setPass] = useState(Math.min(10, Math.max(1, Number(params.pass) || (params.kind === "second" ? 2 : 1))));
   const [kind, setKind] = useState<WorkKind>(
-    params.kind === "review" || params.kind === "second"
-      ? params.kind
-      : "initial",
+    params.kind === "review" ? "review" : "pass",
   );
   const [minutes, setMinutes] = useState(params.minutes ?? "");
   const [performance, setPerformance] = useState<Performance>("good");
@@ -36,18 +37,9 @@ export default function Study() {
       </Screen>
     );
   const p = state.progress[objective.id] ?? emptyProgress();
-  const remaining =
-    kind === "initial"
-      ? objective.initialMinutes - p.initialMinutes
-      : kind === "review"
-        ? objective.reviewMinutes - p.reviewMinutes
-        : objective.secondMinutes - p.secondMinutes;
-  const already =
-    kind === "initial"
-      ? !!p.initialCompletedOn
-      : kind === "second"
-        ? !!p.secondCompletedOn
-        : false;
+  const current = passProgress(p, pass);
+  const remaining = kind === 'review' ? objective.reviewMinutes-p.reviewMinutes : passRemaining(objective,p,state.profile,pass);
+  const already = kind === 'pass' && !!current.completedOn;
   const amount = minutes === "" ? remaining : Number(minutes);
   const save = async (finish: boolean) => {
     if (inFlight.current) return;
@@ -65,10 +57,11 @@ export default function Study() {
         id: actionId.current,
         objectiveId: objective.id,
         kind,
+        ...(kind === "pass" ? { pass } : {}),
         minutes: amount,
         completed: finish,
         source: "self",
-        ...(kind !== "initial" && finish ? { performance } : {}),
+        ...(kind === "review" && finish ? { performance } : {}),
       });
       setMessage(
         finish
@@ -102,34 +95,12 @@ export default function Study() {
             acquis.
           </Txt>
           <View style={s.wrap}>
-            {(["initial", "review", "second"] as WorkKind[]).map((k) => (
-              <Chip
-                key={k}
-                label={
-                  k === "initial"
-                    ? "Premier passage"
-                    : k === "review"
-                      ? "Rappel actif"
-                      : "Deuxième tour"
-                }
-                selected={kind === k}
-                onPress={() => {
-                  setKind(k);
-                  setMinutes("");
-                  setMessage("");
-                  setError("");
-                  actionId.current = "";
-                }}
-              />
-            ))}
+            {Array.from({length: Math.max(state.profile.targetPasses ?? 2, p.secondCompletedOn ? 2 : 1, ...Object.keys(p.passes ?? {}).map(Number))}, (_,i)=>i+1).map(n => <Chip key={n} label={`Tour ${n}${passProgress(p,n).completedOn ? ' ✓' : ''}`} selected={kind === 'pass' && pass === n} onPress={()=>{setPass(n);setKind('pass');setMinutes('');actionId.current='';setMessage('');setError('');}} />)}
+            <Chip label="Rappel espacé" selected={kind === 'review'} onPress={()=>{setKind('review');setMinutes('');actionId.current='';}} />
           </View>
-          <Progress
-            value={(p.initialMinutes / objective.initialMinutes) * 100}
-          />
-          <Txt size={13}>
-            Premier passage : {p.initialMinutes}/{objective.initialMinutes} min
-            · {p.initialCompletedOn ? "Parcouru" : "À terminer"}
-          </Txt>
+          <Txt>{passSuggestion(pass)} · suggestion, lecture libre.</Txt>
+          <Button title="Consulter le chapitre et ses sources" secondary onPress={()=>router.push({pathname:'/chapter',params:{id:objective.id}})} />
+          <Txt size={13}>Tour {pass} : {current.completedOn ? 'Terminé le ' + current.completedOn : `${current.minutes} min enregistrées · à terminer`}</Txt>
           {!state.onboarded ? (
             <Button
               title="Configurer mon profil"
@@ -139,8 +110,8 @@ export default function Study() {
             <Txt bold>
               Ce passage est déjà terminé. Vous pouvez choisir un rappel actif.
             </Txt>
-          ) : kind !== "initial" && !p.initialCompletedOn ? (
-            <Txt>Terminez le premier passage avant de valider un rappel.</Txt>
+          ) : (kind === "review" && !passProgress(p,1).completedOn) || (kind === "pass" && pass > 1 && !passProgress(p,pass-1).completedOn) ? (
+            <Txt>Terminez le passage précédent de ce chapitre avant cette validation.</Txt>
           ) : (
             <>
               <Txt size={13}>
@@ -158,10 +129,9 @@ export default function Study() {
                 }}
               />
               <Txt size={12} color={c.muted}>
-                Indiquez la durée de cette séance, pas le cumul. Un passage
-                terminé correspond à tout son travail prévu.
+                Indiquez la durée de cette séance, pas le cumul. Validez explicitement quand le chapitre est terminé, même plus tôt que prévu.
               </Txt>
-              {kind !== "initial" && (
+              {kind === "review" && (
                 <>
                   <Txt>
                     Après un rappel de mémoire, comment vous sentez-vous ?
@@ -201,13 +171,13 @@ export default function Study() {
                   busy ||
                   !Number.isInteger(amount) ||
                   amount <= 0 ||
-                  amount >= remaining
+                  (kind === "review" && amount >= remaining)
                 }
                 onPress={() => void save(false)}
               />
               <Button
                 title={busy ? "Enregistrement…" : "Valider ce passage terminé"}
-                disabled={busy || amount !== remaining}
+                disabled={busy || !Number.isInteger(amount) || amount <= 0 || (kind === "review" && amount !== remaining)}
                 onPress={() => void save(true)}
               />
             </>
