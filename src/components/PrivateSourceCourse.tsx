@@ -6,6 +6,7 @@ import type { SourcePacket, SourcePart } from '../domain/sourceCourse/packet';
 import { importPrivateCourse, loadPrivateCourse, openOriginalPage } from '../services/storage/privateCourse';
 import { SourceCourseVerification } from './SourceCourseVerification';
 import { loadChapterValidation } from '../services/storage/sourceValidation';
+import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 
 type Mode = 'Cours reconstitué' | 'À vérifier' | 'Pages originales' | 'Vérification manuelle';
 const roles: Record<string,string> = { heading:'Titre', paragraph:'Paragraphe', list:'Liste', table:'Tableau',
@@ -39,8 +40,10 @@ function Part({ part, printed, pdf, original, showAsText }: {part:SourcePart;pri
   // Dans le cours Norya (showAsText=true), on affiche TOUT comme texte SAUF les vraies illustrations
   // Une VRAIE illustration est un bloc avec role='figure' ET texte court (schémas chimiques avec symboles)
   // Les blocs 'figure' ou 'table' avec du texte long sont en réalité des tableaux/listes à afficher en texte
+  const presentation = sourcePresentation(printed, part);
+  if (showAsText && presentation.hide) return null;
   const isTrueIllustration = part.role === 'figure' && part.text && part.text.trim().length < 200;
-  const showImage = showAsText ? isTrueIllustration : (part.kind === 'visual' || compare);
+  const showImage = showAsText ? (isTrueIllustration || presentation.imageOnly) : (part.kind === 'visual' || compare);
   const heading=part.role==='heading';
   return <View testID={`source-part-${part.id}`} style={{gap:10,paddingVertical:18,borderBottomWidth:1,borderBottomColor:c.line}}>
     <View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
@@ -51,7 +54,7 @@ function Part({ part, printed, pdf, original, showAsText }: {part:SourcePart;pri
       wide={['table','contents','box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
       : <View style={{borderLeftWidth: part.reasons.length>0 ? 3 : 0, borderLeftColor: c.peach, paddingLeft: part.reasons.length>0 ? 8 : 0}}>
         <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{fontSize:heading?23:17,lineHeight:heading?32:29,color:c.ink,fontWeight:heading?'600':'400'}}>
-          {part.lines.map((line,i)=><Text key={i}>{line.map((run,j)=><Text key={j} style={{fontWeight:run.bold||heading?'600':'400',fontStyle:run.italic?'italic':'normal'}}>{run.text}</Text>)}{i<part.lines.length-1?'\n':''}</Text>)}
+          {showAsText ? presentation.text : part.text}
         </Text>
         {part.reasons.length>0 && showAsText && <Txt size={10} color={c.peach} style={{marginTop:4}}>⚠️ Passage à vérifier</Txt>}
       </View>}
