@@ -1,3 +1,4 @@
+import { SourcePresentationText } from './SourcePresentationText';
 import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Button, Card, Chip, Txt } from './ui';
@@ -52,10 +53,18 @@ function Part({ part, printed, pdf, original, showAsText }: {part:SourcePart;pri
     </View>
     {showImage ? <OriginalVisual image={part.image} ratio={(part.bbox[3]-part.bbox[1])/(part.bbox[2]-part.bbox[0])}
       wide={['table','contents','box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
+      : showAsText && presentation.contents ? <View style={{flexDirection:'row',gap:18,flexWrap:'wrap'}}>
+        {presentation.contents.map((column, ci) => <View key={ci} style={{flex:1,minWidth:245,gap:5}}>
+          {column.map((entry, ri) => <View key={ri} style={{flexDirection:'row',justifyContent:'space-between',gap:8}}>
+            <Text selectable style={{color:c.ink,fontSize:14,flex:1}}>{entry.label}</Text>
+            <Text selectable style={{color:c.ink,fontSize:14,minWidth:28,textAlign:'right'}}>{entry.page}</Text>
+          </View>)}
+        </View>)}
+      </View>
       : <View style={{borderLeftWidth: part.reasons.length>0 ? 3 : 0, borderLeftColor: c.peach, paddingLeft: part.reasons.length>0 ? 8 : 0}}>
-        <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{fontSize:heading?23:17,lineHeight:heading?32:29,color:c.ink,fontWeight:heading?'600':'400'}}>
-          {showAsText ? presentation.text : part.text}
-        </Text>
+        {showAsText ? <SourcePresentationText presentation={presentation} heading={heading} /> : (
+          <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{fontSize:heading?23:17,lineHeight:heading?32:29,color:c.ink,fontWeight:heading?'600':'400'}}>{part.text}</Text>
+        )}
         {part.reasons.length>0 && showAsText && <Txt size={10} color={c.peach} style={{marginTop:4}}>⚠️ Passage à vérifier</Txt>}
       </View>}
     {!showAsText && (part.kind==='text' || part.text) && <Pressable accessibilityRole="button" onPress={()=>setCompare(!compare)} style={{paddingVertical:6}}>

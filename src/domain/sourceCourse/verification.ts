@@ -1,8 +1,12 @@
+import type { SourcePacket } from './packet';
+import { reviewBlocks } from './reviewNavigation';
 /**
  * Types et fonctions pour la validation humaine des cours source.
  * Ce module permet de marquer, persister et consulter le statut de vérification
  * de chaque bloc, page et chapitre, sans modifier les données source.
  */
+
+import type { AnomalyReport } from './anomalies';
 
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -47,6 +51,8 @@ export interface PageValidation {
 /** Données de validation pour un chapitre */
 export interface ChapterValidation {
   chapterId: string;
+  /** Présent après reprise des anciennes anomalies ; sauvegarde atomique avec les blocs. */
+  anomalies?: AnomalyReport[];
   pages: PageValidation[];
   startedAt?: string;
   lastUpdatedAt?: string;
@@ -69,6 +75,7 @@ const STORAGE_KEY_PREFIX = 'norya-validation-';
  * Une page est 'not-started' si tous les blocs sont 'pending'.
  */
 function calculatePageStatus(blocks: BlockValidation[]): PageValidationStatus {
+  if (blocks.length === 0) return 'not-started';
   const allPending = blocks.every(b => b.status === 'pending');
   const allVerified = blocks.every(b => b.status === 'verified' || b.status === 'corrected');
   
@@ -83,16 +90,17 @@ function calculatePageStatus(blocks: BlockValidation[]): PageValidationStatus {
 function calculateChapterStats(pages: PageValidation[]): Omit<ChapterValidation, 'chapterId' | 'pages' | 'startedAt' | 'lastUpdatedAt'> {
   const allBlocks = pages.flatMap(p => p.blocks);
   const verifiedBlocks = allBlocks.filter(b => b.status === 'verified' || b.status === 'corrected').length;
-  const verifiedPages = pages.filter(p => p.status === 'verified').length;
+  const activePages = pages.filter(p => p.blocks.length > 0);
+  const verifiedPages = activePages.filter(p => p.status === 'verified').length;
   const highPriorityBlocks = allBlocks.filter(b => b.issueDescription?.includes('high') || 
     (b.notes && b.notes.includes('high'))).length;
   const mediumPriorityBlocks = allBlocks.filter(b => b.issueDescription?.includes('medium') || 
     (b.notes && b.notes.includes('medium'))).length;
   
   return {
-    complete: verifiedPages === pages.length,
+    complete: activePages.length > 0 && verifiedPages === activePages.length,
     verifiedPages,
-    totalPages: pages.length,
+    totalPages: activePages.length,
     highPriorityBlocks,
     mediumPriorityBlocks,
     verifiedBlocks,
@@ -162,7 +170,7 @@ export function updateBlockValidation(
     ...updates,
     verifiedAt: updates.status === 'verified' || updates.status === 'corrected' 
       ? new Date().toISOString() 
-      : page.blocks[blockIndex].verifiedAt,
+      : undefined,
   };
   
   const updatedBlocks = [...page.blocks];
@@ -175,7 +183,7 @@ export function updateBlockValidation(
     status: newStatus,
     verifiedAt: newStatus === 'verified' 
       ? new Date().toISOString() 
-      : page.verifiedAt,
+      : undefined,
   };
   
   const updatedPages = [...validation.pages];
@@ -205,17 +213,17 @@ function getStorageKey(chapterId: string): string {
 export async function loadValidation(chapterId: string, controlReport?: any): Promise<ChapterValidation | null> {
   if (Platform.OS === 'web') {
     // Version web : utiliser IndexedDB
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const request = indexedDB.open('norya-validations', 1);
       request.onupgradeneeded = () => request.result.createObjectStore('validations');
-      request.onerror = () => resolve(null);
+      request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         const db = request.result;
         const transaction = db.transaction('validations', 'readonly');
         const store = transaction.objectStore('validations');
         const getRequest = store.get(chapterId);
         
-        getRequest.onerror = () => resolve(null);
+        getRequest.onerror = () => { db.close(); reject(getRequest.error); };
         getRequest.onsuccess = () => {
           if (getRequest.result) {
             resolve(getRequest.result as ChapterValidation);
@@ -246,8 +254,8 @@ export async function loadValidation(chapterId: string, controlReport?: any): Pr
         return initialized;
       }
       return null;
-    } catch {
-      return null;
+    } catch (error) {
+      throw error;
     }
   }
 }
@@ -268,7 +276,7 @@ export async function saveValidation(validation: ChapterValidation): Promise<voi
         const putRequest = store.put(validation, validation.chapterId);
         
         transaction.oncomplete = () => { db.close(); resolve(); };
-        transaction.onerror = () => { db.close(); reject(transaction.error); };
+        transaction.onerror = transaction.onabort = () => { db.close(); reject(transaction.error || new Error('Transaction annulée')); };
       };
     });
   } else {
@@ -276,6 +284,7 @@ export async function saveValidation(validation: ChapterValidation): Promise<voi
       await AsyncStorage.setItem(getStorageKey(validation.chapterId), JSON.stringify(validation));
     } catch (error) {
       console.error('Erreur de sauvegarde de la validation :', error);
+      throw error;
     }
   }
 }
@@ -296,7 +305,7 @@ export async function deleteValidation(chapterId: string): Promise<void> {
         const deleteRequest = store.delete(chapterId);
         
         transaction.oncomplete = () => { db.close(); resolve(); };
-        transaction.onerror = () => { db.close(); reject(transaction.error); };
+        transaction.onerror = transaction.onabort = () => { db.close(); reject(transaction.error || new Error('Transaction annulée')); };
       };
     });
   } else {
@@ -393,4 +402,71 @@ export function getAnomalyCount(validation: ChapterValidation): { high: number; 
   // Ce sera intégré avec les données du control-report
   // Pour l'instant, on retourne 0
   return { high: 0, medium: 0, total: 0 };
+}
+
+/** Une seule écriture contient la validation et tout l'historique des anomalies. */
+export async function saveBlockReview(
+  validation: ChapterValidation,
+  anomalies: AnomalyReport[],
+  printedPage: number,
+  blockId: string,
+  status: BlockValidationStatus,
+  anomaly?: AnomalyReport,
+  mode: 'create' | 'edit' = 'create',
+): Promise<ChapterValidation> {
+  const pageIndex = validation.pages.findIndex(p => p.printedPage === printedPage);
+  if (pageIndex < 0 || !validation.pages[pageIndex].blocks.some(b => b.id === blockId)) {
+    throw new Error('Bloc de validation introuvable');
+  }
+  const matches = (a: AnomalyReport) => a.chapterId === validation.chapterId &&
+    a.printedPage === printedPage && a.blockId === blockId;
+  if (anomaly && (!matches(anomaly) || status !== 'issue-found' || anomaly.status !== 'open')) {
+    throw new Error('Anomalie incompatible avec le bloc');
+  }
+  const history = validation.anomalies ?? anomalies;
+  const updated = updateBlockValidation(validation, pageIndex, blockId, { status });
+  updated.anomalies = history.map(a => status === 'verified' && matches(a) && a.status !== 'resolved'
+    ? { ...a, status: 'resolved', updatedAt: updated.lastUpdatedAt! } : a);
+  if (anomaly) {
+    const index = history.findIndex(a => a.id === anomaly.id && (mode === 'create' || matches(a)));
+    if (mode === 'edit') {
+      const previous = history[index];
+      if (!previous || !matches(previous) || previous.status === 'resolved') {
+        throw new Error('Anomalie active introuvable pour ce bloc');
+      }
+      const descriptionHistory = previous.description !== anomaly.description
+        ? [...(previous.descriptionHistory ?? []), { description: previous.description, updatedAt: previous.updatedAt }]
+        : previous.descriptionHistory;
+      updated.anomalies[index] = { ...previous, description: anomaly.description,
+        descriptionHistory, status: 'open', updatedAt: updated.lastUpdatedAt! };
+    } else {
+      if (index >= 0) throw new Error('Identifiant déjà utilisé');
+      updated.anomalies.push(anomaly);
+    }
+  }
+  await saveValidation(updated);
+  return updated;
+}
+
+/** Add newly imported blocks by stable page/id without discarding any saved record. */
+export function reconcileReviewValidation(validation: ChapterValidation | null, packet: SourcePacket): ChapterValidation {
+  if (!validation) return initializeValidationFromControlReport(packet.chapterId, {
+    pages: packet.pages.map(page => ({ ...page, blocks: reviewBlocks(page) })),
+  });
+  const pages = validation.pages.map(page => ({ ...page, blocks: [...page.blocks] }));
+  for (const source of packet.pages) {
+    let page = pages.find(p => p.printedPage === source.printedPage);
+    if (!page) {
+      page = { printedPage: source.printedPage, pdfPage: source.pdfPage, status: 'not-started', blocks: [] };
+      pages.push(page);
+    }
+    for (const block of reviewBlocks(source)) {
+      if (!page.blocks.some(b => b.id === block.id)) {
+        page.blocks.push({ id: block.id, page: source.printedPage, status: 'pending' });
+      }
+    }
+    page.status = calculatePageStatus(page.blocks);
+    if (page.status !== 'verified') page.verifiedAt = undefined;
+  }
+  return { ...validation, pages, ...calculateChapterStats(pages) };
 }

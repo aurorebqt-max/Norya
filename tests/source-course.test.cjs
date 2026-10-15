@@ -98,3 +98,79 @@ test('anomaly report creation and export', () => {
   assert.equal(fullReport.chapterId, 'kum-08');
   assert.equal(fullReport.manual, 'Kumar');
 });
+
+const { sourcePresentation } = require('../.test-build/domain/sourceCourse/displayCorrections');
+test('Kumar anomaly corrections supersede stale presentation without changing source text', () => {
+  const part = { id: 'part-1', text: 'Sepsisul şi tratamentul\ninfectiilor bacteriene\n,\nMark Melzer, Andrew Leitch, David Wareham',
+    noryaPresentation: { imageOnly: true, hide: false, text: 'Old title' } };
+  const before = structuredClone(part);
+  const shown = sourcePresentation(151, part);
+  assert.equal(shown.imageOnly, false);
+  assert.equal(shown.heading, 'Sepsisul şi tratamentul infecţiilor bacteriene');
+  assert.ok(shown.text.endsWith('Mark Melzer, Andrew Leitch, David Wareham'));
+  assert.deepEqual(part, before);
+  assert.equal(sourcePresentation(150, part).text, 'Old title');
+});
+test('Kumar layout fixes preserve bullets, paragraph boundaries and medical values', () => {
+  const box = sourcePresentation(152, { id: 'part-2', text: '■Cadranul 8.1\nSimptome\n• Durata\n• indispoziţie,\nconfuzie, vărsături' });
+  assert.equal(box.text, 'Cadranul 8.1\nSimptome\n• Durata\n• indispoziţie, confuzie, vărsături');
+  assert.equal(sourcePresentation(153, { id: 'part-3', text: 'Această listă nu este \nexhaustivă.\n\nAlt paragraf 1,5 mg.' }).text,
+    'Această listă nu este exhaustivă.\n\nAlt paragraf 1,5 mg.');
+  const skills = sourcePresentation(151, { id: 'part-3', text: "APTITUDINI SI NOTIUNI DE BAZĂ\n'\n'\nText {OPAT, Outpatient Antibiotic\nTreatment).\nAbilităţile esenţiale descrise în acest capitol includ:\n•\nUnu\n•\nDoi\n•\nTrei\nMijloacele prin care studenţii învaţă." });
+  assert.equal(skills.heading, 'APTITUDINI ȘI NOȚIUNI DE BAZĂ');
+  assert.ok(skills.text.includes('(OPAT, Outpatient Antibiotic Treatment).'));
+  assert.ok(skills.text.includes('• Unu\n• Doi\n• Trei\n\nMijloacele'));
+});
+test('only the requested Kumar tables and existing figure remain images; folio stays hidden', () => {
+  for (const [page, id] of [[155, 'part-2'], [156, 'part-2'], [162, 'part-1'], [152, 'part-3']]) {
+    assert.equal(sourcePresentation(page, { id, text: 'Original' }).imageOnly, true);
+  }
+  assert.equal(sourcePresentation(151, { id: 'part-9', text: '151 ' }).hide, true);
+  assert.equal(sourcePresentation(153, { id: 'part-9', text: '151 ' }).hide, false);
+  const contents = sourcePresentation(151, { id: 'part-2', text: '' }).contents;
+  assert.deepEqual(contents.map(c => c.length), [12, 12]);
+  assert.deepEqual(contents[1][2], { label: 'Administrarea tratamentul antimicrobian', page: '159' });
+});
+
+test('report 5 retains the complete page 153 diagram and repairs only requested page/block text', () => {
+  assert.equal(sourcePresentation(153, { id: 'part-4', text: 'Diagram labels' }).imageOnly, true);
+  const sofa = sourcePresentation(154, { id: 'part-15', text: 'Criterii:\n•\nGlasgow <15\n•\nfrecvenţa respiratorie 2:22 respiraţii/minut\n•\npresiune arterială sistolică :5100 mmHg.\nîn Marea Britanie, NEWS 2.' });
+  assert.equal((sofa.text.match(/^• /gm) ?? []).length, 3);
+  assert.ok(sofa.text.includes('≥22 respiraţii/minut'));
+  assert.ok(sofa.text.includes('≤100 mmHg.\n\nîn Marea Britanie'));
+  assert.equal(sourcePresentation(154, { id: 'part-8', text: 'prin° imunotromboză\ndifuză' }).text, 'prin imunotromboză difuză');
+  assert.equal(sourcePresentation(154, { id: 'part-14', text: 'infecţie\': ,,SIRS"' }).text, 'infecţie". „SIRS"');
+  assert.equal(sourcePresentation(154, { id: 'part-20', text: 'IAMA 2016; 315:801-\n810.' }).text, 'IAMA 2016; 315:801-810.');
+  assert.equal(sourcePresentation(154, { id: 'part-21', text: 'RECUNOASTEREA SEP SISULUI ' }).heading, 'RECUNOAŞTEREA SEPSISULUI');
+  assert.equal(sourcePresentation(154, { id: 'part-22', text: 'I \nGrupele aflate la risc ' }).text, 'Grupele aflate la risc');
+  assert.equal(sourcePresentation(155, { id: 'part-6', text: 'Su[>ravegherea intraspitalicească' }).text, 'Supravegherea intraspitalicească');
+  assert.equal(sourcePresentation(155, { id: 'part-7', text: 'N EWS în Bri\u00ad\ntanie, pre\u00ad\ncoce.' }).text, 'NEWS în Britanie, precoce.');
+  assert.equal(sourcePresentation(155, { id: 'part-8', text: 'Sit\u00ad\nuation' }).text, 'Situation');
+  assert.equal(sourcePresentation(155, { id: 'part-9', text: 'evalua\u00ad\nrea proba\u00ad\nbilitate suspi\u00ad\nciuni' }).text, 'evaluarea probabilitate suspiciuni');
+  assert.equal(sourcePresentation(155, { id: 'part-11', text: 'natu\u00ad\nral' }).text, 'natural');
+  const bullets = sourcePresentation(155, { id: 'part-5', text: '•\nvârstnicii (>65 de ani)\n•\npacienţii cu afecţiuni\nmedicale' });
+  assert.equal(bullets.text, '• vârstnicii (>65 de ani)\n\n• pacienţii cu afecţiuni medicale');
+  assert.equal(sourcePresentation(157, { id: 'part-7', text: 'N EWS\nOriginal' }).text, 'N EWS\nOriginal');
+});
+
+
+test('report 6 reflows only the requested blocks and preserves paragraph/list boundaries', () => {
+  const cases = [
+    [154, 'part-21', 'RECUNOASTEREA SEP SISULUI ', 'RECUNOAŞTEREA SEPSISULUI'],
+    [155, 'part-13', 'comu\u00ad\nnitar 48 de ore inter\u00ad\nnarea', 'comunitar 48 de ore internarea'],
+    [155, 'part-14', '•\npacienţi externaţi în ultimele 30 de zile\n•\npacienţi în\ncomunităţi închise', '• pacienţi externaţi în ultimele 30 de zile\n\n• pacienţi în comunităţi închise'],
+    [155, 'part-15', 'ţii care necesită hemodializă).\nInfecţiile dobândite comunitar sunt sensi\u00ad\nbile. Streptococ\u00ad\ncus pneumoniae.', 'ţii care necesită hemodializă).\n\nInfecţiile dobândite comunitar sunt sensibile. Streptococcus pneumoniae.'],
+    [155, 'part-16', 'noso\u00ad\ncomiale sep\u00ad\nsisul (.,controlul sursei").', 'nosocomiale sepsisul („controlul sursei").'],
+    [156, 'part-4', 'dis\u00ad\nfuncţiei dete\u00ad\nriorare', 'disfuncţiei deteriorare'],
+    [156, 'part-5', 'hipoten\u00ad\nsiune som\u00ad\nnolenţă.', 'hipotensiune somnolenţă.'],
+    [156, 'part-6', 'disfunc\u00ad\nţiei creş\u00ad\nterea electrocar\u00ad\ndiogramă (ECG).', 'disfuncţiei creşterea electrocardiogramă (ECG).'],
+    [156, 'part-9', 'zonele vizi\u00ad\ntate şi\nmomentul', 'zonele vizitate şi momentul'],
+  ];
+  for (const [page, id, text, expected] of cases) {
+    const part = { id, text, noryaPresentation: { text: 'Stale display', imageOnly: false, hide: false } };
+    const before = structuredClone(part);
+    assert.equal(sourcePresentation(page, part).text, expected, `${page}/${id}`);
+    assert.deepEqual(part, before);
+    assert.equal(sourcePresentation(160, part).text, 'Stale display');
+  }
+});

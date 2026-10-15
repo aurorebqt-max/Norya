@@ -20,7 +20,8 @@ let AsyncStorage: {
   setItem: (key: string, value: string) => Promise<void>;
 };
 try {
-  AsyncStorage = require('@react-native-async-storage/async-storage');
+  const storage = require('@react-native-async-storage/async-storage');
+  AsyncStorage = storage.default ?? storage;
 } catch {
   // Dans Node.js, AsyncStorage n'est pas disponible
   AsyncStorage = {
@@ -47,6 +48,7 @@ export interface AnomalyReport {
   blockRole: string;               // Rôle du bloc (ex: "table", "paragraph")
   blockTextPreview: string;        // Extrait du texte concerné (pour identification)
   description: string;             // Description détaillée de l'anomalie
+  descriptionHistory?: { description: string; updatedAt: string }[];
   status: AnomalyStatus;           // Statut de l'anomalie
   createdAt: string;               // Date ISO de création
   updatedAt: string;               // Date ISO de dernière modification
@@ -74,7 +76,7 @@ export interface ChapterAnomalyReport {
  * Utilise un timestamp + blockId pour garantir l'unicité.
  */
 export function generateAnomalyId(blockId: string): string {
-  return `anomaly-${Date.now()}-${blockId}`;
+  return `anomaly-${Date.now()}-${Math.random().toString(36).slice(2)}-${blockId}`;
 }
 
 /**
@@ -117,11 +119,14 @@ function getAnomalyStorageKey(chapterId: string): string {
  * Charge les anomalies pour un chapitre.
  */
 export async function loadChapterAnomalies(chapterId: string): Promise<AnomalyReport[]> {
+  const { loadValidation } = await import('./verification');
+  const validation = await loadValidation(chapterId);
+  if (validation?.anomalies) return validation.anomalies;
   if (Platform.OS === 'web') {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const request = indexedDB.open('norya-anomalies', 1);
       request.onupgradeneeded = () => request.result.createObjectStore('anomalies');
-      request.onerror = () => resolve([]);
+      request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         const db = request.result;
         const transaction = db.transaction('anomalies', 'readonly');
@@ -129,7 +134,7 @@ export async function loadChapterAnomalies(chapterId: string): Promise<AnomalyRe
         const key = getAnomalyStorageKey(chapterId);
         const getRequest = store.get(key);
         
-        getRequest.onerror = () => resolve([]);
+        getRequest.onerror = () => { db.close(); reject(getRequest.error); };
         getRequest.onsuccess = () => {
           const anomalies = (getRequest.result as AnomalyReport[]) || [];
           db.close();
@@ -141,8 +146,8 @@ export async function loadChapterAnomalies(chapterId: string): Promise<AnomalyRe
     try {
       const stored = await AsyncStorage.getItem(getAnomalyStorageKey(chapterId));
       return stored ? JSON.parse(stored) as AnomalyReport[] : [];
-    } catch {
-      return [];
+    } catch (error) {
+      throw error;
     }
   }
 }
@@ -152,6 +157,16 @@ export async function loadChapterAnomalies(chapterId: string): Promise<AnomalyRe
  */
 export async function saveAnomaly(anomaly: AnomalyReport): Promise<void> {
   const chapterId = anomaly.chapterId;
+  const { loadValidation, saveValidation } = await import('./verification');
+  const validation = await loadValidation(chapterId);
+  if (validation?.anomalies) {
+    const anomalies = [...validation.anomalies];
+    const index = anomalies.findIndex(a => a.id === anomaly.id);
+    if (index < 0) anomalies.push(anomaly);
+    else anomalies[index] = anomaly;
+    await saveValidation({ ...validation, anomalies });
+    return;
+  }
   
   if (Platform.OS === 'web') {
     return new Promise((resolve, reject) => {
@@ -213,6 +228,12 @@ export async function saveAnomaly(anomaly: AnomalyReport): Promise<void> {
  * Supprime une anomalie.
  */
 export async function deleteAnomaly(chapterId: string, anomalyId: string): Promise<void> {
+  const { loadValidation, saveValidation } = await import('./verification');
+  const validation = await loadValidation(chapterId);
+  if (validation?.anomalies) {
+    await saveValidation({ ...validation, anomalies: validation.anomalies.filter(a => a.id !== anomalyId) });
+    return;
+  }
   if (Platform.OS === 'web') {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('norya-anomalies', 1);
@@ -269,6 +290,7 @@ export function exportAnomaliesToJSON(anomalies: AnomalyReport[]): string {
       blockRole: a.blockRole,
       blockTextPreview: a.blockTextPreview,
       description: a.description,
+      descriptionHistory: a.descriptionHistory,
       status: a.status,
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
@@ -325,6 +347,9 @@ export function exportAnomaliesToMarkdown(anomalies: AnomalyReport[]): string {
       lines.push(`- **Date** : ${anomaly.createdAt}`);
       lines.push(`- **Aperçu** : ${anomaly.blockTextPreview}`);
       lines.push(`- **Description** : ${anomaly.description}`);
+      for (const previous of anomaly.descriptionHistory ?? []) {
+        lines.push(`- **Commentaire précédent (${previous.updatedAt})** : ${previous.description}`);
+      }
       lines.push(``);
     }
   }

@@ -78,7 +78,7 @@ export async function loadChapterValidation(controlReport?: any): Promise<Chapte
     return null;
   } catch (error) {
     console.error('Erreur de chargement de la validation :', error);
-    return null;
+    throw error;
   }
 }
 

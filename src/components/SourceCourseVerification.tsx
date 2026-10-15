@@ -1,3 +1,6 @@
+import { reviewBlocks, reviewKey, reviewTargets, filterReviewTargets, selectReviewTarget, isVerified, type ReviewFilter, type ReviewTarget } from '../domain/sourceCourse/reviewNavigation';
+import { SourcePresentationText } from './SourcePresentationText';
+import { reconcileReviewValidation, saveBlockReview, updateBlockValidation, saveValidation } from '../domain/sourceCourse/verification';
 /**
  * Composant de vérification de fidélité pour les cours source.
  * Permet de vérifier côte à côte le texte extrait et le visuel PDF,
@@ -8,24 +11,18 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { Button, Card, Chip, Txt } from './ui';
 import { colors as c } from '../design/theme';
+import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 import type { SourcePacket, SourcePart } from '../domain/sourceCourse/packet';
 import { openOriginalPage } from '../services/storage/privateCourse';
-import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 import {
   ChapterValidation,
   BlockValidationStatus,
-  PageValidation,
-  PageValidationStatus,
   loadChapterValidation,
-  saveChapterValidation,
-  updateBlockStatus,
   getPagesWithAnomalies,
-  getValidationStats,
   AnomalyReport,
   AnomalyStatus,
   createAnomalyReport,
   loadChapterAnomalies,
-  saveAnomaly,
   exportAnomaliesToJSON,
   exportAnomaliesToMarkdown,
   generateFullAnomalyReport,
@@ -84,7 +81,7 @@ const statusLabels: Record<BlockValidationStatus, string> = {
   'in-review': 'En cours',
   verified: 'Vérifié ✓',
   'issue-found': 'Anomalie !',
-  corrected: 'Corrigé ✓',
+  corrected: 'Vérifié ✓',
 };
 
 const statusIcons: Record<BlockValidationStatus, string> = {
@@ -107,18 +104,57 @@ interface SourceCourseVerificationProps {
  */
 export function SourceCourseVerification({ packet, controlReport, onClose }: SourceCourseVerificationProps) {
   const [validation, setValidation] = useState<ChapterValidation | null>(null);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('pending');
+  const [pageNotice, setPageNotice] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'split' | 'text' | 'visual'>('split');
-  const [filter, setFilter] = useState<'all' | 'anomalies' | 'pending' | 'user-anomalies'>('all');
+  const [filter, setFilter] = useState<'anomalies' | 'user-anomalies' | null>(null);
   const [showUserAnomalies, setShowUserAnomalies] = useState(true);
   const [showStats, setShowStats] = useState(false);
   const [showPageSelector, setShowPageSelector] = useState(false);
   const [anomalies, setAnomalies] = useState<AnomalyReport[]>([]);
-  const [currentAnomaly, setCurrentAnomaly] = useState<AnomalyReport | null>(null);
-  const [commentInput, setCommentInput] = useState('');
-  const [showCommentInput, setShowCommentInput] = useState(false);
-  const [editingBlockKey, setEditingBlockKey] = useState<string | null>(null);
+const allTargets = reviewTargets(packet, validation, anomalies);
+   
+   // Filtrer les cibles pour exclure les blocs marqués comme fusionnés dans le précédent
+   const filteredTargets = allTargets.filter(target => {
+     const blockValidation = validation?.pages.find(p => p.printedPage === target.printedPage)
+       ?.blocks.find(b => b.id === target.blockId);
+     return !(blockValidation?.notes?.startsWith('MERGED_INTO_PREVIOUS:'));
+   });
+   
+   const visibleTargets = filterReviewTargets(filteredTargets, reviewFilter);
+   const target = selectReviewTarget(filteredTargets, visibleTargets, selectedKey);
+   const targetRef = useRef(target);
+   targetRef.current = target;
+   const currentPageIndex = target?.pageIndex ?? 0;
+   const currentBlockIndex = target?.blockIndex ?? -1;
+
+   const [draft, setDraftState] = useState<{ key: string; anomalyId?: string; description: string; session: number } | null>(null);
+   const draftRef = useRef<typeof draft>(null);
+   const draftSession = useRef(0);
+   // État pour l'aperçu de fusion
+   const [mergePreview, setMergePreview] = useState<{
+     currentBlock: SourcePart | null;
+     nextBlock: SourcePart | null;
+     previewText: string;
+     manualText: string;
+     useSpace: boolean;
+   } | null>(null);
+   const [mergeSaving, setMergeSaving] = useState(false);
+   const [mergeError, setMergeError] = useState<string | null>(null);
+   const [mergeSuccess, setMergeSuccess] = useState<string | null>(null);
+  function setDraft(value: typeof draft) {
+    draftRef.current = value;
+    setDraftState(value);
+  }
+  const showCommentInput = draft !== null;
+  const editingBlockKey = draft?.key;
+  const commentInput = draft?.description ?? '';
+  const currentAnomaly = anomalies.find(a => a.id === draft?.anomalyId && reviewKey(a.chapterId, a.printedPage, a.blockId) === draft.key);
+  const latestValidation = useRef<ChapterValidation | null>(null);
+  const mutationRef = useRef(false);
+  const [loaded, setLoaded] = useState(false);
+  const [anomalyFilter, setAnomalyFilter] = useState<AnomalyStatus>('open');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
@@ -132,249 +168,160 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   // Une illustration a role='figure' ET un texte très court (symboles chimiques)
   const isTrueIllustration = (part: any) => part.role === 'figure' && part.text && part.text.trim().length < 200;
   
-  // Charger les validations et anomalies au démarrage
+  // Load once before allowing writes; never race a temporary empty validation
+  // against persisted data. Cancellation prevents an old load updating a new packet.
   useEffect(() => {
-    if (packet) {
-      loadChapterValidation(controlReport).then(v => {
-        if (v) setValidation(v);
+    let active = true;
+    setLoaded(false);
+    Promise.all([loadChapterValidation(), loadChapterAnomalies(packet.chapterId)])
+      .then(([saved, reports]) => {
+        if (!active) return;
+        const v = reconcileReviewValidation(saved, packet);
+        latestValidation.current = v;
+        setValidation(v);
+        setAnomalies(v.anomalies ?? reports);
+        setLoaded(true);
+      }).catch(() => {
+        if (active) setSaveError('Impossible de charger les validations et anomalies. Réessayez en rouvrant la vérification.');
       });
-      
-      // Charger les anomalies pour ce chapitre
-      loadChapterAnomalies(packet.chapterId).then(setAnomalies);
-    }
-  }, [packet, controlReport]);
-  
-  // Les identifiants de blocs peuvent se répéter d'une page à l'autre.
-  const anomalyForBlock = (pageIndex: number, blockId: string) => {
-    const page = packet.pages[pageIndex];
-    return anomalies.find(a => a.chapterId === packet.chapterId &&
-      a.printedPage === page?.printedPage && a.blockId === blockId);
-  };
+    return () => { active = false; };
+  }, [packet]);
 
-  // Ne jamais remplacer un brouillon par une réponse de stockage asynchrone.
-  // Le formulaire est lié à la page ET au bloc, et se ferme lors de la navigation.
+  // Navigation discards only the unsaved editor, never persisted reports.
   useEffect(() => {
-    const page = packet.pages[currentPageIndex];
-    const blocks = (page?.parts || []).filter(part => part.role !== 'page-header');
-    const block = blocks[currentBlockIndex];
-    const existing = block ? anomalyForBlock(currentPageIndex, block.id) : undefined;
-    setCurrentAnomaly(existing || null);
-    setCommentInput(existing?.description || '');
-    setEditingBlockKey(null);
-    setShowCommentInput(false);
+    if (target) setSelectedKey(target.key);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+    setDraft(null);
     setSaveError(null);
     setSaveSuccess(null);
-  }, [currentPageIndex, currentBlockIndex, packet]);
+  }, [target?.key, packet]);
 
-  // Si pas de validation, en créer une nouvelle à partir du paquet
-  useEffect(() => {
-    if (packet && !validation) {
-      // Créer une validation avec tous les blocs du paquet (sauf page-header)
-      const pages: PageValidation[] = packet.pages.map((page) => ({
-        printedPage: page.printedPage,
-        pdfPage: page.pdfPage,
-        blocks: (page.parts || []).filter(p => p.role !== 'page-header').map(part => ({
-          id: part.id,
-          page: page.printedPage,
-          status: 'pending' as BlockValidationStatus,
-          notes: '',
-        })),
-        status: 'not-started' as PageValidationStatus,
-        verifiedAt: undefined,
-      }));
-      
-      const totalBlocks = pages.reduce((sum, p) => sum + p.blocks.length, 0);
-      
-      setValidation({
-        chapterId: 'kum-08',
-        pages,
-        startedAt: new Date().toISOString(),
-        lastUpdatedAt: new Date().toISOString(),
-        complete: false,
-        verifiedPages: 0,
-        totalPages: packet.pages.length,
-        highPriorityBlocks: 0,
-        mediumPriorityBlocks: 0,
-        verifiedBlocks: 0,
-        totalBlocks,
-      });
-    }
-  }, [packet, validation]);
-  
-  // Navigation entre les blocs
-  function nextBlock() {
-    const page = packet.pages[currentPageIndex];
-    if (currentBlockIndex >= (page.parts || []).filter(part => part.role !== 'page-header').length - 1) {
-      // Passer à la page suivante
-      if (currentPageIndex < packet.pages.length - 1) {
-        setCurrentPageIndex(currentPageIndex + 1);
-        setCurrentBlockIndex(0);
-      }
-    } else {
-      setCurrentBlockIndex(currentBlockIndex + 1);
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-    }
+  function selectTarget(next: ReviewTarget | undefined | null) {
+    if (!next) return;
+    setSelectedKey(next.key);
+    setPageNotice(null);
+    setShowPageSelector(false);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
   }
-  
-  function prevBlock() {
-    if (currentBlockIndex > 0) {
-      setCurrentBlockIndex(currentBlockIndex - 1);
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-    } else if (currentPageIndex > 0) {
-      const prevPage = packet.pages[currentPageIndex - 1];
-      setCurrentPageIndex(currentPageIndex - 1);
-      setCurrentBlockIndex(Math.max(0, (prevPage.parts || []).filter(part => part.role !== 'page-header').length - 1));
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
-    }
+  function nextBlock() { selectTarget(visibleTargets[visibleTargets.findIndex(t => t.key === target?.key) + 1]); }
+  function prevBlock() { selectTarget(visibleTargets[visibleTargets.findIndex(t => t.key === target?.key) - 1]); }
+  function changeReviewFilter(next: ReviewFilter) {
+    setReviewFilter(next);
+    setFilter(null);
+    setDraft(null);
+    setPageNotice(null);
   }
-  
+
   // Met à jour le statut d'un bloc
   async function handleBlockStatusChange(
     pageIndex: number,
     blockId: string,
     newStatus: BlockValidationStatus
   ) {
-    if (!validation) return;
-    
-    const updated = await updateBlockStatus(
-      validation,
-      pageIndex,
-      blockId,
-      newStatus
-    );
-    setValidation(updated);
+    const session = draftRef.current?.session;
+    if (await commitReview(pageIndex, blockId, newStatus)) {
+      if (draftRef.current?.session === session) closeAnomalyForm();
+    }
+  }
+
+  async function commitReview(pageIndex: number, blockId: string, status: BlockValidationStatus, anomaly?: AnomalyReport, mode: 'create' | 'edit' = 'create') {
+    const current = latestValidation.current;
+    if (!current || !loaded || mutationRef.current) return false;
+    mutationRef.current = true;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const updated = await saveBlockReview(current, anomalies,
+        packet.pages[pageIndex].printedPage, blockId, status, anomaly, mode);
+      latestValidation.current = updated;
+      setValidation(updated);
+      setAnomalies(updated.anomalies!);
+      const page = packet.pages[pageIndex].printedPage;
+      const updatedTargets = reviewTargets(packet, updated);
+      if (status === 'verified' && updatedTargets.filter(t => t.printedPage === page).every(t => isVerified(t.status))) {
+        setPageNotice(page);
+      } else if (!isVerified(status)) {
+        setPageNotice(previous => previous === page ? null : previous);
+      }
+      const previousBlock = current.pages.find(p => p.printedPage === page)?.blocks.find(b => b.id === blockId);
+      if (status === 'issue-found' && previousBlock && isVerified(previousBlock.status) &&
+          targetRef.current?.key === reviewKey(packet.chapterId, page, blockId)) {
+        setReviewFilter('pending');
+      }
+      return true;
+    } catch {
+      setSaveError("Erreur lors de l'enregistrement. Veuillez réessayer.");
+      return false;
+    } finally {
+      mutationRef.current = false;
+      setSaving(false);
+    }
   }
   
-  // Navigue vers une page spécifique
   function goToPage(pageIndex: number) {
-    setCurrentPageIndex(pageIndex);
-    setCurrentBlockIndex(0);
-    setShowPageSelector(false);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-  }
-  
-  // Navigue vers un bloc spécifique
-  function goToBlock(pageIndex: number, blockIndex: number) {
-    setCurrentPageIndex(pageIndex);
-    setCurrentBlockIndex(blockIndex);
-    setShowPageSelector(false);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-  }
-  
-  // Ouvre le formulaire de commentaire pour une anomalie
-  function openAnomalyForm(blockId: string) {
-    const existingAnomaly = anomalyForBlock(currentPageIndex, blockId);
-    if (existingAnomaly) {
-      setCurrentAnomaly(existingAnomaly);
-      setCommentInput(existingAnomaly.description);
-    } else {
-      setCurrentAnomaly(null);
-      setCommentInput('');
-    }
-    setEditingBlockKey(`${packet.pages[currentPageIndex]?.printedPage}:${blockId}`);
-    setShowCommentInput(true);
+    selectTarget(visibleTargets.find(t => t.pageIndex === pageIndex));
   }
 
-  // Ferme le formulaire de commentaire
-  function closeAnomalyForm() {
-    setShowCommentInput(false);
-    setEditingBlockKey(null);
-    setCommentInput('');
-    setCurrentAnomaly(null);
+  function blockKey(pageIndex: number, blockId: string) {
+    return reviewKey(packet.chapterId, packet.pages[pageIndex].printedPage, blockId);
   }
 
-  // Gère le changement de statut avec gestion des anomalies
-  async function handleStatusChangeWithComment(
-    pageIndex: number,
-    blockId: string,
-    newStatus: BlockValidationStatus,
-    comment?: string
-  ) {
-    // Enregistrer le commentaire avant de changer le statut : un échec ne doit pas
-    // laisser croire que l’anomalie a été sauvegardée.
-    if (newStatus !== 'issue-found') {
-      await handleBlockStatusChange(pageIndex, blockId, newStatus);
-    }
+  // A new report starts blank. Editing an existing report is an explicit choice.
+  function openAnomalyForm(blockId: string, anomaly?: AnomalyReport) {
+    const key = blockKey(currentPageIndex, blockId);
+    if (!anomaly && draftRef.current?.key === key) return;
+    setDraft({ key, anomalyId: anomaly?.id, description: anomaly?.description ?? '', session: ++draftSession.current });
+    setSaveError(null);
+    setSaveSuccess(null);
+  }
 
-    const block = packet.pages[pageIndex].parts?.find(p => p.id === blockId);
+  function closeAnomalyForm() { setDraft(null); }
+
+  async function saveAnomalyDraft(pageIndex: number, blockId: string) {
+    const editor = draftRef.current;
+    if (!editor || editor.key !== blockKey(pageIndex, blockId) || !editor.description.trim()) return;
+    const page = packet.pages[pageIndex];
+    const block = reviewBlocks(page).find(p => p.id === blockId);
     if (!block) return;
-    
-    // Si c'est une anomalie (issue-found ou corrected), gérer le commentaire
-    if (newStatus === 'issue-found' && comment && comment.trim()) {
-      setSaving(true);
-      setSaveError(null);
-      setSaveSuccess(null);
-      
-      try {
-        // Créer ou mettre à jour l'anomalie
-        const existingAnomaly = anomalyForBlock(pageIndex, blockId);
-        const anomalyData = existingAnomaly ? {
-          ...existingAnomaly,
-          description: comment,
-          status: 'open' as AnomalyStatus,
-          updatedAt: new Date().toISOString(),
-        } : createAnomalyReport(
-          packet.chapterId,
-          'Kumar', // Manuel - à rendre générique
-          packet.pages[pageIndex].printedPage,
-          packet.pages[pageIndex].pdfPage,
-          blockId,
-          block.role,
-          block.text,
-          comment
-        );
-        
-        await saveAnomaly(anomalyData);
-        await handleBlockStatusChange(pageIndex, blockId, newStatus);
-        
-        // Recharger les anomalies
-        const updatedAnomalies = await loadChapterAnomalies(packet.chapterId);
-        setAnomalies(updatedAnomalies);
-        setCurrentAnomaly(updatedAnomalies.find(a => a.chapterId === packet.chapterId && a.printedPage === packet.pages[pageIndex].printedPage && a.blockId === blockId) || null);
-        
+    const existing = anomalies.find(a => a.id === editor.anomalyId && reviewKey(a.chapterId, a.printedPage, a.blockId) === editor.key);
+    if (editor.anomalyId && !existing) return;
+    const anomaly = existing ? { ...existing, description: editor.description, status: 'open' as const }
+      : createAnomalyReport(packet.chapterId, 'Kumar', page.printedPage, page.pdfPage,
+        blockId, block.role, block.text, editor.description);
+    if (await commitReview(pageIndex, blockId, 'issue-found', anomaly, existing ? 'edit' : 'create')) {
+      // A completed save must not close a different block's newly opened editor.
+      if (draftRef.current?.session === editor.session) {
+        closeAnomalyForm();
         setSaveSuccess('Anomalie enregistrée avec succès !');
-        setTimeout(() => setSaveSuccess(null), 3000);
-      } catch (error) {
-        setSaveError('Erreur lors de l\'enregistrement. Veuillez réessayer.');
-        setTimeout(() => setSaveError(null), 5000);
-      } finally {
-        setSaving(false);
       }
     }
-    
-    // Si le statut n'est plus issue-found, supprimer le commentaire
-    if (newStatus !== 'issue-found' && newStatus !== 'corrected') {
-      setCommentInput('');
-      setShowCommentInput(false);
-    }
   }
-  
-  // Gère le clic sur "Anomalie"
-  function handleAnomalieClick(block: SourcePart, pageIndex: number) {
-    const existingAnomaly = anomalyForBlock(pageIndex, block.id);
-    
-    // Ouvrir le formulaire pour ce bloc
-    // Ne PAS changer le statut ici - l'utilisateur le fera via le formulaire
-    // Cela évite les conflits si l'utilisateur change de bloc avant d'enregistrer
-    
-    if (existingAnomaly) {
-      // Une anomalie existe déjà : afficher son commentaire
-      setCurrentAnomaly(existingAnomaly);
-      setCommentInput(existingAnomaly.description);
-    } else {
-      // Nouvelle anomalie : préparer un champ vide
-      setCurrentAnomaly(null);
-      setCommentInput('');
-    }
-    
-    // Ouvrir le formulaire
-    setEditingBlockKey(`${packet.pages[pageIndex]?.printedPage}:${block.id}`);
-    setShowCommentInput(true);
-    
-    // Ne PAS appeler handleBlockStatusChange ici
-    // Le statut sera mis à jour quand l'utilisateur enregistrera le commentaire
+
+  function renderAnomalyForm(pageIndex: number, blockId: string) {
+    if (!draft || editingBlockKey !== blockKey(pageIndex, blockId)) return null;
+    const existing = anomalies.filter(a => a.chapterId === packet.chapterId &&
+      a.printedPage === packet.pages[pageIndex].printedPage && a.blockId === blockId && a.status !== 'resolved');
+    return <View style={{ marginTop: 12, gap: 8, width: '100%' }}>
+      <Txt size={13} bold>{currentAnomaly ? "Modifier l'anomalie" : 'Nouvelle anomalie'}</Txt>
+      {existing.map((a, i) => <Button key={a.id} title={`Modifier l’anomalie ${i + 1}`}
+        secondary disabled={saving} onPress={() => openAnomalyForm(blockId, a)} />)}
+      {currentAnomaly && <Button title="Nouvelle anomalie" secondary disabled={saving}
+        onPress={() => { closeAnomalyForm(); openAnomalyForm(blockId); }} />}
+      <TextInput multiline numberOfLines={4} accessibilityLabel="Description de l’anomalie"
+        placeholder="Décrivez l’anomalie…" value={commentInput} editable={!saving}
+        onChangeText={description => {
+          if (draftRef.current && !mutationRef.current) setDraft({ ...draftRef.current, description });
+        }}
+        style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12,
+          fontSize: 15, color: c.ink, backgroundColor: c.paper, minHeight: 100, width: '100%' }} />
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button title={currentAnomaly ? 'Mettre à jour' : 'Enregistrer'} secondary
+          disabled={!loaded || saving || !commentInput.trim()} onPress={() => saveAnomalyDraft(pageIndex, blockId)} />
+        <Button title="Annuler" secondary onPress={closeAnomalyForm} />
+      </View>
+    </View>;
   }
-  
+
   // Génère un rapport complet des anomalies
   function generateAnomalyReport() {
     return generateFullAnomalyReport(anomalies);
@@ -430,31 +377,228 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     return getPagesWithAnomalies(validation, controlReport);
   }
   
-  // Obtenir les blocs de la page actuelle
-  // On filtre les blocs décoratifs qui n'ont pas besoin de vérification textuelle
-  function getCurrentBlocks() {
-    if (!packet.pages[currentPageIndex]) return [];
-    // Exclure les page-header qui sont des en-têtes de page sans contenu utile
-    return (packet.pages[currentPageIndex].parts || []).filter(part => part.role !== 'page-header');
-  }
+   // Obtenir les blocs de la page actuelle
+   // On filtre les blocs décoratifs qui n'ont pas besoin de vérification textuelle
+   function getCurrentBlocks() {
+     if (!packet.pages[currentPageIndex]) return [];
+     // Exclure les page-header qui sont des en-têtes de page sans contenu utile
+     return reviewBlocks(packet.pages[currentPageIndex]);
+   }
   
   // Obtenir le statut d'un bloc
   function getCurrentBlockStatus(blockId: string): BlockValidationStatus {
-    if (!validation) return 'pending';
-    const page = validation.pages.find(p => p.printedPage === packet.pages[currentPageIndex]?.printedPage);
-    if (!page) return 'pending';
-    const block = page.blocks.find(b => b.id === blockId);
-    return block?.status || 'pending';
+    return allTargets.find(t => t.pageIndex === currentPageIndex && t.blockId === blockId)?.status ?? 'pending';
   }
   
-  // Statistiques de validation
+  // Récupère le texte à afficher pour un bloc (en tenant compte des fusions)
+   function getBlockDisplayText(block: any): string {
+     const validation = latestValidation.current;
+     if (!validation) return block.text;
+     
+     const pageIndex = validation.pages.findIndex(p => p.printedPage === block.page || p.printedPage === packet.pages[currentPageIndex]?.printedPage);
+     if (pageIndex < 0) return block.text;
+     
+     const blockValidation = validation.pages[pageIndex].blocks.find(b => b.id === block.id);
+     if (!blockValidation) return block.text;
+     
+     // Vérifier si ce bloc a été fusionné (notes commencent par FUSION DES BLOCS)
+     if (blockValidation.notes && blockValidation.notes.startsWith('FUSION DES BLOCS')) {
+       // Extraire le texte fusionné des notes : format "FUSION DES BLOCS a ET b: "texte""
+       const colonIndex = blockValidation.notes.indexOf(':');
+       if (colonIndex > 0) {
+         const textAfterColon = blockValidation.notes.substring(colonIndex + 1).trim();
+         // Supprimer les guillemets si présents
+         if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
+           return textAfterColon.substring(1, textAfterColon.length - 1);
+         }
+         return textAfterColon;
+       }
+     }
+     
+     return block.text;
+   }
   function getStats() {
     if (!validation) return null;
-    return getValidationStats(validation);
+    const verifiedBlocks = allTargets.filter(t => isVerified(t.status)).length;
+    const pages = packet.pages.filter(p => allTargets.some(t => t.printedPage === p.printedPage));
+    const verifiedPages = pages.filter(p => allTargets.filter(t => t.printedPage === p.printedPage).every(t => isVerified(t.status))).length;
+    return { verifiedBlocks, totalBlocks: allTargets.length, verifiedPages, totalPages: pages.length,
+      progress: allTargets.length ? Math.round(100 * verifiedBlocks / allTargets.length) : 0,
+      complete: allTargets.length > 0 && verifiedBlocks === allTargets.length };
   }
   
-  // Rendu du contenu en fonction du mode d'affichage
-  function renderContent() {
+   // Vérifie si le bloc actuel peut être fusionné avec le suivant
+   function canMergeWithNext(): boolean {
+     if (!loaded || !packet.pages[currentPageIndex]) return false;
+     
+     const blocks = getCurrentBlocks();
+     const currentBlock = blocks[currentBlockIndex];
+     
+     // Vérifier qu'il y a un bloc suivant
+     if (currentBlockIndex + 1 >= blocks.length) return false;
+     
+     const nextBlock = blocks[currentBlockIndex + 1];
+     
+     // Ne pas fusionner les éléments structurés
+     const structuredRoles = ['heading', 'table', 'figure', 'list', 'box', 'contents', 'chapter-title', 'section-title', 'page-header'];
+     if (structuredRoles.includes(currentBlock.role) || structuredRoles.includes(nextBlock.role)) {
+       return false;
+     }
+     
+     // Autoriser la fusion entre paragraphes (peut être affiné selon les besoins)
+     return currentBlock.role === 'paragraph' && nextBlock.role === 'paragraph';
+   }
+   
+   // Ouvre le aperçu de fusion
+   function openMergePreview() {
+     if (!loaded || !packet.pages[currentPageIndex]) return;
+     
+     const blocks = getCurrentBlocks();
+     const currentBlock = blocks[currentBlockIndex];
+     const nextBlock = blocks[currentBlockIndex + 1];
+     
+     if (!currentBlock || !nextBlock) return;
+     
+     // Texte des deux blocs
+     const currentText = currentBlock.text.trim();
+     const nextText = nextBlock.text.trim();
+     
+     // Aperçu avec espace
+     const previewWithSpace = currentText + ' ' + nextText;
+     // Aperçu sans espace (pour les mots coupés)
+     const previewWithoutSpace = currentText + nextText;
+     
+     setMergePreview({
+       currentBlock,
+       nextBlock,
+       previewText: previewWithSpace, // Valeur par défaut
+       manualText: previewWithSpace,  // Commence avec l'aperçu avec espace
+       useSpace: true                 // Commence avec l'option espace
+     });
+   }
+   
+   // Ferme l'aperçu de fusion
+   function closeMergePreview() {
+     setMergePreview(null);
+     setMergeError(null);
+     setMergeSuccess(null);
+   }
+   
+   // Gère le changement d'option (espace ou pas)
+   function handleMergeOptionChange(useSpace: boolean) {
+     setMergePreview(prev => {
+       if (!prev) return prev;
+       const { currentBlock, nextBlock } = prev;
+       if (!currentBlock || !nextBlock) return prev;
+       const currentText = currentBlock.text.trim();
+       const nextText = nextBlock.text.trim();
+       
+       // Texte de base selon l'option
+       const baseText = useSpace ? currentText + ' ' + nextText : currentText + nextText;
+       
+       return {
+         ...prev,
+         previewText: baseText,
+         manualText: baseText, // Réinitialise le texte manuel
+         useSpace
+       };
+     });
+   }
+   
+   // Gère le changement du texte manuel
+   function handleManualTextChange(text: string) {
+     setMergePreview(prev => {
+       if (!prev) return prev;
+       return {
+         ...prev,
+         manualText: text
+       };
+     });
+   }
+   
+   // Confirme la fusion
+   async function confirmMerge() {
+     if (!mergePreview || !loaded) return;
+     
+     setMergeSaving(true);
+     setMergeError(null);
+     setMergeSuccess(null);
+     
+     try {
+       // Récupérer les blocs actuels
+       const blocks = getCurrentBlocks();
+       const currentBlock = blocks[currentBlockIndex];
+       const nextBlock = blocks[currentBlockIndex + 1];
+       
+       if (!currentBlock || !nextBlock) {
+         throw new Error('Blocs introuvables');
+       }
+       
+       // Récupérer la validation actuelle
+       const validation = latestValidation.current;
+       if (!validation) throw new Error('Validation non disponible');
+       
+       // Trouver les index des blocs dans la validation
+       const pageIndex = validation.pages.findIndex(p => p.printedPage === packet.pages[currentPageIndex].printedPage);
+       if (pageIndex < 0) throw new Error('Page introuvable dans la validation');
+       
+       const currentBlockIndexInValidation = validation.pages[pageIndex].blocks.findIndex(b => b.id === currentBlock.id);
+       const nextBlockIndexInValidation = validation.pages[pageIndex].blocks.findIndex(b => b.id === nextBlock.id);
+       
+       if (currentBlockIndexInValidation < 0 || nextBlockIndexInValidation < 0) {
+         throw new Error('Bloc introuvable dans la validation');
+       }
+       
+       // Préparer les descriptions
+       const mergeDescription = `FUSION DES BLOCS ${currentBlock.id} ET ${nextBlock.id}: "${mergePreview.manualText}"`;
+       const mergedIntoPrevious = `MERGED_INTO_PREVIOUS:${currentBlock.id}`;
+       
+       // Mettre à jour le premier bloc avec la description de fusion
+       let updatedValidation = updateBlockValidation(
+         validation,
+         pageIndex,
+         currentBlock.id,
+         {
+           notes: mergeDescription,
+           // Préserver le statut actuel
+           status: validation.pages[pageIndex].blocks[currentBlockIndexInValidation].status
+         }
+       );
+       
+       // Mettre à jour le deuxième bloc pour le marquer comme fusionné dans le précédent
+       updatedValidation = updateBlockValidation(
+         updatedValidation,
+         pageIndex,
+         nextBlock.id,
+         {
+           notes: mergedIntoPrevious,
+           // Préserver le statut actuel
+           status: updatedValidation.pages[pageIndex].blocks[nextBlockIndexInValidation].status
+         }
+       );
+       
+       // Sauvegarder la validation
+       await saveValidation(updatedValidation);
+       latestValidation.current = updatedValidation;
+       setValidation(updatedValidation);
+       
+       setMergeSuccess('Fusion enregistrée avec succès !');
+       
+       // Fermer l'aperçu après un court délai
+       setTimeout(() => {
+         closeMergePreview();
+       }, 1500);
+       
+     } catch (error) {
+       console.error('Erreur lors de la fusion:', error);
+       setMergeError('Erreur lors de l\'enregistrement de la fusion. Veuillez réessayer.');
+     } finally {
+       setMergeSaving(false);
+     }
+   }
+   
+   // Rendu du contenu en fonction du mode d'affichage
+   function renderContent() {
     const page = packet.pages[currentPageIndex];
     const blocks = getCurrentBlocks();
     const currentBlock = blocks[currentBlockIndex];
@@ -462,7 +606,9 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     if (!page || !currentBlock) {
       return (
         <View style={{ padding: 20 }}>
-          <Txt size={16} color={c.muted}>Aucun bloc sélectionné</Txt>
+          <Txt size={16} color={c.muted}>{!loaded ? 'Chargement…' : reviewFilter === 'pending'
+              ? 'Tous les blocs sont vérifiés. Retrouvez-les dans « Vérifiés » ou « Tous ».'
+              : reviewFilter === 'verified' ? 'Aucun bloc vérifié pour le moment.' : 'Aucun bloc dans ce cours.'}</Txt>
         </View>
       );
     }
@@ -470,7 +616,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     const blockStatus = getCurrentBlockStatus(currentBlock.id);
     const presentation = sourcePresentation(page.printedPage, currentBlock);
     const isIllustration = isTrueIllustration(currentBlock) || presentation.imageOnly;
-    const showAsText = !isIllustration; // Même règle d'affichage que le cours reconstitué, source brute inchangée
+    const showAsText = !isIllustration; // Dans vérification, on affiche le texte sauf pour les vraies illustrations
     
     // Mode split : texte + visuel
     if (viewMode === 'split') {
@@ -489,106 +635,81 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
               </Txt>
             </View>
             
-            {showAsText ? (
-              // Affiche le texte pour les blocs non-illustration
-              <>
-                <ScrollView nestedScrollEnabled style={{ maxHeight: isWide ? 500 : 300 }}>
-                  <Text selectable testID="verification-presented-text" style={{fontSize:16,lineHeight:26,color:c.ink}}>
-                    {presentation.hide ? 'Ce numéro de pagination isolé est masqué dans le cours reconstitué. Vérifiez son emplacement dans le PDF.' : presentation.text}
-                  </Text>
-                  {presentation.text !== currentBlock.text && <Txt size={11} color={c.muted}>Présentation ajustée : le texte extrait original reste conservé et disponible ci-dessous.</Txt>}
-                  {presentation.text !== currentBlock.text && <Text selectable style={{fontSize:12,color:c.muted,marginTop:6}}>{currentBlock.text}</Text>}
-                </ScrollView>
-                
-                {/* Champ de commentaire (si anomalie) */}
-                {showCommentInput && editingBlockKey === `${page.printedPage}:${currentBlock.id}` && (
-                  <View style={{ marginTop: 12, gap: 8 }}>
-                    <Txt size={13} bold>Décrivez l'anomalie :</Txt>
-                    <TextInput
-                      multiline
-                      numberOfLines={4}
-                      placeholder="Ex: Virgule supplémentaire, mot incorrect, valeur médicale erronée, unité incorrecte..."
-                      value={commentInput}
-                      onChangeText={setCommentInput}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: c.line,
-                        borderRadius: 8,
-                        padding: 12,
-                        fontSize: 15,
-                        color: c.ink,
-                        backgroundColor: c.paper,
-                        minHeight: 100,
-                      }}
-                    />
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <Button
-                        title={currentAnomaly ? 'Mettre à jour' : 'Enregistrer'}
-                        secondary
-                        disabled={saving || !commentInput.trim()}
-                        onPress={() => handleStatusChangeWithComment(
-                          currentPageIndex,
-                          currentBlock.id,
-                          'issue-found',
-                          commentInput
-                        )}
-                      />
-                      <Button
-                        title="Annuler"
-                        secondary
-                        onPress={closeAnomalyForm}
-                      />
-                    </View>
-                    {saveError && <Txt size={12} color='#dc3545'>{saveError}</Txt>}
-                    {saveSuccess && <Txt size={12} color={c.primary}>{saveSuccess}</Txt>}
-                  </View>
-                )}
-                
-                {/* Boutons de statut */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: showCommentInput ? 0 : 12 }}>
-                  {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => {
-                    const isAnomalie = status === 'issue-found';
-                    return (
-                      <Button
-                        key={status}
-                        title={statusLabels[status]}
-                        secondary={blockStatus !== status}
-                        onPress={() => {
-                          if (isAnomalie) {
-                            // Pour "Anomalie", toujours ouvrir le formulaire
-                            openAnomalyForm(currentBlock.id);
-                          } else {
-                            // Pour les autres statuts, juste changer le statut
-                            // et fermer le formulaire si ouvert
-                            handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
-                            closeAnomalyForm();
-                          }
-                        }}
-                      />
-                    );
-                  })}
-                </View>
-              </>
-            ) : (
+             {showAsText ? (
+               // Affiche le texte pour les blocs non-illustration
+               <>
+                 <ScrollView nestedScrollEnabled style={{ maxHeight: isWide ? 500 : 300 }}>
+                   {presentation.contents ? (
+                     <View style={{flexDirection:'row',flexWrap:'wrap',gap:14}}>
+                       {presentation.contents.map((column, ci) => (
+                         <View key={ci} style={{flex:1,minWidth:240,gap:6}}>
+                           {column.map((entry, i) => (
+                             <View key={i} style={{flexDirection:'row',gap:8,justifyContent:'space-between'}}>
+                               <Text selectable style={{fontSize:16,color:c.ink,flex:1}}>{entry.label}</Text>
+                               <Text selectable style={{fontSize:16,color:c.ink,minWidth:32,textAlign:'right'}}>{entry.page}</Text>
+                             </View>
+                           ))}
+                         </View>
+                       ))}
+                     </View>
+                   ) : (
+                     <SourcePresentationText presentation={presentation} size={16} />
+                   )}
+                 </ScrollView>
+                 
+                 {/* Boutons de statut et de fusion */}
+                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: showCommentInput ? 0 : 12 }}>
+                   {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => {
+                     const isAnomalie = status === 'issue-found';
+                     return (
+                       <Button
+                         key={status}
+                         disabled={!loaded || saving}
+                         title={statusLabels[status]}
+                         secondary={blockStatus !== status}
+                         onPress={() => {
+                           if (isAnomalie) {
+                             // Pour "Anomalie", toujours ouvrir le formulaire
+                             openAnomalyForm(currentBlock.id);
+                           } else {
+                             // Pour les autres statuts, juste changer le statut
+                             // et fermer le formulaire si ouvert
+                             return handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
+                           }
+                         }}
+                       />
+                     );
+                   })}
+                   {/* Bouton de fusion */}
+                   <Button
+                     key="merge"
+                     disabled={!loaded || saving || !canMergeWithNext()}
+                     title="Fusionner avec le bloc suivant"
+                     secondary
+                     onPress={() => openMergePreview()}
+                   />
+                 </View>
+               </>
+             ) : (
               // Affiche l'illustration
               <View style={{ alignItems: 'center', gap: 8 }}>
                 <OriginalVisual image={currentBlock.image} ratio={(currentBlock.bbox[3]-currentBlock.bbox[1])/(currentBlock.bbox[2]-currentBlock.bbox[0])}
                   wide={false} label={`${roles[currentBlock.role] || 'Illustration'} original`} />
                 <Txt size={12} color={c.muted}>Illustration médicale - à vérifier visuellement</Txt>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: showCommentInput ? 0 : 12, justifyContent: 'center' }}>
-                  {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => {
+                  {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => {
                     const isAnomalie = status === 'issue-found';
                     return (
                       <Button
                         key={status}
+                        disabled={!loaded || saving}
                         title={statusLabels[status]}
                         secondary={blockStatus !== status}
                         onPress={() => {
                           if (isAnomalie) {
                             openAnomalyForm(currentBlock.id);
                           } else {
-                            handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
-                            closeAnomalyForm();
+                            return handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
                           }
                         }}
                       />
@@ -596,50 +717,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                   })}
                 </View>
                 
-                {/* Champ de commentaire pour illustration */}
-                {showCommentInput && editingBlockKey === `${page.printedPage}:${currentBlock.id}` && (
-                  <View style={{ marginTop: 12, gap: 8, width: '100%' }}>
-                    <Txt size={13} bold>Décrivez l'anomalie :</Txt>
-                    <TextInput
-                      multiline
-                      numberOfLines={4}
-                      placeholder="Ex: Schéma incomplet, légende manquante..."
-                      value={commentInput}
-                      onChangeText={setCommentInput}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: c.line,
-                        borderRadius: 8,
-                        padding: 12,
-                        fontSize: 15,
-                        color: c.ink,
-                        backgroundColor: c.paper,
-                        minHeight: 100,
-                        width: '100%',
-                      }}
-                    />
-                    <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center' }}>
-                      <Button
-                        title={currentAnomaly ? 'Mettre à jour' : 'Enregistrer'}
-                        secondary
-                        disabled={saving || !commentInput.trim()}
-                        onPress={() => handleStatusChangeWithComment(
-                          currentPageIndex,
-                          currentBlock.id,
-                          'issue-found',
-                          commentInput
-                        )}
-                      />
-                      <Button
-                        title="Annuler"
-                        secondary
-                        onPress={closeAnomalyForm}
-                      />
-                    </View>
-                    {saveError && <Txt size={12} color='#dc3545' style={{ textAlign: 'center' }}>{saveError}</Txt>}
-                    {saveSuccess && <Txt size={12} color={c.primary} style={{ textAlign: 'center' }}>{saveSuccess}</Txt>}
-                  </View>
-                )}
+
               </View>
             )}
           </View>
@@ -715,18 +793,28 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
           {showAsText ? (
             <>
               <ScrollView nestedScrollEnabled>
-                <Text selectable testID="verification-presented-text" style={{fontSize:18,lineHeight:28,color:c.ink}}>
-                  {presentation.hide ? 'Numéro de pagination isolé : masqué dans le cours reconstitué.' : presentation.text}
-                </Text>
-                {presentation.text !== currentBlock.text && <View style={{marginTop:12,gap:5}}>
-                  <Txt size={12} color={c.muted}>Texte brut extrait (conservé pour vérification) :</Txt>
-                  <Text selectable style={{fontSize:13,color:c.muted}}>{currentBlock.text}</Text>
-                </View>}
+                {presentation.contents ? (
+                    <View style={{flexDirection:'row',flexWrap:'wrap',gap:14}}>
+                      {presentation.contents.map((column, ci) => (
+                        <View key={ci} style={{flex:1,minWidth:240,gap:6}}>
+                          {column.map((entry, i) => (
+                            <View key={i} style={{flexDirection:'row',gap:8,justifyContent:'space-between'}}>
+                              <Text selectable style={{fontSize:18,color:c.ink,flex:1}}>{entry.label}</Text>
+                              <Text selectable style={{fontSize:18,color:c.ink,minWidth:32,textAlign:'right'}}>{entry.page}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <SourcePresentationText presentation={presentation} size={18} />
+                  )}
               </ScrollView>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => (
+                {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => (
                   <Button
                     key={status}
+                    disabled={!loaded || saving}
                     title={statusLabels[status]}
                     secondary={blockStatus !== status}
                     onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
@@ -738,11 +826,12 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
             <View style={{ alignItems: 'center', gap: 8 }}>
               <OriginalVisual image={currentBlock.image} ratio={(currentBlock.bbox[3]-currentBlock.bbox[1])/(currentBlock.bbox[2]-currentBlock.bbox[0])}
                 wide={false} label={`${roles[currentBlock.role] || 'Illustration'} original`} />
-              <Txt size={12} color={c.muted}>{presentation.imageOnly ? "Visuel original retenu pour ce passage — contenu textuel toujours à vérifier" : "Illustration médicale"}</Txt>
+              <Txt size={12} color={c.muted}>Illustration médicale</Txt>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => (
+                {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => (
                   <Button
                     key={status}
+                    disabled={!loaded || saving}
                     title={statusLabels[status]}
                     secondary={blockStatus !== status}
                     onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
@@ -772,40 +861,34 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
           <Button
             title="Page précédente"
             secondary
-            disabled={currentPageIndex === 0}
+            disabled={!visibleTargets.some(t => t.pageIndex < currentPageIndex)}
             onPress={() => {
-              setCurrentPageIndex(currentPageIndex - 1);
-              setCurrentBlockIndex(0);
-              scrollRef.current?.scrollTo({ y: 0, animated: true });
+              const previous = visibleTargets.filter(t => t.pageIndex < currentPageIndex).at(-1);
+              if (previous) goToPage(previous.pageIndex);
             }}
           />
           <Button
-            title="Bloc précédent"
+            title={reviewFilter === 'pending' ? 'Bloc précédent à vérifier' : 'Bloc précédent'}
             secondary
-            disabled={currentPageIndex === 0 && currentBlockIndex === 0}
+            disabled={!target || visibleTargets[0]?.key === target.key}
             onPress={prevBlock}
           />
           <Button
-            title={`Page ${page?.printedPage || '?'} · Bloc ${currentBlockIndex + 1}/${blocks.length || 0}`}
+            title={target ? `Page ${page?.printedPage || '?'} · Bloc ${currentBlockIndex + 1}/${blocks.length || 0}` : 'Choisir une page'}
             secondary
             onPress={() => setShowPageSelector(!showPageSelector)}
           />
           <Button
-            title="Bloc suivant"
+            title={reviewFilter === 'pending' ? 'Bloc suivant à vérifier' : 'Bloc suivant'}
             secondary
-            disabled={currentPageIndex === packet.pages.length - 1 && 
-                     currentBlockIndex >= blocks.length - 1}
+            disabled={!target || visibleTargets.at(-1)?.key === target.key}
             onPress={nextBlock}
           />
           <Button
             title="Page suivante"
             secondary
-            disabled={currentPageIndex === packet.pages.length - 1}
-            onPress={() => {
-              setCurrentPageIndex(currentPageIndex + 1);
-              setCurrentBlockIndex(0);
-              scrollRef.current?.scrollTo({ y: 0, animated: true });
-            }}
+            disabled={!visibleTargets.some(t => t.pageIndex > currentPageIndex)}
+            onPress={() => selectTarget(visibleTargets.find(t => t.pageIndex > currentPageIndex))}
           />
         </View>
         
@@ -830,11 +913,10 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
         
         {/* Filtrage */}
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <Chip
-            label="Tous"
-            selected={filter === 'all'}
-            onPress={() => setFilter('all')}
-          />
+          {(['pending', 'verified', 'all'] as ReviewFilter[]).map(mode => (
+            <Chip key={mode} label={mode === 'pending' ? 'À traiter' : mode === 'verified' ? 'Vérifiés' : 'Tous'}
+              selected={reviewFilter === mode} onPress={() => changeReviewFilter(mode)} />
+          ))}
           {anomalies.length > 0 && (
             <Chip
               label={`Mes anomalies (${anomalies.length})`}
@@ -850,11 +932,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
             selected={filter === 'anomalies'}
             onPress={() => setFilter('anomalies')}
           />
-          <Chip
-            label="À vérifier"
-            selected={filter === 'pending'}
-            onPress={() => setFilter('pending')}
-          />
+
         </View>
         
         {/* Statistiques */}
@@ -899,13 +977,16 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
             <Txt bold size={16} style={{ marginBottom: 12 }}>Aller à la page</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {packet.pages.map((p, i) => {
-                const pageValidation = validation?.pages.find(vp => vp.printedPage === p.printedPage);
-                const pageStatus = pageValidation?.status || 'not-started';
+                const pageTargets = allTargets.filter(t => t.printedPage === p.printedPage);
+                const pageStatus = pageTargets.length && pageTargets.every(t => isVerified(t.status)) ? 'verified' : 'in-progress';
+                const available = visibleTargets.some(t => t.printedPage === p.printedPage);
                 const bgColor = pageStatus === 'verified' ? c.primary : 
                                pageStatus === 'in-progress' ? c.peach : c.muted;
                 return (
                   <Pressable
-                    key={i}
+                    key={p.printedPage}
+                    disabled={!available}
+                    accessibilityLabel={`Page ${p.printedPage}${pageStatus === 'verified' ? ' entièrement vérifiée' : ''}`}
                     onPress={() => goToPage(i)}
                     style={{ 
                       padding: 10, 
@@ -929,13 +1010,10 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   
   // Navigue vers une anomalie spécifique
   function goToAnomaly(anomaly: AnomalyReport) {
-    const pageIndex = packet.pages.findIndex(p => p.printedPage === anomaly.printedPage);
-    if (pageIndex !== -1) {
-      const blockIndex = packet.pages[pageIndex].parts?.findIndex(p => p.id === anomaly.blockId) || 0;
-      setCurrentPageIndex(pageIndex);
-      setCurrentBlockIndex(blockIndex);
-      setShowPageSelector(false);
-      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    const next = allTargets.find(t => t.key === reviewKey(anomaly.chapterId, anomaly.printedPage, anomaly.blockId));
+    if (next) {
+      setReviewFilter(isVerified(next.status) ? 'verified' : 'pending');
+      selectTarget(next);
     }
   }
 
@@ -1029,7 +1107,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     
     // Grouper les anomalies par page
     const anomaliesByPage: Record<number, AnomalyReport[]> = {};
-    for (const anomaly of anomalies) {
+    for (const anomaly of anomalies.filter(a => a.status === anomalyFilter)) {
       if (!anomaliesByPage[anomaly.printedPage]) {
         anomaliesByPage[anomaly.printedPage] = [];
       }
@@ -1041,6 +1119,12 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     
     return (
       <Card>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          {(['open', 'corrected-pending-review', 'resolved'] as AnomalyStatus[]).map(status => (
+            <Chip key={status} label={`${status === 'open' ? 'Ouvertes' : status === 'resolved' ? 'Résolues' : 'À revérifier'} (${anomalies.filter(a => a.status === status).length})`}
+              selected={anomalyFilter === status} onPress={() => setAnomalyFilter(status)} />
+          ))}
+        </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <Txt bold size={16}>Anomalies signalées ({anomalies.length})</Txt>
           <Button
@@ -1120,6 +1204,9 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                       }}>
                         <Txt size={13} bold>Description :</Txt>
                         <Txt size={12}>{anomaly.description}</Txt>
+                        {(anomaly.descriptionHistory ?? []).map((previous, i) => (
+                          <Txt key={i} size={11} color={c.muted}>Commentaire précédent : {previous.description}</Txt>
+                        ))}
                       </View>
                       
                       <View style={{ 
@@ -1217,8 +1304,8 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
         {renderExportModal()}
         
         {/* En-tête */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flex: 1, minWidth: 220 }}>
             <Txt size={12} color={c.primary} bold>KUMAR · CHAPITRE 8</Txt>
             <Txt size={24} bold>Vérification de fidélité</Txt>
             <Txt size={13} color={c.muted}>
@@ -1243,23 +1330,26 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
           </View>
         </View>
         
+        {saveError && <Txt color="#dc3545">{saveError}</Txt>}
         {/* Statistiques globales */}
         <View style={{ backgroundColor: '#FFF4DD', padding: 14, borderRadius: 12, gap: 8 }}>
           <Txt bold size={14}>📊 Progression</Txt>
           {getStats() ? (
             <Txt size={13}>
               {getStats()!.verifiedPages}/{getStats()!.totalPages} pages vérifiées · 
-              {getStats()!.verifiedBlocks}/{getStats()!.totalBlocks} blocs vérifiés · 
+              {getStats()!.verifiedBlocks} blocs vérifiés / {getStats()!.totalBlocks} ·
               {getStats()!.progress}% complet
             </Txt>
           ) : (
             <Txt size={13}>Chargement des statistiques...</Txt>
           )}
           <Txt size={12} color={c.muted}>
-            {validation?.complete ? '✅ Chapitre entièrement vérifié' : '⏳ Vérification en cours'}
+            {getStats()?.complete ? '✅ Chapitre entièrement vérifié' : '⏳ Vérification en cours'}
           </Txt>
         </View>
         
+        {loaded && <Txt bold>{allTargets.filter(t => !isVerified(t.status)).length} blocs restant à contrôler</Txt>}
+        {pageNotice !== null && <Txt color={c.primary}>Page entièrement vérifiée · p. {pageNotice}</Txt>}
         {/* Statistiques des anomalies */}
         {anomalies.length > 0 && (
           <View style={{ backgroundColor: '#FFE8E8', padding: 14, borderRadius: 12, gap: 8 }}>
@@ -1294,35 +1384,180 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
         {/* Contenu principal */}
         <ScrollView ref={scrollRef} nestedScrollEnabled style={{ maxHeight: isWide ? 700 : 500 }}>
           {renderContent()}
-        </ScrollView>
-        
-        {/* Navigation */}
-        {renderNavigation()}
-        
-        {/* Instructions */}
-        <View style={{ backgroundColor: '#E8F4FD', padding: 14, borderRadius: 8, gap: 8 }}>
-          <Txt bold size={13}>ℹ️ Instructions</Txt>
-          <Txt size={12}>
-            <Txt bold>Cours reconstitué : </Txt>
-            Texte extrait du PDF avec mise en forme.
-          </Txt>
-          <Txt size={12}>
-            <Txt bold>Visuel original : </Txt>
-            Image de la page PDF pour comparaison.
-          </Txt>
-          <Txt size={12}>
-            <Txt bold>Marquage : </Txt>
-            Utilisez les boutons de statut pour valider chaque bloc.
-          </Txt>
-          <Txt size={12}>
-            <Txt bold>Priorités : </Txt>
-            Pages 162, 152-157, 163-164 à vérifier en premier.
-          </Txt>
-        </View>
-      </View>
-    </Card>
-  );
-}
+          {getCurrentBlocks()[currentBlockIndex] && renderAnomalyForm(currentPageIndex, getCurrentBlocks()[currentBlockIndex].id)}
+          {saveSuccess && <Txt size={12} color={c.primary}>{saveSuccess}</Txt>}
+          {target && anomalies.filter(a => reviewKey(a.chapterId, a.printedPage, a.blockId) === target.key).map(a => (
+            <View key={a.id} style={{ padding: 12, borderTopWidth: 1, borderColor: c.line, gap: 4 }}>
+              <Txt bold>Historique · {a.status === 'resolved' ? 'Résolue' : a.status === 'open' ? 'Ouverte' : 'À revérifier'}</Txt>
+              <Txt size={12}>{a.createdAt} · Mise à jour : {a.updatedAt}</Txt>
+              <Txt>{a.description}</Txt>
+              {(a.descriptionHistory ?? []).map((previous, i) => <Txt key={i} size={12}>Commentaire précédent ({previous.updatedAt}) : {previous.description}</Txt>)}
+            </View>
+          ))}
+         </ScrollView>
+         
+         {/* Navigation */}
+         {renderNavigation()}
+         
+         {/* Instructions */}
+         <View style={{ backgroundColor: '#E8F4FD', padding: 14, borderRadius: 8, gap: 8 }}>
+           <Txt bold size={13}>ℹ️ Instructions</Txt>
+           <Txt size={12}>
+             <Txt bold>Cours reconstitué : </Txt>
+             Texte extrait du PDF avec mise en forme.
+           </Txt>
+           <Txt size={12}>
+             <Txt bold>Visuel original : </Txt>
+             Image de la page PDF pour comparaison.
+           </Txt>
+           <Txt size={12}>
+             <Txt bold>Marquage : </Txt>
+             Utilisez les boutons de statut pour valider chaque bloc.
+           </Txt>
+           <Txt size={12}>
+             <Txt bold>Fusion de blocs : </Txt>
+             Utilisez le bouton "Fusionner avec le bloc suivant" pour combiner deux blocs textuels séparés incorrectement lors de l'extraction du PDF.
+           </Txt>
+         </View>
+       </View>
+       
+       {/* Modal d'aperçu de fusion */}
+       {mergePreview && (
+         <View style={{
+           position: 'absolute',
+           top: 0,
+           left: 0,
+           right: 0,
+           bottom: 0,
+           backgroundColor: 'rgba(0,0,0,0.5)',
+           justifyContent: 'center',
+           alignItems: 'center',
+           zIndex: 2000,
+         }}>
+           <View style={{
+             backgroundColor: 'white',
+             padding: 24,
+             borderRadius: 12,
+             maxWidth: 500,
+             width: '90%',
+             maxHeight: '80%',
+             gap: 16,
+           }}>
+             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+               <Txt size={18} bold>Aperçu de fusion</Txt>
+               <Pressable onPress={() => closeMergePreview()}>
+                 <Txt size={24}>×</Txt>
+               </Pressable>
+             </View>
+             
+             {/* Texte des deux blocs */}
+             <View style={{ gap: 8 }}>
+               <Txt size={14} bold>Bloc actuel ({mergePreview.currentBlock?.id}):</Txt>
+               <Txt size={13} color={c.ink}>{mergePreview.currentBlock?.text}</Txt>
+               <Txt size={14} bold>Bloc suivant ({mergePreview.nextBlock?.id}):</Txt>
+               <Txt size={13} color={c.ink}>{mergePreview.nextBlock?.text}</Txt>
+             </View>
+             
+             {/* Aperçu du texte fusionné */}
+             <View style={{ gap: 8 }}>
+               <Txt size={14} bold>Aperçu du texte fusionné:</Txt>
+               <View style={{ 
+                 backgroundColor: '#FFF4DD', 
+                 padding: 12, 
+                 borderRadius: 8,
+                 borderWidth: 1,
+                 borderColor: c.line
+               }}>
+                 <Txt size={13} color={c.ink}>{mergePreview.previewText}</Txt>
+               </View>
+             </View>
+             
+             {/* Options de fusion */}
+             <View style={{ gap: 8 }}>
+               <Txt size={14} bold>Options de jonction:</Txt>
+               <View style={{ flexDirection: 'row', gap: 16 }}>
+                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                   <Pressable
+                     onPress={() => handleMergeOptionChange(true)}
+                     style={{ 
+                       padding: 8, 
+                       borderWidth: mergePreview.useSpace ? 2 : 1,
+                       borderColor: mergePreview.useSpace ? c.primary : c.line,
+                       borderRadius: 4
+                     }}
+                   >
+                     <Txt size={13}>Avec espace</Txt>
+                   </Pressable>
+                 </View>
+                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                   <Pressable
+                     onPress={() => handleMergeOptionChange(false)}
+                     style={{ 
+                       padding: 8, 
+                       borderWidth: !mergePreview.useSpace ? 2 : 1,
+                       borderColor: !mergePreview.useSpace ? c.primary : c.line,
+                       borderRadius: 4
+                     }}
+                   >
+                     <Txt size={13}>Sans espace</Txt>
+                   </Pressable>
+                 </View>
+               </View>
+             </View>
+             
+             {/* Correction manuelle */}
+             <View style={{ gap: 8 }}>
+               <Txt size={14} bold>Correction manuelle (si nécessaire):</Txt>
+               <TextInput
+                 multiline
+                 numberOfLines={3}
+                 accessibilityLabel="Texte fusionné corrigé"
+                 placeholder="Corrigez le texte fusionné ici si nécessaire..."
+                 value={mergePreview.manualText}
+                 editable={!mergeSaving}
+                 onChangeText={handleManualTextChange}
+                 style={{ 
+                   borderWidth: 1, 
+                   borderColor: c.line, 
+                   borderRadius: 8, 
+                   padding: 12,
+                   fontSize: 15, 
+                   color: c.ink, 
+                   backgroundColor: c.paper,
+                   minHeight: 80,
+                   width: '100%'
+                 }}
+               />
+               <Txt size={12} color={c.muted}>
+                 Ne supprimez jamais un véritable trait d'union d'un terme médical.
+               </Txt>
+             </View>
+             
+             {/* Boutons d'action */}
+             <View style={{ gap: 8, flexDirection: 'row-reverse' }}>
+               <Button
+                 title="Annuler"
+                 secondary
+                 onPress={closeMergePreview}
+               />
+               <Button
+                 title={mergeSaving ? 'Enregistrement...' : 'Confirmer la fusion'}
+                 disabled={mergeSaving || !mergePreview.manualText.trim()}
+                 onPress={confirmMerge}
+               />
+             </View>
+             
+             {mergeError && <Txt color="#dc3545">{mergeError}</Txt>}
+             {mergeSuccess && <Txt size={12} color={c.primary}>{mergeSuccess}</Txt>}
+           </View>
+         </View>
+       )}
+       
+       {/* Modal d'export pour mobile */}
+       {renderExportModal()}
+     </Card>
+   );
+ }
 
 /**
  * Hook pour utiliser la vérification dans PrivateSourceCourse.

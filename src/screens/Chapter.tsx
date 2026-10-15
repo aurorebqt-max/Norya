@@ -275,7 +275,7 @@ export default function Chapter() {
         <Txt size={11} color={c.muted}>{lesson?.verification === 'beta' ? 'Version bêta · couverture documentaire, validation en cours' : lesson ? 'Contenu partiel · non vérifié' : 'Contenu en préparation'}</Txt>
       </View>
     </Card>
-    {(learning.archivedReadings?.[id] || learning.archivedReadingHistory?.[id]?.length || learning.orphanedAnnotations?.some(annotation => annotation.chapterId === id)) && <Card>
+    {id !== 'kum-08' && (learning.archivedReadings?.[id] || learning.archivedReadingHistory?.[id]?.length || learning.orphanedAnnotations?.some(annotation => annotation.chapterId === id)) && <Card>
       <Txt bold>Anciennes données conservées</Txt>
       {!!learning.archivedReadings?.[id] && <Txt size={12}>
         Ancienne reprise de lecture archivée ({learning.archivedReadings[id].readSections.length} parties lues). Elle n’est pas reportée sur le cours reconstruit.
@@ -294,8 +294,8 @@ export default function Chapter() {
     </Card>}
 
     <View style={s.wrap}>
-      {((id === 'kum-08' ? ['COURS SOURCE', 'COURS COMPLET', 'FICHES', 'FLASHCARDS'] : ['COURS COMPLET', 'FICHES', 'FLASHCARDS']) as ChapterMode[]).map(choice =>
-        <Chip key={choice} label={id === 'kum-08' && choice === 'COURS COMPLET' ? 'ANCIEN COURS' : choice} selected={mode === choice} onPress={() => setMode(choice)} />
+      {((id === 'kum-08' ? ['COURS SOURCE', 'FICHES', 'FLASHCARDS'] : ['COURS COMPLET', 'FICHES', 'FLASHCARDS']) as ChapterMode[]).map(choice =>
+        <Chip key={choice} label={choice} selected={mode === choice} onPress={() => setMode(choice)} />
       )}
     </View>
     {mode !== 'COURS SOURCE' && lesson && <View style={[s.row, { flexWrap: 'wrap', alignItems: 'center' }]}>
