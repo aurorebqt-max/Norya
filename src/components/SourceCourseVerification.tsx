@@ -115,11 +115,11 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   const [anomalies, setAnomalies] = useState<AnomalyReport[]>([]);
 const allTargets = reviewTargets(packet, validation, anomalies);
    
-   // Filtrer les cibles pour exclure les blocs marqués comme fusionnés dans le précédent
+   // Filtrer les cibles pour exclure les blocs marqués comme fusionnés dans un autre bloc
    const filteredTargets = allTargets.filter(target => {
      const blockValidation = validation?.pages.find(p => p.printedPage === target.printedPage)
        ?.blocks.find(b => b.id === target.blockId);
-     return !(blockValidation?.notes?.startsWith('MERGED_INTO_PREVIOUS:'));
+     return !(blockValidation?.notes?.startsWith('MERGED_INTO_PREVIOUS:') || blockValidation?.notes?.startsWith('MERGED_INTO:'));
    });
    
    const visibleTargets = filterReviewTargets(filteredTargets, reviewFilter);
@@ -134,12 +134,16 @@ const allTargets = reviewTargets(packet, validation, anomalies);
    const draftSession = useRef(0);
    // État pour l'aperçu de fusion
    const [mergePreview, setMergePreview] = useState<{
-     currentBlock: SourcePart | null;
-     nextBlock: SourcePart | null;
+     block1: SourcePart | null;
+     block2: SourcePart | null;
+     block1Key: string | null;
+     block2Key: string | null;
      previewText: string;
      manualText: string;
-     useSpace: boolean;
+     junction: 'space' | 'linebreak' | 'none' | 'hyphen';
+     order: '1-2' | '2-1';
    } | null>(null);
+   const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
    const [mergeSaving, setMergeSaving] = useState(false);
    const [mergeError, setMergeError] = useState<string | null>(null);
    const [mergeSuccess, setMergeSuccess] = useState<string | null>(null);
@@ -402,16 +406,35 @@ const allTargets = reviewTargets(packet, validation, anomalies);
      if (!blockValidation) return block.text;
      
      // Vérifier si ce bloc a été fusionné (notes commencent par FUSION DES BLOCS)
-     if (blockValidation.notes && blockValidation.notes.startsWith('FUSION DES BLOCS')) {
-       // Extraire le texte fusionné des notes : format "FUSION DES BLOCS a ET b: "texte""
-       const colonIndex = blockValidation.notes.indexOf(':');
-       if (colonIndex > 0) {
-         const textAfterColon = blockValidation.notes.substring(colonIndex + 1).trim();
-         // Supprimer les guillemets si présents
-         if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
-           return textAfterColon.substring(1, textAfterColon.length - 1);
+     if (blockValidation.notes && (blockValidation.notes.startsWith('FUSION DES BLOCS') || blockValidation.notes.startsWith('MERGED_INTO'))) {
+       if (blockValidation.notes.startsWith('FUSION DES BLOCS')) {
+         const colonIndex = blockValidation.notes.indexOf(':');
+         if (colonIndex > 0) {
+           const textAfterColon = blockValidation.notes.substring(colonIndex + 1).trim();
+           if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
+             return textAfterColon.substring(1, textAfterColon.length - 1);
+           }
+           return textAfterColon;
          }
-         return textAfterColon;
+       }
+       // If merged into another, try to find the merged text in the target
+       if (blockValidation.notes.startsWith('MERGED_INTO')) {
+         const targetId = blockValidation.notes.split(':')[1];
+         // look for target's merged text
+         for (const page of validation.pages) {
+           const target = page.blocks.find(b => b.id === targetId);
+           if (target && target.notes && target.notes.startsWith('FUSION DES BLOCS')) {
+             const colonIndex = target.notes.indexOf(':');
+             if (colonIndex > 0) {
+               const textAfterColon = target.notes.substring(colonIndex + 1).trim();
+               if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
+                 return textAfterColon.substring(1, textAfterColon.length - 1);
+               }
+               return textAfterColon;
+             }
+           }
+         }
+         return block.text;
        }
      }
      
@@ -484,23 +507,29 @@ const allTargets = reviewTargets(packet, validation, anomalies);
      setMergeSuccess(null);
    }
    
-   // Gère le changement d'option (espace ou pas)
-   function handleMergeOptionChange(useSpace: boolean) {
+   // Gère le changement d'option (jonction)
+   function handleMergeOptionChange(junction: 'space' | 'linebreak' | 'none' | 'hyphen') {
      setMergePreview(prev => {
        if (!prev) return prev;
-       const { currentBlock, nextBlock } = prev;
-       if (!currentBlock || !nextBlock) return prev;
-       const currentText = currentBlock.text.trim();
-       const nextText = nextBlock.text.trim();
-       
-       // Texte de base selon l'option
-       const baseText = useSpace ? currentText + ' ' + nextText : currentText + nextText;
-       
+       const { block1, block2, order } = prev;
+       if (!block1 || !block2) return prev;
+       const text1 = order === '1-2' ? block1.text.trim() : block2.text.trim();
+       const text2 = order === '1-2' ? block2.text.trim() : block1.text.trim();
+       let baseText = text1;
+       if (junction === 'space') baseText = text1 + ' ' + text2;
+       else if (junction === 'linebreak') baseText = text1 + '\n' + text2;
+       else if (junction === 'none') baseText = text1 + text2;
+       else if (junction === 'hyphen') {
+         // Remove trailing hyphen from text1 if present and merge
+         const cleaned1 = text1.replace(/[-‐-―−﹣－]\s*$/, '');
+         baseText = cleaned1 + '-' + text2.replace(/^\s*/, '');
+       }
        return {
          ...prev,
          previewText: baseText,
-         manualText: baseText, // Réinitialise le texte manuel
-         useSpace
+         manualText: baseText,
+         junction,
+         order: prev.order
        };
      });
    }
@@ -525,55 +554,45 @@ const allTargets = reviewTargets(packet, validation, anomalies);
      setMergeSuccess(null);
      
      try {
-       // Récupérer les blocs actuels
-       const blocks = getCurrentBlocks();
-       const currentBlock = blocks[currentBlockIndex];
-       const nextBlock = blocks[currentBlockIndex + 1];
-       
-       if (!currentBlock || !nextBlock) {
-         throw new Error('Blocs introuvables');
-       }
-       
-       // Récupérer la validation actuelle
+       const { block1, block2, order } = mergePreview;
+       if (!block1 || !block2) throw new Error('Blocs introuvables');
        const validation = latestValidation.current;
        if (!validation) throw new Error('Validation non disponible');
        
-       // Trouver les index des blocs dans la validation
-       const pageIndex = validation.pages.findIndex(p => p.printedPage === packet.pages[currentPageIndex].printedPage);
-       if (pageIndex < 0) throw new Error('Page introuvable dans la validation');
+       const mergedBlockId = order === '1-2' ? block1.id : block2.id;
+       const otherBlockId = order === '1-2' ? block2.id : block1.id;
+       const mergedPage = packet.pages.find(p => p.parts?.some(part => part.id === mergedBlockId));
+       const otherPage = packet.pages.find(p => p.parts?.some(part => part.id === otherBlockId));
+       if (!mergedPage || !otherPage) throw new Error('Pages introuvables');
        
-       const currentBlockIndexInValidation = validation.pages[pageIndex].blocks.findIndex(b => b.id === currentBlock.id);
-       const nextBlockIndexInValidation = validation.pages[pageIndex].blocks.findIndex(b => b.id === nextBlock.id);
+       const mergedPageIdx = validation.pages.findIndex(p => p.printedPage === mergedPage.printedPage);
+       const otherPageIdx = validation.pages.findIndex(p => p.printedPage === otherPage.printedPage);
+       if (mergedPageIdx < 0 || otherPageIdx < 0) throw new Error('Page introuvable dans la validation');
        
-       if (currentBlockIndexInValidation < 0 || nextBlockIndexInValidation < 0) {
-         throw new Error('Bloc introuvable dans la validation');
-       }
+       const mergedBlockIdx = validation.pages[mergedPageIdx].blocks.findIndex(b => b.id === mergedBlockId);
+       const otherBlockIdx = validation.pages[otherPageIdx].blocks.findIndex(b => b.id === otherBlockId);
+       if (mergedBlockIdx < 0 || otherBlockIdx < 0) throw new Error('Bloc introuvable dans la validation');
        
-       // Préparer les descriptions
-       const mergeDescription = `FUSION DES BLOCS ${currentBlock.id} ET ${nextBlock.id}: "${mergePreview.manualText}"`;
-       const mergedIntoPrevious = `MERGED_INTO_PREVIOUS:${currentBlock.id}`;
+       const mergeDescription = `FUSION DES BLOCS ${block1.id} ET ${block2.id} (ordre:${order}, jonction:${mergePreview.junction}): "${mergePreview.manualText}"`;
+       const mergedIntoTarget = `MERGED_INTO:${mergedBlockId}`;
        
-       // Mettre à jour le premier bloc avec la description de fusion
        let updatedValidation = updateBlockValidation(
          validation,
-         pageIndex,
-         currentBlock.id,
+         mergedPageIdx,
+         mergedBlockId,
          {
            notes: mergeDescription,
-           // Préserver le statut actuel
-           status: validation.pages[pageIndex].blocks[currentBlockIndexInValidation].status
+           status: validation.pages[mergedPageIdx].blocks[mergedBlockIdx].status
          }
        );
        
-       // Mettre à jour le deuxième bloc pour le marquer comme fusionné dans le précédent
        updatedValidation = updateBlockValidation(
          updatedValidation,
-         pageIndex,
-         nextBlock.id,
+         otherPageIdx,
+         otherBlockId,
          {
-           notes: mergedIntoPrevious,
-           // Préserver le statut actuel
-           status: updatedValidation.pages[pageIndex].blocks[nextBlockIndexInValidation].status
+           notes: mergedIntoTarget,
+           status: updatedValidation.pages[otherPageIdx].blocks[otherBlockIdx].status
          }
        );
        
@@ -588,6 +607,64 @@ const allTargets = reviewTargets(packet, validation, anomalies);
        setTimeout(() => {
          closeMergePreview();
        }, 1500);
+     } catch (error) {
+       console.error('Erreur lors de la fusion:', error);
+       setMergeError('Erreur lors de l'enregistrement de la fusion. Veuillez réessayer.');
+     } finally {
+       setMergeSaving(false);
+     }
+   }
+
+   // Annule une fusion
+   async function unmergeBlock(blockId: string, printedPage: number) {
+     const validation = latestValidation.current;
+     if (!validation) return;
+     const pageIdx = validation.pages.findIndex(p => p.printedPage === printedPage);
+     if (pageIdx < 0) return;
+     const block = validation.pages[pageIdx].blocks.find(b => b.id === blockId);
+     if (!block) return;
+     // If this block is the target of merge (has FUSION DES BLOCS), we need to find and restore merged blocks
+     if (block.notes && block.notes.startsWith('FUSION DES BLOCS')) {
+       // Extract merged block IDs
+       const match = block.notes.match(/FUSION DES BLOCS ([A-Za-z0-9-]+) ET ([A-Za-z0-9-]+)/);
+       if (match) {
+         const id1 = match[1], id2 = match[2];
+         // Restore both blocks - remove merge notes
+         let updated = updateBlockValidation(validation, pageIdx, blockId, { notes: '', status: block.status });
+         // Find and restore the other block
+         for (let pi = 0; pi < updated.pages.length; pi++) {
+           const bi = updated.pages[pi].blocks.findIndex(b => b.id === id1 || b.id === id2);
+           if (bi >= 0 && updated.pages[pi].blocks[bi].id !== blockId) {
+             updated = updateBlockValidation(updated, pi, updated.pages[pi].blocks[bi].id, { notes: '', status: updated.pages[pi].blocks[bi].status });
+           }
+         }
+         await saveValidation(updated);
+         latestValidation.current = updated;
+         setValidation(updated);
+       }
+     } else if (block.notes && block.notes.startsWith('MERGED_INTO')) {
+       // This block was merged into target - restore it
+       const targetId = block.notes.split(':')[1];
+       let updated = updateBlockValidation(validation, pageIdx, blockId, { notes: '', status: block.status });
+       // Also clean up target if it only had this merge?
+       for (let pi = 0; pi < updated.pages.length; pi++) {
+         const bi = updated.pages[pi].blocks.findIndex(b => b.id === targetId);
+         if (bi >= 0) {
+           const tblock = updated.pages[pi].blocks[bi];
+           if (tblock.notes && tblock.notes.startsWith('FUSION DES BLOCS')) {
+             const match = tblock.notes.match(/FUSION DES BLOCS ([A-Za-z0-9-]+) ET ([A-Za-z0-9-]+)/);
+             if (match && (match[1] === blockId || match[2] === blockId)) {
+               updated = updateBlockValidation(updated, pi, targetId, { notes: '', status: tblock.status });
+             }
+           }
+         }
+       }
+       await saveValidation(updated);
+       latestValidation.current = updated;
+       setValidation(updated);
+     }
+   }
+
        
      } catch (error) {
        console.error('Erreur lors de la fusion:', error);
