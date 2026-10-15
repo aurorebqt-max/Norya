@@ -117,6 +117,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   const [currentAnomaly, setCurrentAnomaly] = useState<AnomalyReport | null>(null);
   const [commentInput, setCommentInput] = useState('');
   const [showCommentInput, setShowCommentInput] = useState(false);
+  const [editingBlockKey, setEditingBlockKey] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
@@ -142,32 +143,28 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     }
   }, [packet, controlReport]);
   
-  // Charger l'anomalie pour le bloc actuel si elle existe
-  // Ce useEffect synchronise commentInput et currentAnomaly avec le bloc actuel
+  // Les identifiants de blocs peuvent se répéter d'une page à l'autre.
+  const anomalyForBlock = (pageIndex: number, blockId: string) => {
+    const page = packet.pages[pageIndex];
+    return anomalies.find(a => a.chapterId === packet.chapterId &&
+      a.printedPage === page?.printedPage && a.blockId === blockId);
+  };
+
+  // Ne jamais remplacer un brouillon par une réponse de stockage asynchrone.
+  // Le formulaire est lié à la page ET au bloc, et se ferme lors de la navigation.
   useEffect(() => {
-    if (packet && currentBlockIndex >= 0) {
-      const blocks = getCurrentBlocks();
-      const currentBlock = blocks[currentBlockIndex];
-      if (currentBlock) {
-        const existingAnomaly = anomalies.find(a => a.blockId === currentBlock.id);
-        setCurrentAnomaly(existingAnomaly || null);
-        
-        // TOUJOURS mettre à jour commentInput avec la description de l'anomalie du bloc actuel
-        // Si aucune anomalie pour ce bloc, vider le champ
-        setCommentInput(existingAnomaly?.description || '');
-        
-        // Si le bloc n'a pas d'anomalie, fermer le formulaire
-        // Sauf si l'utilisateur est en train d'en créer une nouvelle (mais on ne peut pas savoir ça ici)
-        // Solution : on ferme le formulaire si le commentInput actuel ne correspond pas à cette anomalie
-        // Mais pour simplifier, on ferme TOUJOURS quand on change de bloc
-        // L'utilisateur devra rouvrir le formulaire manuellement
-        if (!existingAnomaly) {
-          setShowCommentInput(false);
-        }
-      }
-    }
-  }, [currentBlockIndex, anomalies, packet]);
-  
+    const page = packet.pages[currentPageIndex];
+    const blocks = (page?.parts || []).filter(part => part.role !== 'page-header');
+    const block = blocks[currentBlockIndex];
+    const existing = block ? anomalyForBlock(currentPageIndex, block.id) : undefined;
+    setCurrentAnomaly(existing || null);
+    setCommentInput(existing?.description || '');
+    setEditingBlockKey(null);
+    setShowCommentInput(false);
+    setSaveError(null);
+    setSaveSuccess(null);
+  }, [currentPageIndex, currentBlockIndex, packet]);
+
   // Si pas de validation, en créer une nouvelle à partir du paquet
   useEffect(() => {
     if (packet && !validation) {
@@ -265,7 +262,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   
   // Ouvre le formulaire de commentaire pour une anomalie
   function openAnomalyForm(blockId: string) {
-    const existingAnomaly = anomalies.find(a => a.blockId === blockId);
+    const existingAnomaly = anomalyForBlock(currentPageIndex, blockId);
     if (existingAnomaly) {
       setCurrentAnomaly(existingAnomaly);
       setCommentInput(existingAnomaly.description);
@@ -273,12 +270,14 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
       setCurrentAnomaly(null);
       setCommentInput('');
     }
+    setEditingBlockKey(`${packet.pages[currentPageIndex]?.printedPage}:${blockId}`);
     setShowCommentInput(true);
   }
 
   // Ferme le formulaire de commentaire
   function closeAnomalyForm() {
     setShowCommentInput(false);
+    setEditingBlockKey(null);
     setCommentInput('');
     setCurrentAnomaly(null);
   }
@@ -290,9 +289,12 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     newStatus: BlockValidationStatus,
     comment?: string
   ) {
-    // Mettre à jour le statut de validation du bloc
-    await handleBlockStatusChange(pageIndex, blockId, newStatus);
-    
+    // Enregistrer le commentaire avant de changer le statut : un échec ne doit pas
+    // laisser croire que l’anomalie a été sauvegardée.
+    if (newStatus !== 'issue-found') {
+      await handleBlockStatusChange(pageIndex, blockId, newStatus);
+    }
+
     const block = packet.pages[pageIndex].parts?.find(p => p.id === blockId);
     if (!block) return;
     
@@ -304,7 +306,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
       
       try {
         // Créer ou mettre à jour l'anomalie
-        const existingAnomaly = anomalies.find(a => a.blockId === blockId);
+        const existingAnomaly = anomalyForBlock(pageIndex, blockId);
         const anomalyData = existingAnomaly ? {
           ...existingAnomaly,
           description: comment,
@@ -322,11 +324,12 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
         );
         
         await saveAnomaly(anomalyData);
+        await handleBlockStatusChange(pageIndex, blockId, newStatus);
         
         // Recharger les anomalies
         const updatedAnomalies = await loadChapterAnomalies(packet.chapterId);
         setAnomalies(updatedAnomalies);
-        setCurrentAnomaly(updatedAnomalies.find(a => a.blockId === blockId) || null);
+        setCurrentAnomaly(updatedAnomalies.find(a => a.chapterId === packet.chapterId && a.printedPage === packet.pages[pageIndex].printedPage && a.blockId === blockId) || null);
         
         setSaveSuccess('Anomalie enregistrée avec succès !');
         setTimeout(() => setSaveSuccess(null), 3000);
@@ -347,7 +350,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   
   // Gère le clic sur "Anomalie"
   function handleAnomalieClick(block: SourcePart, pageIndex: number) {
-    const existingAnomaly = anomalies.find(a => a.blockId === block.id);
+    const existingAnomaly = anomalyForBlock(pageIndex, block.id);
     
     // Ouvrir le formulaire pour ce bloc
     // Ne PAS changer le statut ici - l'utilisateur le fera via le formulaire
@@ -364,6 +367,8 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     }
     
     // Ouvrir le formulaire
+    setEditingBlockKey(`${packet.pages[currentPageIndex]?.printedPage}:${blockId}`);
+    setEditingBlockKey(`${packet.pages[pageIndex]?.printedPage}:${block.id}`);
     setShowCommentInput(true);
     
     // Ne PAS appeler handleBlockStatusChange ici
@@ -515,7 +520,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                 </ScrollView>
                 
                 {/* Champ de commentaire (si anomalie) */}
-                {showCommentInput && (
+                {showCommentInput && editingBlockKey === `${page.printedPage}:${currentBlock.id}` && (
                   <View style={{ marginTop: 12, gap: 8 }}>
                     <Txt size={13} bold>Décrivez l'anomalie :</Txt>
                     <TextInput
@@ -611,7 +616,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                 </View>
                 
                 {/* Champ de commentaire pour illustration */}
-                {showCommentInput && (
+                {showCommentInput && editingBlockKey === `${page.printedPage}:${currentBlock.id}` && (
                   <View style={{ marginTop: 12, gap: 8, width: '100%' }}>
                     <Txt size={13} bold>Décrivez l'anomalie :</Txt>
                     <TextInput
@@ -648,7 +653,6 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                         title="Annuler"
                         secondary
                         onPress={closeAnomalyForm}
-                        }}
                       />
                     </View>
                     {saveError && <Txt size={12} color='#dc3545' style={{ textAlign: 'center' }}>{saveError}</Txt>}
@@ -755,7 +759,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                     key={status}
                     title={statusLabels[status]}
                     secondary={blockStatus !== status}
-                    onPress={() => handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
+                    onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
                   />
                 ))}
               </View>
@@ -771,7 +775,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
                     key={status}
                     title={statusLabels[status]}
                     secondary={blockStatus !== status}
-                    onPress={() => handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
+                    onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
                   />
                 ))}
               </View>
