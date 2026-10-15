@@ -10,6 +10,7 @@ import { Button, Card, Chip, Txt } from './ui';
 import { colors as c } from '../design/theme';
 import type { SourcePacket, SourcePart } from '../domain/sourceCourse/packet';
 import { openOriginalPage } from '../services/storage/privateCourse';
+import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 import {
   ChapterValidation,
   BlockValidationStatus,
@@ -203,7 +204,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
   // Navigation entre les blocs
   function nextBlock() {
     const page = packet.pages[currentPageIndex];
-    if (!page.parts || currentBlockIndex >= page.parts.length - 1) {
+    if (currentBlockIndex >= (page.parts || []).filter(part => part.role !== 'page-header').length - 1) {
       // Passer à la page suivante
       if (currentPageIndex < packet.pages.length - 1) {
         setCurrentPageIndex(currentPageIndex + 1);
@@ -222,7 +223,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     } else if (currentPageIndex > 0) {
       const prevPage = packet.pages[currentPageIndex - 1];
       setCurrentPageIndex(currentPageIndex - 1);
-      setCurrentBlockIndex(prevPage.parts ? prevPage.parts.length - 1 : 0);
+      setCurrentBlockIndex(Math.max(0, (prevPage.parts || []).filter(part => part.role !== 'page-header').length - 1));
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     }
   }
@@ -367,7 +368,6 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     }
     
     // Ouvrir le formulaire
-    setEditingBlockKey(`${packet.pages[currentPageIndex]?.printedPage}:${blockId}`);
     setEditingBlockKey(`${packet.pages[pageIndex]?.printedPage}:${block.id}`);
     setShowCommentInput(true);
     
@@ -468,8 +468,9 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
     }
     
     const blockStatus = getCurrentBlockStatus(currentBlock.id);
-    const isIllustration = isTrueIllustration(currentBlock);
-    const showAsText = !isIllustration; // Dans vérification, on affiche le texte sauf pour les vraies illustrations
+    const presentation = sourcePresentation(page.printedPage, currentBlock);
+    const isIllustration = isTrueIllustration(currentBlock) || presentation.imageOnly;
+    const showAsText = !isIllustration; // Même règle d'affichage que le cours reconstitué, source brute inchangée
     
     // Mode split : texte + visuel
     if (viewMode === 'split') {
@@ -492,31 +493,11 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
               // Affiche le texte pour les blocs non-illustration
               <>
                 <ScrollView nestedScrollEnabled style={{ maxHeight: isWide ? 500 : 300 }}>
-                  {currentBlock.lines && currentBlock.lines.length > 0 ? (
-                    currentBlock.lines.map((line, i) => (
-                      <Text key={i} selectable style={{ 
-                        fontSize: 16, 
-                        lineHeight: 24, 
-                        color: c.ink,
-                        marginBottom: 8,
-                        fontWeight: line.every(run => !run.bold) ? '400' : '600'
-                      }}>
-                        {line.map((run, j) => (
-                          <Text key={j} style={{ 
-                            fontWeight: run.bold ? '600' : '400',
-                            fontStyle: run.italic ? 'italic' : 'normal'
-                          }}>
-                            {run.text}
-                          </Text>
-                        ))}
-                      </Text>
-                    ))
-                  ) : (
-                    // Pour les blocs visual sans lines (ne devrait pas arriver avec nos données)
-                    <Text selectable style={{fontSize: 16, lineHeight: 24, color: c.ink}}>
-                      {currentBlock.text}
-                    </Text>
-                  )}
+                  <Text selectable testID="verification-presented-text" style={{fontSize:16,lineHeight:26,color:c.ink}}>
+                    {presentation.hide ? 'Ce numéro de pagination isolé est masqué dans le cours reconstitué. Vérifiez son emplacement dans le PDF.' : presentation.text}
+                  </Text>
+                  {presentation.text !== currentBlock.text && <Txt size={11} color={c.muted}>Présentation ajustée : le texte extrait original reste conservé et disponible ci-dessous.</Txt>}
+                  {presentation.text !== currentBlock.text && <Text selectable style={{fontSize:12,color:c.muted,marginTop:6}}>{currentBlock.text}</Text>}
                 </ScrollView>
                 
                 {/* Champ de commentaire (si anomalie) */}
@@ -734,24 +715,13 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
           {showAsText ? (
             <>
               <ScrollView nestedScrollEnabled>
-                {currentBlock.lines && currentBlock.lines.length > 0 ? (
-                  currentBlock.lines.map((line, i) => (
-                    <Text key={i} selectable style={{ fontSize: 18, lineHeight: 28, color: c.ink, marginBottom: 12 }}>
-                      {line.map((run, j) => (
-                        <Text key={j} style={{ 
-                          fontWeight: run.bold ? '600' : '400',
-                          fontStyle: run.italic ? 'italic' : 'normal'
-                        }}>
-                          {run.text}
-                        </Text>
-                      ))}
-                    </Text>
-                  ))
-                ) : (
-                  <Text selectable style={{fontSize: 18, lineHeight: 28, color: c.ink}}>
-                    {currentBlock.text}
-                  </Text>
-                )}
+                <Text selectable testID="verification-presented-text" style={{fontSize:18,lineHeight:28,color:c.ink}}>
+                  {presentation.hide ? 'Numéro de pagination isolé : masqué dans le cours reconstitué.' : presentation.text}
+                </Text>
+                {presentation.text !== currentBlock.text && <View style={{marginTop:12,gap:5}}>
+                  <Txt size={12} color={c.muted}>Texte brut extrait (conservé pour vérification) :</Txt>
+                  <Text selectable style={{fontSize:13,color:c.muted}}>{currentBlock.text}</Text>
+                </View>}
               </ScrollView>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
                 {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => (
@@ -768,7 +738,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
             <View style={{ alignItems: 'center', gap: 8 }}>
               <OriginalVisual image={currentBlock.image} ratio={(currentBlock.bbox[3]-currentBlock.bbox[1])/(currentBlock.bbox[2]-currentBlock.bbox[0])}
                 wide={false} label={`${roles[currentBlock.role] || 'Illustration'} original`} />
-              <Txt size={12} color={c.muted}>Illustration médicale</Txt>
+              <Txt size={12} color={c.muted}>{presentation.imageOnly ? "Visuel original retenu pour ce passage — contenu textuel toujours à vérifier" : "Illustration médicale"}</Txt>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
                 {(['pending', 'in-review', 'verified', 'issue-found', 'corrected'] as BlockValidationStatus[]).map(status => (
                   <Button
@@ -824,7 +794,7 @@ export function SourceCourseVerification({ packet, controlReport, onClose }: Sou
             title="Bloc suivant"
             secondary
             disabled={currentPageIndex === packet.pages.length - 1 && 
-                     currentBlockIndex >= (packet.pages[currentPageIndex]?.parts?.length || 0) - 1}
+                     currentBlockIndex >= blocks.length - 1}
             onPress={nextBlock}
           />
           <Button
