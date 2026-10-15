@@ -2,15 +2,15 @@
 
 ## État retrouvé
 
-Le dépôt contenait des modifications non commitées : migration vers le rezidențiat, index Tematica 2026 (39 chapitres), écran Référentiel privé et dépendances Expo associées. Elles ont été conservées. Le calendrier existant répartissait un premier tour et un second passage opportuniste. Profil, journal de travail, annotations et rappels étaient persistés localement. Une fiche néphrotique française avec cartes/QCM existait dans un prototype distinct, sans rattachement effectif au nouveau programme roumain. Aucune traduction RO–FR généralisée ni couverture médicale complète n’était disponible.
+Les modifications non commitées du dépôt ont été conservées. Norya est consacrée au rezidențiat roumain, filière médecine. Le programme indexe 39 chapitres; les données de préparation et d’apprentissage sont conservées localement. Les anciens contenus et fonctionnalités non affichés restent dans le dépôt, mais ne sont pas présentés comme contenus médicaux roumains validés.
 
 ## Fonctionnalités ajoutées
 
-- Étape onboarding dédiée : 1, 2, 3, 4 ou 1–10 tours ; réglage ultérieur dans Profil.
+- Onboarding raccourci : date de concours, 1 à 10 tours, disponibilités et jours de repos; aucune vitesse de lecture ni durée par page n’est demandée.
 - Date de concours saisie par l’étudiant ; aucune date exacte préchargée pour les nouveaux profils. Les dates historiques sont conservées. Le seul programme disponible reste celui de 2026, même si une autre année est choisie.
-- Charge basée sur les plages de pages de l’index (904 pages, comptage inclusif sans doublons à l’intérieur d’un chapitre). Base provisoire 8 minutes/page modifiable, puis 65 % au deuxième tour et 40 % aux suivants. Ce ne sont pas des durées pédagogiques validées ; les pages partiellement incluses sont comptées comme des pages entières.
+- Les estimations de lecture d’un cours utilisent le nombre de mots roumains, les tableaux et illustrations renseignées, avec une vitesse moyenne intégrée à l’application. La lecture attentive est estimée séparément; ni l’une ni l’autre n’est une promesse d’apprentissage. La charge du calendrier reste distincte.
 - Tours séquentiels dans le calendrier, échéances prévues et progression indépendante. Les chapitres fragiles sont prioritaires dans les tours suivants.
-- Validation explicite par chapitre/tour, séances partielles et validation anticipée selon le temps réellement déclaré. Consulter, écouter, répondre à un QCM ou réviser une carte ne valide aucun tour.
+- Validation explicite des parties depuis le lecteur; consulter ou changer de mode n’ajoute pas plusieurs fois la progression. Les QCM et flashcards restent distincts de la validation de lecture.
 - Recalcul selon la date courante, les séances, disponibilités, absences, rythme et nombre de tours. Les tours retirés de l’objectif restent dans l’historique.
 - Rappels en parallèle : budget plafonné à 20 % tant qu’un tour reste à faire, puis 50 % pendant le dernier mois. Le temps non utilisé par les rappels reste disponible pour les passages. Les prévisions supposent des rappels réussis ; les événements réels les remplacent.
 - Objectif impossible signalé avec estimation du besoin horaire. Après le concours, les tâches tardives ne représentent qu’une projection ; horizon borné à un an après le concours ou le jour de reprise. Une prévision hors horizon reste indéterminée.
@@ -19,34 +19,37 @@ Le dépôt contenait des modifications non commitées : migration vers le rezide
 
 ## Contenus effectivement disponibles
 
-Le nouveau module du chapitre Kumar 8 contient cinq sections originales détaillées et express, en roumain/français/bilingue, cinq flashcards et quatre QCM à réponse unique. Il couvre les notions fondamentales de sepsis, mécanismes, reconnaissance, choc, investigations et réévaluation antibiotique. Il ne couvre pas encore tous les tableaux de molécules, posologies, résistances et prophylaxies : l’interface l’indique explicitement. Relecture médicale et linguistique requise.
+Quatre chapitres pilotes contiennent 24 parties, 40 flashcards et 30 QCM originaux Norya. Le contenu reste partiel et demande une relecture médicale; aucun de ces chapitres n’est déclaré entièrement vérifié. Cinq tableaux structurés sont disponibles. Les estimations de lecture varient avec le contenu réel.
 
 Sources lues : `references-privees/rezidentiat-M-2026.pdf` (p.1–4), `SEPSIS.pdf` (chapitre p.151–168, repères indiqués par section), `20211121-erata-23aug2021.pdf` (corrections du chapitre, PDF p.1). Le seul erratum trouvé est daté de **2021** ; aucun erratum identifié comme 2026 n’a été trouvé. Ne pas lui attribuer artificiellement une date de 2026.
 
 Vérification clinique complémentaire : [SCCM, recommandations adultes 2026](https://www.sccm.org/survivingsepsiscampaign/guidelines-and-resources/surviving-sepsis-campaign-adult-guidelines), notamment la limite du qSOFA comme outil unique. Cette source ne remplace pas la bibliographie du concours.
 
-La fiche néphrotique et ses anciens résultats sont conservés. Elle n’est pas présentée comme une fiche roumaine validée. Les autres chapitres disposent d’un index, du lien vers leur PDF privé, d’annotations et du suivi multi-tours ; leurs fiches originales restent à rédiger.
+Les autres chapitres disposent d’un index et du suivi multi-tours; la rédaction des contenus pédagogiques reste à faire. Les PDF sources demeurent privés et ne sont pas inclus au build public.
 
 ## Validation
 
 - TypeScript : `npm run typecheck` — réussi.
-- Tests métier : `npm test` — **31 tests réussis**, y compris tours successifs, déterminisme, capacité quotidienne, J−30, retard, jours de repos, séances partielles, validations anticipées, migration, redémarrage du repository, annotations, erreurs disque et écritures concurrentes, identifiants de cartes uniques et liens des contenus au programme.
-- Bundles : `npx expo export --platform all --output-dir build-validation` (web, Android, iOS) — réussi ; aucun fichier PDF dans l’export.
+- Tests métier : `npm test` — **38 tests réussis**, dont multi-tours, migrations, persistance, notes et surlignages, estimations, QCM et déduplication des mini-fiches.
+- Export web : `npm run export:web` — réussi; inspection de `dist` sans PDF, document privé ni index d’annales.
 - Dépendances : `npm run check`, contrôle de la table Expo locale hors ligne.
 - Limite : pas de navigateur automatisé ni de simulateur mobile disponible ; les gestes d’import/ouverture de PDF, le rendu visuel et la relance réelle de l’application restent à vérifier sur appareil. Les tests de redémarrage portent sur le stockage/repository.
 
 ## Pour commencer à réviser
 
-Lancer `npm run web` ou `npm start`, remplir l’onboarding avec la date réelle du concours, choisir les disponibilités et les tours, puis importer ses PDF depuis Référentiel privé. Consulter librement un chapitre dans Bibliothèque ; valider ses passages depuis « Étudier ce chapitre ». Le module Sepsis permet déjà de lire les deux versions, ajouter les cartes et répondre aux QCM. Les erreurs de ces QCM sont visibles dans le carnet et les résultats sont conservés.
+Lancer `npm run web` ou `npm start`, renseigner la date du concours, les tours et les disponibilités, puis ouvrir un chapitre depuis Bibliothèque. Choisir Cours complet, Fiches ou Flashcards. La progression de lecture n’avance qu’après validation explicite d’une partie; les QCM et cartes peuvent être consultés séparément. « Mes erreurs » conserve les questions ratées et leur échéance, mais les explications médicales restent signalées comme non vérifiées.
 
 ## Suite prioritaire
 
-1. Vérification manuelle web/téléphone du parcours onboarding → import PDF → trois validations → fermeture/réouverture.
-2. Relecture médicale/linguistique du module Sepsis, puis achèvement du chapitre 8 avant d’étendre aux autres chapitres ; obtenir l’éventuel erratum officiel 2026.
-3. Remplacer progressivement les écrans de démonstration restants (notamment carnet fictif, coach, audio et anciens entraînements) par des contenus roumains validés, sans supprimer les historiques.
-4. Construire des examens blancs conformes au concours. Les QCM actuels sont pédagogiques et ne simulent pas encore la notation officielle.
-5. Relier davantage le temps de consolidation aux QCM/cartes : le calendrier planifie aujourd’hui les passages et rappels ; les exercices sont accessibles librement, sans créneau automatique distinct d’examen blanc.
-6. Calibrer les estimations par chapitre et le rythme observé ; actuellement l’ajustement minutes/page est manuel. Aucun Supabase ajouté.
+1. Relecture médicale et linguistique des quatre chapitres pilotes, puis achèvement d’un parcours avant d’étendre le contenu.
+2. Reprendre par OCR les documents d’annales non importables, vérifier les corrigés, les droits et les années/sessions.
+3. Ajouter une interface privée de contrôle des associations annales–notions–parties; aucune association n’est confirmée à ce stade.
+4. Intégrer les questions officielles utilisables, puis construire un examen blanc uniquement lorsque la banque et les règles sont vérifiées.
+5. Tester manuellement le parcours web, tablette et mobile ainsi que la persistance après fermeture réelle.
+
+## Annales privées — index local
+
+L’import incrémental a détecté cinq documents privés : `Subiect 2023.pdf` (104 fragments de questions), `Subiecte Rezi Noiembrie 2022 Rezolvate.pdf` (150 fragments), et trois documents dont l’extraction texte n’a dégagé aucune question (OCR requis). Ces nombres sont des fragments détectés, pas des totaux certifiés. Les candidats de nom/texte sont 2023 (session indéterminée), mai 2023, novembre 2021 et novembre 2022 (texte : 20 novembre); le scan `CONCURSUL NATIONAL DE REZIDENTIAT, SESIUNEA 17 NOI_241120_085101.pdf` n’a pas de date/session automatiquement attribuée. Ces candidats ne sont pas des métadonnées officielles vérifiées. Aucun corrigé, droit de réutilisation ou rattachement pédagogique n’est confirmé; aucune annale n’est présentée dans l’application comme vérifiée. L’index privé conserve les empreintes et évite de retraiter les documents inchangés.
 
 ## Index disponible
 

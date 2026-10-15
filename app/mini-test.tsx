@@ -15,7 +15,7 @@ export default function MiniTest() {
         <Txt bold size={21}>{question.text}</Txt>
         {question.choices.map((item) => <Chip key={item.id} label={item.text} selected={answer === item.id} onPress={() => setAnswer(item.id)} />)}
         {choice && <Txt color={choice.isCorrect ? c.primary : "#9A513C"}>{choice.isCorrect ? "Bonne réponse. " : "À reprendre. "}{choice.explanation ?? question.generalExplanation}</Txt>}
-        <Button title="Continuer le programme" onPress={() => router.replace("/calendar")} />
+        <Button title="Continuer le programme" onPress={() => router.replace("/schedule")} />
       </Card>
     </Screen>
   );

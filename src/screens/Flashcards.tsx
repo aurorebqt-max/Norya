@@ -1,59 +1,28 @@
-import { useMemo, useState } from "react";
-import { View } from "react-native";
-import { router } from "expo-router";
-import { Screen, Card, Txt, Chip, Button, Progress, RowLink, s } from "../components/ui";
-import { useDemo } from "../state/DemoProvider";
-import { colors as c } from "../design/theme";
-import { todayInZone } from "../domain/preparation/dates";
-
-export default function Flashcards() {
-  const { availableCards, cardProgress, reviewCard } = useDemo();
-  const decks = useMemo(() => [...new Set(availableCards.map((card) => card.subject))], [availableCards]);
-  const [deck, setDeck] = useState("Tous");
-  const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const cards = availableCards.filter((card) => deck === "Tous" || card.subject === deck);
-  const current = cards[index % Math.max(cards.length, 1)];
-  const due = cards.filter((card) => (cardProgress[card.id]?.nextReviewOn ?? "") <= todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Paris")).length;
-  if (!current)
-    return (
-      <Screen title="Mes Decks" subtitle="Ajoutez les cartes depuis une fiche Norya." back>
-        <Card><Txt>Ouvrez une fiche dans la bibliothèque et ajoutez ses cartes. Cela ne valide aucun tour.</Txt><Button title="Ouvrir la bibliothèque" onPress={() => router.replace("/library")} /></Card>
-      </Screen>
-    );
-  const rate = async (rating: "again" | "hard" | "good" | "easy") => {
-    await reviewCard(current.id, rating);
-    setRevealed(false);
-    setIndex((value) => (value + 1) % cards.length);
-  };
-  return (
-    <Screen title="Mes Decks" subtitle="Cartes recto-verso et répétition espacée locale." back>
-      <Card style={{ backgroundColor: c.mint }}>
-        <Txt size={12} color={c.primary}>CARTES MÉDICALES · SOURCE AFFICHÉE DANS LA FICHE</Txt>
-        <Txt>{availableCards.length} cartes débloquées · {due} à revoir aujourd’hui ou en retard.</Txt>
-        <View style={s.wrap}>{["Tous", ...decks].map((name) => <Chip key={name} label={name} selected={deck === name} onPress={() => { setDeck(name); setIndex(0); setRevealed(false); }} />)}</View>
-        <Progress value={availableCards.length ? (availableCards.filter((card) => cardProgress[card.id]?.historyCount > 0).length / availableCards.length) * 100 : 0} />
-      </Card>
-      <Card>
-        <Txt size={12} color={c.muted}>{current.subject} · objectif {current.objectiveId}</Txt>
-        <Txt bold size={24}>{current.recto}</Txt>
-        {!revealed ? <Button title="Retourner la carte" onPress={() => setRevealed(true)} /> : (
-          <>
-            <Txt color={c.primary} bold>Verso</Txt>
-            <Txt>{current.verso}</Txt>
-            {current.explanation && <Txt size={13} color={c.muted}>{current.explanation}</Txt>}
-            <Txt bold>Autoévaluation</Txt>
-            <View style={s.wrap}>
-              <Chip label="À revoir" onPress={() => void rate("again")} />
-              <Chip label="Difficile" onPress={() => void rate("hard")} />
-              <Chip label="Bien" onPress={() => void rate("good")} />
-              <Chip label="Facile" onPress={() => void rate("easy")} />
-            </View>
-          </>
-        )}
-        <Txt size={12} color={c.muted}>Échéance : {cardProgress[current.id]?.nextReviewOn ?? "aujourd’hui"}</Txt>
-      </Card>
-      <RowLink title="Retourner à la fiche" subtitle="Le statut du premier passage reste dans votre calendrier." icon="book-outline" href="/library" />
-    </Screen>
-  );
+import {useRef,useState} from 'react';
+import {View,TextInput} from 'react-native';
+import {router,useLocalSearchParams} from 'expo-router';
+import {Screen,Card,Txt,Chip,Button,s} from '../components/ui';
+import {useDemo} from '../state/DemoProvider';
+import {useLearning} from '../state/LearningProvider';
+import {usePreparation} from '../state/PreparationProvider';
+import {examChapters} from '../data/rezidentiat2026';
+import {romanianLessons} from '../data/romanianLessons';
+import {passProgress} from '../domain/preparation/passes';
+export default function Flashcards(){
+ const params=useLocalSearchParams<{chapter?:string}>();
+ const {availableCards,cardProgress,reviewCard,legacyCourseCardIds}=useDemo();const {commit}=useLearning();const {state,today}=usePreparation();
+ const [book,setBook]=useState('Tous'),[chapter,setChapter]=useState(params.chapter??'Tous'),[pass,setPass]=useState(0),[due,setDue]=useState(true),[index,setIndex]=useState(0),[revealed,setRevealed]=useState(false);
+ const [create,setCreate]=useState(false),[front,setFront]=useState(''),[back,setBack]=useState(''),[personalChapter,setPersonalChapter]=useState(params.chapter??'kum-08'),[busy,setBusy]=useState(false),[error,setError]=useState('');const lock=useRef(false),newId=useRef('');
+ const cards=availableCards.filter(c=>{
+ const meta=examChapters.find(x=>x.id===c.objectiveId);
+ return (book==='Tous'||meta?.bookId===book)&&(chapter==='Tous'||c.objectiveId===chapter)&&(!pass||!!passProgress(state.progress[c.objectiveId],pass).completedOn)&&(!due||(cardProgress[c.id]?.nextReviewOn??today)<=today);
+ });const current=cards[index%Math.max(1,cards.length)];
+ function reset(){setIndex(0);setRevealed(false);}
+ async function save(action:()=>Promise<void>){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await action();}catch(e){setError(e instanceof Error?e.message:'Sauvegarde impossible.');}finally{setBusy(false);lock.current=false;}}
+ return <Screen title="Mes flashcards" subtitle="Rappels espacés · cartes uniques pour tous les tours" back>
+  {!!legacyCourseCardIds.length&&<Card><Txt bold>Anciennes cartes à vérifier</Txt><Txt size={12}>{legacyCourseCardIds.length} ancienne(s) carte(s) des chapitres reconstruits et leur échéancier sont conservés, mais ne sont pas considérés comme fiables ni fusionnés avec les nouvelles cartes.</Txt></Card>}
+  <Card><Txt>{cards.length} cartes dans ce filtre · {availableCards.length} cartes ajoutées à vos decks</Txt><View style={s.wrap}>{['Tous','kumar','lawrence','sinopsis'].map(v=><Chip key={v} label={v} selected={book===v} onPress={()=>{setBook(v);reset();}}/>)}</View><View style={s.wrap}><Chip label="Tous les chapitres" selected={chapter==='Tous'} onPress={()=>{setChapter('Tous');reset();}}/>{romanianLessons.map(l=><Chip key={l.chapterId} label={l.title.fr} selected={chapter===l.chapterId} onPress={()=>{setChapter(l.chapterId);reset();}}/>)}</View><View style={s.wrap}><Chip label="Tous les tours" selected={!pass} onPress={()=>{setPass(0);reset();}}/>{Array.from({length:state.profile.targetPasses??2},(_,i)=>i+1).map(n=><Chip key={n} label={`Tour ${n} validé`} selected={pass===n} onPress={()=>{setPass(n);reset();}}/>)}</View><View style={s.wrap}><Chip label="Échéance atteinte" selected={due} onPress={()=>{setDue(true);reset();}}/><Chip label="Toutes échéances" selected={!due} onPress={()=>{setDue(false);reset();}}/></View><Txt size={12}>Le filtre tour sélectionne les chapitres validés pour ce tour ; il ne crée pas de cartes supplémentaires.</Txt></Card>
+  {current?<Card><Txt size={12}>{current.subject} · {current.objectiveId}</Txt><Txt bold size={23}>{current.recto}</Txt>{!revealed?<Button title="Retourner la carte" onPress={()=>setRevealed(true)}/>:<><Txt>{current.verso}</Txt><Txt size={12}>{current.explanation??'Carte personnelle · non vérifiée médicalement'}</Txt><View style={s.wrap}>{([['again','Oublié'],['hard','Difficile'],['good','Correct'],['easy','Facile']] as const).map(([rating,label])=><Button key={rating} title={label} secondary disabled={busy} onPress={()=>void save(async()=>{await reviewCard(current.id,rating);setRevealed(false);setIndex(i=>due?i:i+1);})}/>)}</View></>}<Txt size={12}>Prochaine révision : {cardProgress[current.id]?.nextReviewOn}</Txt><Button title="Ouvrir la fiche" secondary onPress={()=>router.push({pathname:'/chapter',params:{id:current.objectiveId}})}/></Card>:<Card><Txt>Aucune carte dans ce filtre. Validez une fiche ou un passage pour ajouter ses cartes, ou affichez toutes les échéances.</Txt><Button title="Bibliothèque" onPress={()=>router.push('/library')}/></Card>}
+  <Button title="Créer une flashcard personnelle" secondary onPress={()=>setCreate(!create)}/>{create&&<Card><Txt>Votre contenu personnel reste local, sans validation médicale.</Txt><TextInput accessibilityLabel="Recto personnel" style={s.input} multiline value={front} onChangeText={v=>{setFront(v);newId.current='';}} placeholder="Question / recto"/><TextInput accessibilityLabel="Verso personnel" style={s.input} multiline value={back} onChangeText={v=>{setBack(v);newId.current='';}} placeholder="Réponse / verso"/><Txt>Chapitre associé</Txt><View style={s.wrap}>{examChapters.map(c=><Chip key={c.id} label={c.chapter} selected={personalChapter===c.id} onPress={()=>setPersonalChapter(c.id)}/>)}</View><Button title="Enregistrer ma carte" disabled={busy||!front.trim()||!back.trim()} onPress={()=>void save(async()=>{if(!newId.current)newId.current=`personal-${Date.now()}-${Math.random().toString(36).slice(2)}`;await commit({type:'personal-card',card:{id:newId.current,objectiveId:personalChapter,itemNumber:0,subject:'Mes cartes personnelles',recto:front.trim(),verso:back.trim(),sourceVersionId:'personal-unverified'}});setFront('');setBack('');newId.current='';setCreate(false);setDue(false);})}/></Card>}{!!error&&<Txt>{error}</Txt>}
+ </Screen>;
 }

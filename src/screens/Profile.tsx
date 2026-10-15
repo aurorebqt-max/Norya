@@ -6,7 +6,7 @@ import { usePreparation } from "../state/PreparationProvider";
 import {
   DateFields,
   AvailabilityFields,
-  GoalFields,
+  PassFields,
 } from "../components/PreparationFields";
 import { PlanStatus } from "../components/PreparationSummary";
 import { validateProfile } from "../domain/preparation/profile";
@@ -60,7 +60,7 @@ export default function Profile() {
               {profile.name}
             </Txt>
             <Txt color={c.muted}>
-              {profile.exam} · {profile.year}
+              {profile.exam}
             </Txt>
           </View>
         </View>
@@ -80,9 +80,6 @@ export default function Profile() {
           disabled={busy || !name.trim()}
           onPress={() => void persist()}
         />
-        <Txt size={13} color={c.muted}>
-          {profile.specialties.join(" · ") || "Aucune spécialité choisie"}
-        </Txt>
         <Txt size={13}>
           Concours : {formatDay(plan.examOn)} ·{" "}
           {profile.examDate.official
@@ -98,6 +95,11 @@ export default function Profile() {
       </Card>
       <PlanStatus plan={plan} profile={profile} editable={false} />
       <Card>
+        <RowLink title="Coach Norya" subtitle="Conseils de préparation en démonstration, sans réponses médicales générées." icon="sparkles-outline" href="/mentor" />
+        <RowLink title="Écoute des cours" subtitle="Lecture vocale locale des contenus roumains." icon="headset-outline" href="/podcasts" />
+        <RowLink title="Mes erreurs" subtitle="Questions ratées et prochaines révisions." icon="layers-outline" href="/errors" />
+      </Card>
+      <Card>
         <Button
           title={editing ? "Fermer les réglages" : "Disponibilités et dates"}
           secondary
@@ -111,7 +113,7 @@ export default function Profile() {
           <>
             <AvailabilityFields profile={draft} onChange={setDraft} />
             <DateFields profile={draft} onChange={setDraft} />
-            <GoalFields profile={draft} onChange={setDraft} />
+            <PassFields profile={draft} onChange={setDraft} />
             <Button
               title={busy ? "Enregistrement…" : "Enregistrer et recalculer"}
               disabled={

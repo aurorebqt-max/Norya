@@ -1,3 +1,6 @@
+import { importedKumarEnabled } from "../data/importedKumar";
+import { useLearning } from "./LearningProvider";
+import { usePreparation } from "./PreparationProvider";
 import { Card, Txt } from "../components/ui";
 import { romanianFlashcards } from "../data/romanianLessons";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
@@ -23,8 +26,10 @@ type Store = {
   reviewedCards: string[];
   validatedSheets: string[];
   validateSheet: (sheetId: string, cardIds: string[]) => Promise<void>;
+  addCards: (cardIds: string[]) => Promise<void>;
   availableCards: typeof medicalFlashcards;
   cardProgress: Record<string, CardProgress>;
+  legacyCourseCardIds: string[];
   reviewCard: (cardId: string, rating?: FlashcardReviewRating) => Promise<void>;
   audioCompleted: string[];
   audioProgress: Record<string, number>;
@@ -62,6 +67,8 @@ function valid(raw: string | null): Persisted {
 }
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
+  const {learning}=useLearning();
+  const preparation=usePreparation();
   const [saved, setSaved] = useState<Persisted>(initial);
   const stored = useRef<Persisted>(initial);
   const ready = useRef(false);
@@ -130,6 +137,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       practiceErrors: correct ? saved.practiceErrors : saved.practiceErrors.includes(questionId) ? saved.practiceErrors : [...saved.practiceErrors, questionId],
     });
   };
+  useEffect(()=>{
+    if(!loaded)return;
+    const chapters=[...new Set(preparation.state.events.filter(e=>e.completed&&(e.kind==='initial'||e.kind==='pass')).map(e=>e.objectiveId))];
+    for(const id of chapters){
+      const ids=romanianFlashcards.filter(c=>c.objectiveId===id).map(c=>c.id);
+      if(ids.length&&ids.some(card=>!saved.cards[card]))void serialized(()=>validateSheet(id,ids)).catch(e=>setLoadError(e.message));
+    }
+    const missing=learning.personalCards.filter(c=>!saved.cards[c.id]).map(c=>c.id);
+    if(missing.length)void serialized(()=>validateSheet('personal',missing)).catch(e=>setLoadError(e.message));
+  },[loaded,preparation.state.events,learning.personalCards,saved.cards]);
   if (loadError || !loaded) return <Card><Txt>{loadError || "Chargement des acquis pédagogiques…"}</Txt></Card>;
   return (
     <Context.Provider value={{
@@ -140,8 +157,16 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       reviewedCards: Object.values(saved.cards).filter((card) => card.historyCount > 0).map((card) => card.cardId),
       validatedSheets: saved.validatedSheets,
       validateSheet: (id,cards)=>serialized(()=>validateSheet(id,cards)),
-      availableCards: [...medicalFlashcards, ...romanianFlashcards].filter((card) => Object.prototype.hasOwnProperty.call(saved.cards, card.id)),
+      addCards: (cardIds)=>serialized(async()=>{
+        const saved=stored.current;
+        const next:Persisted={...saved,cards:{...saved.cards}};
+        const today=todayInZone(Intl.DateTimeFormat().resolvedOptions().timeZone||"Europe/Paris");
+        for(const cardId of cardIds)if(!next.cards[cardId])next.cards[cardId]={cardId,addedOn:today,nextReviewOn:today,repetitions:0,intervalDays:0,easeFactor:2.5,historyCount:0};
+        await persist(next);
+      }),
+      availableCards: [...medicalFlashcards.filter(card => !importedKumarEnabled || !["kum-08", "kum-09"].includes(card.objectiveId)), ...romanianFlashcards, ...learning.personalCards].filter((card) => Object.prototype.hasOwnProperty.call(saved.cards, card.id)),
       cardProgress: saved.cards,
+      legacyCourseCardIds: Object.keys(saved.cards).filter(id => /^kum-(08|09|10)-card-\d+$/.test(id) || (importedKumarEnabled && !romanianFlashcards.some(card=>card.id===id) && /^(norya-kum-(08|09)-|glossary-)/.test(id))),
       reviewCard: (id,rating)=>serialized(()=>reviewCard(id,rating)),
       audioCompleted: saved.audioCompleted,
       audioProgress: saved.audioProgress,

@@ -1,0 +1,570 @@
+{
+  "schemaVersion": 1,
+  "chapters": [
+    {
+      "chapterId": "kum-08",
+      "file": "contenus-norya/kumar-08.md",
+      "language": "ro",
+      "pages": [
+        [
+          151,
+          168
+        ]
+      ],
+      "sha256": "07a57a7033deaf1f4d7ba26ef6d80623b30244da08792df954e398d1f105ffac",
+      "status": "complete",
+      "verification": {
+        "status": "beta"
+      },
+      "documentaryReview": {
+        "status": "reviewed-with-open-issues",
+        "date": "2026-10-12",
+        "method": "automated source comparison plus rendered tables",
+        "coverage": "controle/kumar-08.couverture.json"
+      },
+      "sections": [
+        {
+          "id": "kum-08-metadata",
+          "title": "# Sepsisul și tratamentul infecțiilor bacteriene",
+          "kind": "metadata",
+          "status": "editorial",
+          "startLine": 1,
+          "endLine": 6,
+          "pages": []
+        },
+        {
+          "id": "kum-08-md-151",
+          "title": "## K08-151 — Abilități clinice și priorități",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 7,
+          "endLine": 16,
+          "pages": [
+            151
+          ]
+        },
+        {
+          "id": "kum-08-md-152",
+          "title": "## K08-152 — Anamneză, investigații și disfuncția de organ",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 17,
+          "endLine": 45,
+          "pages": [
+            152
+          ]
+        },
+        {
+          "id": "kum-08-md-153",
+          "title": "## K08-153 — Examenul obiectiv orientat spre sursă",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 46,
+          "endLine": 65,
+          "pages": [
+            153
+          ]
+        },
+        {
+          "id": "kum-08-md-154",
+          "title": "## K08-154 — Fiziopatologie, definiție și șoc septic",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 66,
+          "endLine": 89,
+          "pages": [
+            154
+          ]
+        },
+        {
+          "id": "kum-08-md-155",
+          "title": "## K08-155 — SOFA complet, pacienți vulnerabili și originea infecției",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 90,
+          "endLine": 123,
+          "pages": [
+            155
+          ]
+        },
+        {
+          "id": "kum-08-md-156",
+          "title": "## K08-156 — Stratificarea riscului și situații speciale",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 124,
+          "endLine": 144,
+          "pages": [
+            156
+          ]
+        },
+        {
+          "id": "kum-08-md-157",
+          "title": "## K08-157 — Tratamentul precoce",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 145,
+          "endLine": 171,
+          "pages": [
+            157
+          ]
+        },
+        {
+          "id": "kum-08-md-158",
+          "title": "## K08-158 — Microbiologie și controlul sursei",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 172,
+          "endLine": 185,
+          "pages": [
+            158
+          ]
+        },
+        {
+          "id": "kum-08-md-159",
+          "title": "## K08-159 — Administrarea prudentă a antibioticelor",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 186,
+          "endLine": 203,
+          "pages": [
+            159
+          ]
+        },
+        {
+          "id": "kum-08-md-160",
+          "title": "## K08-160 — OPAT și alergia la antibiotice",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 204,
+          "endLine": 221,
+          "pages": [
+            160
+          ]
+        },
+        {
+          "id": "kum-08-md-161",
+          "title": "## K08-161 — Chimioprofilaxia",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 222,
+          "endLine": 240,
+          "pages": [
+            161
+          ]
+        },
+        {
+          "id": "kum-08-md-162",
+          "title": "## K08-162 — Antibiotice: doze, unități și condiții",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 241,
+          "endLine": 279,
+          "pages": [
+            162
+          ]
+        },
+        {
+          "id": "kum-08-md-163",
+          "title": "## K08-163 — Betalactamine: mecanism și diferențe",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 280,
+          "endLine": 298,
+          "pages": [
+            163
+          ]
+        },
+        {
+          "id": "kum-08-md-164",
+          "title": "## K08-164 — Inhibitori, chinolone, aminoglicozide și glicopeptide",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 299,
+          "endLine": 324,
+          "pages": [
+            164
+          ]
+        },
+        {
+          "id": "kum-08-md-165",
+          "title": "## K08-165 — Oxazolidinone, tetracicline, macrolide și polimixine",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 325,
+          "endLine": 336,
+          "pages": [
+            165
+          ]
+        },
+        {
+          "id": "kum-08-md-166",
+          "title": "## K08-166 — Alte antibiotice și interacțiuni",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 337,
+          "endLine": 356,
+          "pages": [
+            166
+          ]
+        },
+        {
+          "id": "kum-08-md-167",
+          "title": "## K08-167 — Bacterii multirezistente: mecanisme și tratamente",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 357,
+          "endLine": 372,
+          "pages": [
+            167
+          ]
+        },
+        {
+          "id": "kum-08-md-168",
+          "title": "## K08-168 — Limitele tratamentului CRE și încheiere",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 373,
+          "endLine": 382,
+          "pages": [
+            168
+          ]
+        }
+      ]
+    },
+    {
+      "chapterId": "kum-09",
+      "file": "contenus-norya/kumar-09.md",
+      "language": "ro",
+      "pages": [
+        [
+          172,
+          190
+        ],
+        [
+          195,
+          202
+        ]
+      ],
+      "sha256": "3f041fa4728831d0ed3ea1db12e7724028c01006bc0df2657909af1ba28a47ea",
+      "status": "complete",
+      "verification": {
+        "status": "beta"
+      },
+      "documentaryReview": {
+        "status": "reviewed-with-open-issues",
+        "date": "2026-10-12",
+        "method": "automated source comparison plus rendered tables",
+        "coverage": "controle/kumar-09.couverture.json"
+      },
+      "sections": [
+        {
+          "id": "kum-09-metadata",
+          "title": "# Echilibrul hidro-electrolitic și acido-bazic",
+          "kind": "metadata",
+          "status": "editorial",
+          "startLine": 1,
+          "endLine": 6,
+          "pages": []
+        },
+        {
+          "id": "kum-09-md-172",
+          "title": "## K09-172 — Apa corporală, compartimente și presiuni",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 7,
+          "endLine": 42,
+          "pages": [
+            172
+          ]
+        },
+        {
+          "id": "kum-09-md-173",
+          "title": "## K09-173 — Distribuția perfuziilor și controlul sodiului",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 43,
+          "endLine": 62,
+          "pages": [
+            173
+          ]
+        },
+        {
+          "id": "kum-09-md-174",
+          "title": "## K09-174 — Subumplerea arterială în bolile edematoase",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 63,
+          "endLine": 72,
+          "pages": [
+            174
+          ]
+        },
+        {
+          "id": "kum-09-md-175",
+          "title": "## K09-175 — Transportul tubular și bolile segmentare",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 73,
+          "endLine": 94,
+          "pages": [
+            175
+          ]
+        },
+        {
+          "id": "kum-09-md-176",
+          "title": "## K09-176 — ADH, aquaporine și osmoreglare",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 95,
+          "endLine": 112,
+          "pages": [
+            176
+          ]
+        },
+        {
+          "id": "kum-09-md-177",
+          "title": "## K09-177 — Osmoreglare versus volemie; hipervolemie",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 113,
+          "endLine": 129,
+          "pages": [
+            177
+          ]
+        },
+        {
+          "id": "kum-09-md-178",
+          "title": "## K09-178 — Cauzele edemului și diureticele de ansă",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 130,
+          "endLine": 141,
+          "pages": [
+            178
+          ]
+        },
+        {
+          "id": "kum-09-md-179",
+          "title": "## K09-179 — Clase de diuretice și transportul în ansă",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 142,
+          "endLine": 157,
+          "pages": [
+            179
+          ]
+        },
+        {
+          "id": "kum-09-md-180",
+          "title": "## K09-180 — Distal, colector, rezistența la diuretice",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 158,
+          "endLine": 169,
+          "pages": [
+            180
+          ]
+        },
+        {
+          "id": "kum-09-md-181",
+          "title": "## K09-181 — Hipovolemia: evaluare și cauze",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 170,
+          "endLine": 187,
+          "pages": [
+            181
+          ]
+        },
+        {
+          "id": "kum-09-md-182",
+          "title": "## K09-182 — Repleție și compoziția soluțiilor",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 188,
+          "endLine": 207,
+          "pages": [
+            182
+          ]
+        },
+        {
+          "id": "kum-09-md-183",
+          "title": "## K09-183 — Natremia și hiponatremia hipovolemică",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 208,
+          "endLine": 226,
+          "pages": [
+            183
+          ]
+        },
+        {
+          "id": "kum-09-md-184",
+          "title": "## K09-184 — Pierderi digestive și hiponatremie euvolemică",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 227,
+          "endLine": 247,
+          "pages": [
+            184
+          ]
+        },
+        {
+          "id": "kum-09-md-185",
+          "title": "## K09-185 — Tratamentul hiponatremiei și demielinizarea osmotică",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 248,
+          "endLine": 267,
+          "pages": [
+            185
+          ]
+        },
+        {
+          "id": "kum-09-md-186",
+          "title": "## K09-186 — Supracorecție, vaptani și hipernatremie",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 268,
+          "endLine": 289,
+          "pages": [
+            186
+          ]
+        },
+        {
+          "id": "kum-09-md-187",
+          "title": "## K09-187 — Corecția hipernatremiei și fiziologia K⁺",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 290,
+          "endLine": 303,
+          "pages": [
+            187
+          ]
+        },
+        {
+          "id": "kum-09-md-188",
+          "title": "## K09-188 — Hipokaliemie și tubulopatii",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 304,
+          "endLine": 324,
+          "pages": [
+            188
+          ]
+        },
+        {
+          "id": "kum-09-md-189",
+          "title": "## K09-189 — Înlocuirea K⁺ și cauzele hiperkaliemiei",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 325,
+          "endLine": 343,
+          "pages": [
+            189
+          ]
+        },
+        {
+          "id": "kum-09-md-190",
+          "title": "## K09-190 — Hiperkaliemia severă: ECG și principii de tratament",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 344,
+          "endLine": 364,
+          "pages": [
+            190
+          ]
+        },
+        {
+          "id": "kum-09-md-195",
+          "title": "## K09-195 — Definiții acido-bazice",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 365,
+          "endLine": 383,
+          "pages": [
+            195
+          ]
+        },
+        {
+          "id": "kum-09-md-196",
+          "title": "## K09-196 — Tampoane, ecuații și bicarbonatul renal",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 384,
+          "endLine": 399,
+          "pages": [
+            196
+          ]
+        },
+        {
+          "id": "kum-09-md-197",
+          "title": "## K09-197 — Excreția netă de acid",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 400,
+          "endLine": 414,
+          "pages": [
+            197
+          ]
+        },
+        {
+          "id": "kum-09-md-198",
+          "title": "## K09-198 — Interpretarea tulburărilor acido-bazice",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 415,
+          "endLine": 431,
+          "pages": [
+            198
+          ]
+        },
+        {
+          "id": "kum-09-md-199",
+          "title": "## K09-199 — Gaura anionică și tipurile de ATR",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 432,
+          "endLine": 450,
+          "pages": [
+            199
+          ]
+        },
+        {
+          "id": "kum-09-md-200",
+          "title": "## K09-200 — Diagnosticul ATR, GA urinară, acidoza renală/lactică",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 451,
+          "endLine": 473,
+          "pages": [
+            200
+          ]
+        },
+        {
+          "id": "kum-09-md-201",
+          "title": "## K09-201 — GA crescută, tulburări mixte și tratamentul acidozei",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 474,
+          "endLine": 498,
+          "pages": [
+            201
+          ]
+        },
+        {
+          "id": "kum-09-md-202",
+          "title": "## K09-202 — Alcaloza metabolică: mecanisme și tratament",
+          "kind": "course",
+          "status": "beta",
+          "startLine": 499,
+          "endLine": 522,
+          "pages": [
+            202
+          ]
+        }
+      ]
+    }
+  ]
+}

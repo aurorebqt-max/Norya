@@ -12,3 +12,5 @@ web-build/
 
 /build-validation/
 /test-results.log
+
+/scripts/source-course/__pycache__/

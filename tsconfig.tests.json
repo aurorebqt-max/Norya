@@ -12,9 +12,18 @@
   },
   "include": [
     "src/domain/preparation/**/*.ts",
+    "src/domain/sourceCourse/**/*.ts",
     "src/data/program.ts",
+    "src/data/courseCoverage.ts",
     "src/data/romanianLessons.ts",
     "src/data/medical.ts",
+    "src/domain/learning/estimate.ts",
+    "src/domain/learning/examScoring.ts",
+    "src/domain/learning/historical.ts",
+    "src/domain/learning/quiz.ts",
+    "src/domain/learning/store.ts",
+    "src/domain/learning/types.ts",
+    "src/data/historicalResults.ts",
     "src/services/storage/repository.ts"
   ]
 }

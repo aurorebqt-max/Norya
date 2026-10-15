@@ -42,6 +42,7 @@ export type Definition = {
 export type Flashcard = {
   id: string;
   objectiveId: string;
+  sectionId?: string;
   itemNumber: number;
   subject: string;
   rank?: KnowledgeRank;

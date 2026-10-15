@@ -17,6 +17,7 @@ const {
   changeExamYear,
   deadline,
   validateProfile,
+  weeklyCapacity,
 } = require("../.test-build/domain/preparation/profile");
 const {
   addDays,
@@ -34,7 +35,7 @@ const {
 const TODAY = "2026-09-24";
 function state(overrides = {}) {
   const value = createState(TODAY, "test-local", "Europe/Paris");
-  value.profile = { ...value.profile, name: "Aurore", examDate:{provisional:"2027-11-15"}, year:"2027", firstPassTarget:"2027-10-16", targetPasses:1, ...overrides };
+  value.profile = { ...value.profile, name: "Aurore", examDate:{provisional:"2027-11-15"}, year:"2027", firstPassTarget:"2027-10-16", targetPasses:1, availabilityConfigured:true, ...overrides };
   value.onboarded = true;
   return value;
 }
@@ -60,6 +61,7 @@ function complete(s, o, on = TODAY, id = o.id, kind = "initial", performance) {
 test("planning déterministe, sans mutation ; durées de chaque objectif réellement distribuées", () => {
   const s = state(),
     copy = JSON.stringify(s);
+  assert.equal(weeklyCapacity(createState(TODAY, "automatic").profile), 1200);
   const a = buildPlan(objectives, s, TODAY),
     b = buildPlan(objectives, s, TODAY);
   assert.deepEqual(a, b);
@@ -470,9 +472,11 @@ test("migration v1 conserve acquis et notes ; corruption et schéma futur ne son
   saved.notes.cardio = "Conserver";
   const old = { ...saved, schemaVersion: 1 };
   delete old.notifications;
+  delete old.profile.availabilityConfigured;
   const migrated = decodeState(JSON.stringify(old));
   assert.equal(migrated.schemaVersion, 2);
   assert.equal(migrated.notifications, true);
+  assert.equal(migrated.profile.availabilityConfigured, true);
   assert.deepEqual(migrated.progress, saved.progress);
   assert.deepEqual(migrated.notes, saved.notes);
   for (const raw of [

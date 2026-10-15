@@ -1,3 +1,4 @@
+import { LearningProvider } from "../src/state/LearningProvider";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -7,7 +8,7 @@ export default function Root() {
   return (
     <SafeAreaProvider>
       <PreparationProvider>
-        <DemoProvider>
+        <LearningProvider><DemoProvider>
           <SafeAreaView style={{ flex: 1, backgroundColor: "#F8F9F5" }}>
             <StatusBar style="dark" />
             <Stack
@@ -17,7 +18,7 @@ export default function Root() {
               }}
             />
           </SafeAreaView>
-        </DemoProvider>
+        </DemoProvider></LearningProvider>
       </PreparationProvider>
     </SafeAreaProvider>
   );

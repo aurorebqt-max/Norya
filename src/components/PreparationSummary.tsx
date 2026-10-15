@@ -4,6 +4,8 @@ import { colors as c } from "../design/theme";
 import { formatDay, daysBetween } from "../domain/preparation/dates";
 import { usePreparation } from "../state/PreparationProvider";
 import { objectives, PROGRAM_LABEL } from "../data/program";
+import { documentaryMap } from "../data/documentation";
+import { useLearning } from "../state/LearningProvider";
 import type {
   Plan,
   PreparationProfile,
@@ -26,58 +28,26 @@ export function PlanStatus({
       />
       <Txt bold>
         {plan.remainingPassMinutes === 0
-          ? "Vos tours sont parcourus"
+          ? "Tes tours prévus sont parcourus"
           : plan.feasible
-            ? "Un cap à votre portée"
-            : "Votre rythme mérite un ajustement"}
+            ? "Un rythme compatible avec J−30"
+            : "Ton objectif est ambitieux"}
       </Txt>
-      <Txt size={13}>
-        Fin cible : {formatDay(plan.deadline)}. Fin prévisionnelle :{" "}
-        {formatDay(plan.passes.at(-1)?.forecast)}.
-      </Txt>
-      {plan.feasible ? (
-        <Txt size={13}>
-          Les tours sont prévus au moins 30 jours avant le concours, avec
-          vos disponibilités actuelles.
-        </Txt>
-      ) : (
-        <>
-          <Txt size={13}>
-            Travail des tours restant : {plan.remainingPassMinutes} min. Capacité
-            restante avant la cible : {plan.availableBeforeTarget} min. Déficit
-            : {plan.deficitMinutes} min.
-          </Txt>
-          <Txt size={13}>
-            {plan.requiredMinutesPerAvailableDay === null
-              ? "Aucun jour disponible avant la cible. Ajoutez des créneaux si vous le pouvez."
-              : `Avec tes disponibilités actuelles, terminer ${profile.targetPasses ?? 2} tours avant J−30 nécessiterait environ ${(plan.requiredMinutesPerAvailableDay / 60).toFixed(1)} heures par jour disponible. Réduis le nombre de tours, augmente les heures disponibles ou ajuste la cible (au plus tard J−30).`}{" "}
-            Vous pouvez continuer à votre rythme.
-          </Txt>
-        </>
-      )}
-      <Txt size={12} color={c.muted}>
-        Concours : {formatDay(plan.examOn)} ·{" "}
-        {profile.examDate.official
-          ? "date déclarée officielle, source renseignée"
-          : "date provisoire à confirmer"}
-        .{" "}
-        {plan.overdueReviews > 0
-          ? plan.overdueReviews +
-            " rappel(s) en retard, redistribué(s) dans les créneaux disponibles."
-          : ""}
-      </Txt>
-      {editable && !plan.feasible && (
-        <Button
-          title="Ajuster mes tours et disponibilités"
-          secondary
-          onPress={() => router.push("/profile")}
-        />
-      )}
+      <Txt size={13}>Date cible : {formatDay(plan.deadline)} · prévision : {formatDay(plan.passes.at(-1)?.forecast)}.</Txt>
+      {plan.requiredMinutesPerAvailableDay !== null && plan.requiredMinutesPerAvailableDay > 0 &&
+        <Txt size={13}>Charge moyenne estimée : environ {(plan.requiredMinutesPerAvailableDay / 60).toFixed(1)} h par jour actif pour terminer {profile.targetPasses ?? 2} tours avant J−30.</Txt>}
+      {plan.feasible
+        ? <Txt size={13}>Le programme tient compte des parties validées, des rappels et de tes jours de repos.</Txt>
+        : <Txt size={13}>À ce rythme, les tours ne seront pas terminés avant J−30. Réduis le nombre de tours ou ajuste les disponibilités ; aucune progression acquise ne sera perdue.</Txt>}
+      {!!plan.overdueReviews && <Txt size={12} color={c.muted}>{plan.overdueReviews} rappel(s) seront redistribués dans les prochaines séances.</Txt>}
+      {editable && !plan.feasible && <Button title="Ajuster mon objectif" secondary onPress={() => router.push("/profile")} />}
     </Card>
   );
 }
 export function TaskRow({ task }: { task: PlannedTask }) {
   const objective = objectives.find((o) => o.id === task.objectiveId)!;
+  const reading = useLearning().learning.reading[task.objectiveId];
+  const lesson = documentaryMap.find((chapter) => chapter.id === task.objectiveId)?.lesson;
   return (
     <RowLink
       title={objective.title}
@@ -90,19 +60,14 @@ export function TaskRow({ task }: { task: PlannedTask }) {
         " · " +
         task.minutes +
         " min" +
+        (lesson
+          ? ` · cours en ${lesson.sections.length} parties · continuer ${Math.min((reading?.section ?? 0) + 1, lesson.sections.length)}/${lesson.sections.length}`
+          : "") +
         (task.phase === "final" ? " · Consolidation finale" : "")
       }
       icon={task.kind === "initial" ? "book-outline" : "refresh-outline"}
       color={task.kind === "initial" ? c.mint : c.lavender}
-      href={{
-        pathname: "/study",
-        params: {
-          objectiveId: task.objectiveId,
-          kind: task.kind,
-          pass: String(task.pass ?? 1),
-          minutes: String(task.minutes),
-        },
-      }}
+      href={{ pathname: "/chapter", params: { id: task.objectiveId } }}
     />
   );
 }
@@ -135,10 +100,7 @@ export function FinalConsolidation() {
           subtitle={
             "Prochain rappel : " + formatDay(state.progress[o.id]?.nextReviewOn)
           }
-          href={{
-            pathname: "/study",
-            params: { objectiveId: o.id, kind: "review" },
-          }}
+          href={{ pathname: "/chapter", params: { id: o.id } }}
         />
       ))}
       <Txt size={13}>Priorité : QCM, examens blancs, flashcards, carnet d’erreurs et chapitres fragiles. Les tours restants sont conservés : avancez sur les chapitres prioritaires avec la moitié du temps réservée aux rappels essentiels.</Txt>

@@ -1,0 +1,416 @@
+{
+  "chapterId": "kum-09",
+  "courseSha256": "3f041fa4728831d0ed3ea1db12e7724028c01006bc0df2657909af1ba28a47ea",
+  "status": "beta",
+  "humanMedicalValidation": false,
+  "notice": "Fișe și flashcards beta, documentate pe paginile indicate. Verificarea medicală umană nu a fost efectuată. Nu sunt protocoale de tratament; datele litigioase sunt marcate în curs și nu sunt folosite ca răspunsuri definitive.",
+  "sheets": [
+    {
+      "sectionId": "kum-09-md-172",
+      "page": 172,
+      "title": "K09-172 — Apa corporală, compartimente și presiuni",
+      "text": "Presiunea hidrostatică favorizează ieșirea; presiunea oncotică plasmatică reține apa; limfa readuce excesul interstițial.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-173",
+      "page": 173,
+      "title": "K09-173 — Distribuția perfuziilor și controlul sodiului",
+      "text": "Ar produce liză osmotică a hematiilor. Schema distribuirii apei nu este o indicație pentru perfuzarea apei pure.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-174",
+      "page": 174,
+      "title": "K09-174 — Subumplerea arterială în bolile edematoase",
+      "text": "Nu. În insuficiență cardiacă și ciroză pot coexista edeme și volum arterial efectiv insuficient, cu retenție renală de Na⁺ și apă.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-175",
+      "page": 175,
+      "title": "K09-175 — Transportul tubular și bolile segmentare",
+      "text": "Fiecare segment are transportori și funcții specifice; disfuncția lor produce tipare de pierderi și tulburări electrolitice.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-176",
+      "page": 176,
+      "title": "K09-176 — ADH, aquaporine și osmoreglare",
+      "text": "Prin receptorul V2 și semnalizarea intracelulară care determină inserția aquaporinei 2 în membrana apicală.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-177",
+      "page": 177,
+      "title": "K09-177 — Osmoreglare versus volemie; hipervolemie",
+      "text": "Da. Semnalele de volum/perfuzie pot întreține retenția apei chiar când osmolalitatea ar cere excreția ei.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-178",
+      "page": 178,
+      "title": "K09-178 — Cauzele edemului și diureticele de ansă",
+      "text": "Trebuie identificată cauza, evaluate aportul de sodiu, perfuzia și răspunsul renal, apoi monitorizate volumul și electroliții.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-179",
+      "page": 179,
+      "title": "K09-179 — Clase de diuretice și transportul în ansă",
+      "text": "Diureticele de ansă inhibă NKCC2 în brațul ascendent gros; tiazidele inhibă transportul NaCl în tubul contort distal.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-180",
+      "page": 180,
+      "title": "K09-180 — Distal, colector, rezistența la diuretice",
+      "text": "Blocarea receptorului mineralocorticoid sau blocarea ENaC; ambele reduc efectul reabsorbției distale a sodiului asupra secreției K⁺.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-181",
+      "page": 181,
+      "title": "K09-181 — Hipovolemia: evaluare și cauze",
+      "text": "Pierderi renale, digestive, cutanate și redistribuție/sechestrare în spațiul al treilea; hemoragia pierde și elemente figurate.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-182",
+      "page": 182,
+      "title": "K09-182 — Repleție și compoziția soluțiilor",
+      "text": "Resuscitarea, înlocuirea pierderilor și întreținerea; compoziția și ritmul se adaptează la hemodinamică și electroliți.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-183",
+      "page": 183,
+      "title": "K09-183 — Natremia și hiponatremia hipovolemică",
+      "text": "Nu. Se verifică osmolalitatea, hiperglicemia/solviții și pseudohiponatremia înainte de clasificarea după volemie.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-184",
+      "page": 184,
+      "title": "K09-184 — Pierderi digestive și hiponatremie euvolemică",
+      "text": "Trebuie diferențiate deficitul glucocorticoid, hipotiroidismul, medicamentele, aportul de apă/solut și alte cauze de hiponatremie.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-185",
+      "page": 185,
+      "title": "K09-185 — Tratamentul hiponatremiei și demielinizarea osmotică",
+      "text": "Sindromul de demielinizare osmotică. Limitele numerice divergente din ediție sunt semnalate separat și nu sunt transformate în protocol.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-186",
+      "page": 186,
+      "title": "K09-186 — Supracorecție, vaptani și hipernatremie",
+      "text": "Pierderea de apă devine persistentă dacă setea, conștiența sau posibilitatea de a bea nu permit înlocuirea ei.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-187",
+      "page": 187,
+      "title": "K09-187 — Corecția hipernatremiei și fiziologia K⁺",
+      "text": "Nu. Redistribuția între celule și plasmă, influențată de insulină, catecolamine și echilibrul acido-bazic, poate schimba valoarea fără pierdere totală echivalentă.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-188",
+      "page": 188,
+      "title": "K09-188 — Hipokaliemie și tubulopatii",
+      "text": "Deficitul de magneziu; trebuie căutat când răspunsul la substituția de K⁺ este insuficient.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-189",
+      "page": 189,
+      "title": "K09-189 — Înlocuirea K⁺ și cauzele hiperkaliemiei",
+      "text": "O valoare crescută poate proveni din recoltare/prelucrare, nu din excesul circulant real; se corelează cu contextul și ECG.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-190",
+      "page": 190,
+      "title": "K09-190 — Hiperkaliemia severă: ECG și principii de tratament",
+      "text": "Nu. Stabilizează membrana; transferul intracelular și eliminarea K⁺ sunt obiective distincte.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-195",
+      "page": 195,
+      "title": "K09-195 — Definiții acido-bazice",
+      "text": "Acidoza este procesul care tinde să reducă pH; acidemia este pH sanguin scăzut. Procese mixte pot masca variația pH.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-196",
+      "page": 196,
+      "title": "K09-196 — Tampoane, ecuații și bicarbonatul renal",
+      "text": "Nu. H⁺ se reciclează în mecanismul de reabsorbție; excreția netă necesită eliminarea acidului urinar.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-197",
+      "page": 197,
+      "title": "K09-197 — Excreția netă de acid",
+      "text": "NH₄⁺ urinar + acid titrabil − bicarbonat urinar.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-198",
+      "page": 198,
+      "title": "K09-198 — Interpretarea tulburărilor acido-bazice",
+      "text": "O tulburare mixtă; pH, PaCO₂ și HCO₃⁻ trebuie interpretate împreună și în context.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-199",
+      "page": 199,
+      "title": "K09-199 — Gaura anionică și tipurile de ATR",
+      "text": "GA = (Na⁺ + K⁺) − (Cl⁻ + HCO₃⁻). Intervalul de referință trebuie raportat la metoda și convenția laboratorului.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-200",
+      "page": 200,
+      "title": "K09-200 — Diagnosticul ATR, GA urinară, acidoza renală/lactică",
+      "text": "Excreția de NH₄⁺, prin raportul dintre Na⁺, K⁺ și Cl⁻ urinare; interpretarea are limite și depinde de anionii prezenți.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-201",
+      "page": 201,
+      "title": "K09-201 — GA crescută, tulburări mixte și tratamentul acidozei",
+      "text": "Bicarbonatul nu înlătură producția de acid ori defectul de eliminare și poate aduce sarcină de sodiu, volum și CO₂.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-09-md-202",
+      "page": 202,
+      "title": "K09-202 — Alcaloza metabolică: mecanisme și tratament",
+      "text": "Depleția de volum/clor și deficitul de K⁺ împiedică eliminarea eficientă a bicarbonatului; tratamentul depinde de volemie și cauză.",
+      "status": "beta"
+    }
+  ],
+  "flashcards": [
+    {
+      "id": "kum-09-md-172-card",
+      "sectionId": "kum-09-md-172",
+      "page": 172,
+      "question": "Ce determină deplasarea apei între plasmă și interstițiu?",
+      "answer": "Presiunea hidrostatică favorizează ieșirea; presiunea oncotică plasmatică reține apa; limfa readuce excesul interstițial.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-173-card",
+      "sectionId": "kum-09-md-173",
+      "page": 173,
+      "question": "De ce apa pură nu se injectează intravenos?",
+      "answer": "Ar produce liză osmotică a hematiilor. Schema distribuirii apei nu este o indicație pentru perfuzarea apei pure.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-174-card",
+      "sectionId": "kum-09-md-174",
+      "page": 174,
+      "question": "Edemele exclud subumplerea arterială?",
+      "answer": "Nu. În insuficiență cardiacă și ciroză pot coexista edeme și volum arterial efectiv insuficient, cu retenție renală de Na⁺ și apă.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-175-card",
+      "sectionId": "kum-09-md-175",
+      "page": 175,
+      "question": "De ce transportul segmentar explică tubulopatiile?",
+      "answer": "Fiecare segment are transportori și funcții specifice; disfuncția lor produce tipare de pierderi și tulburări electrolitice.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-176-card",
+      "sectionId": "kum-09-md-176",
+      "page": 176,
+      "question": "Cum crește ADH permeabilitatea la apă a colectorului?",
+      "answer": "Prin receptorul V2 și semnalizarea intracelulară care determină inserția aquaporinei 2 în membrana apicală.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-177-card",
+      "sectionId": "kum-09-md-177",
+      "page": 177,
+      "question": "Poate stimularea non-osmotică menține ADH în ciuda hipotoniei?",
+      "answer": "Da. Semnalele de volum/perfuzie pot întreține retenția apei chiar când osmolalitatea ar cere excreția ei.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-178-card",
+      "sectionId": "kum-09-md-178",
+      "page": 178,
+      "question": "De ce tratamentul edemelor nu se reduce la administrarea unui diuretic?",
+      "answer": "Trebuie identificată cauza, evaluate aportul de sodiu, perfuzia și răspunsul renal, apoi monitorizate volumul și electroliții.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-179-card",
+      "sectionId": "kum-09-md-179",
+      "page": 179,
+      "question": "Unde acționează diureticele de ansă și tiazidele?",
+      "answer": "Diureticele de ansă inhibă NKCC2 în brațul ascendent gros; tiazidele inhibă transportul NaCl în tubul contort distal.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-180-card",
+      "sectionId": "kum-09-md-180",
+      "page": 180,
+      "question": "Care sunt cele două mecanisme ale diureticelor economisitoare de K⁺?",
+      "answer": "Blocarea receptorului mineralocorticoid sau blocarea ENaC; ambele reduc efectul reabsorbției distale a sodiului asupra secreției K⁺.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-181-card",
+      "sectionId": "kum-09-md-181",
+      "page": 181,
+      "question": "Care sunt marile căi de pierdere în hipovolemie?",
+      "answer": "Pierderi renale, digestive, cutanate și redistribuție/sechestrare în spațiul al treilea; hemoragia pierde și elemente figurate.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-182-card",
+      "sectionId": "kum-09-md-182",
+      "page": 182,
+      "question": "Ce trebuie diferențiat la prescrierea lichidelor?",
+      "answer": "Resuscitarea, înlocuirea pierderilor și întreținerea; compoziția și ritmul se adaptează la hemodinamică și electroliți.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-183-card",
+      "sectionId": "kum-09-md-183",
+      "page": 183,
+      "question": "Orice sodiu plasmatic scăzut înseamnă hipotonie?",
+      "answer": "Nu. Se verifică osmolalitatea, hiperglicemia/solviții și pseudohiponatremia înainte de clasificarea după volemie.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-184-card",
+      "sectionId": "kum-09-md-184",
+      "page": 184,
+      "question": "De ce SIADH este un diagnostic de excludere?",
+      "answer": "Trebuie diferențiate deficitul glucocorticoid, hipotiroidismul, medicamentele, aportul de apă/solut și alte cauze de hiponatremie.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-185-card",
+      "sectionId": "kum-09-md-185",
+      "page": 185,
+      "question": "Care este complicația neurologică a corecției excesiv de rapide a hiponatremiei cronice?",
+      "answer": "Sindromul de demielinizare osmotică. Limitele numerice divergente din ediție sunt semnalate separat și nu sunt transformate în protocol.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-186-card",
+      "sectionId": "kum-09-md-186",
+      "page": 186,
+      "question": "De ce accesul la apă este important în hipernatremie?",
+      "answer": "Pierderea de apă devine persistentă dacă setea, conștiența sau posibilitatea de a bea nu permit înlocuirea ei.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-187-card",
+      "sectionId": "kum-09-md-187",
+      "page": 187,
+      "question": "K⁺ plasmatic reflectă întotdeauna rezervele totale?",
+      "answer": "Nu. Redistribuția între celule și plasmă, influențată de insulină, catecolamine și echilibrul acido-bazic, poate schimba valoarea fără pierdere totală echivalentă.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-188-card",
+      "sectionId": "kum-09-md-188",
+      "page": 188,
+      "question": "Ce deficit poate împiedica corectarea hipokaliemiei?",
+      "answer": "Deficitul de magneziu; trebuie căutat când răspunsul la substituția de K⁺ este insuficient.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-189-card",
+      "sectionId": "kum-09-md-189",
+      "page": 189,
+      "question": "De ce se caută pseudohiperkaliemia?",
+      "answer": "O valoare crescută poate proveni din recoltare/prelucrare, nu din excesul circulant real; se corelează cu contextul și ECG.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-190-card",
+      "sectionId": "kum-09-md-190",
+      "page": 190,
+      "question": "Calciul administrat în hiperkaliemie elimină potasiul?",
+      "answer": "Nu. Stabilizează membrana; transferul intracelular și eliminarea K⁺ sunt obiective distincte.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-195-card",
+      "sectionId": "kum-09-md-195",
+      "page": 195,
+      "question": "Care este diferența dintre acidoză și acidemie?",
+      "answer": "Acidoza este procesul care tinde să reducă pH; acidemia este pH sanguin scăzut. Procese mixte pot masca variația pH.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-196-card",
+      "sectionId": "kum-09-md-196",
+      "page": 196,
+      "question": "Recuperarea bicarbonatului filtrat reprezintă excreție netă de acid?",
+      "answer": "Nu. H⁺ se reciclează în mecanismul de reabsorbție; excreția netă necesită eliminarea acidului urinar.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-197-card",
+      "sectionId": "kum-09-md-197",
+      "page": 197,
+      "question": "Cum se exprimă excreția renală netă de acid?",
+      "answer": "NH₄⁺ urinar + acid titrabil − bicarbonat urinar.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-198-card",
+      "sectionId": "kum-09-md-198",
+      "page": 198,
+      "question": "Ce sugerează o compensare necorespunzătoare procesului primar?",
+      "answer": "O tulburare mixtă; pH, PaCO₂ și HCO₃⁻ trebuie interpretate împreună și în context.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-199-card",
+      "sectionId": "kum-09-md-199",
+      "page": 199,
+      "question": "Ce convenție a găurii anionice este folosită în curs?",
+      "answer": "GA = (Na⁺ + K⁺) − (Cl⁻ + HCO₃⁻). Intervalul de referință trebuie raportat la metoda și convenția laboratorului.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-200-card",
+      "sectionId": "kum-09-md-200",
+      "page": 200,
+      "question": "Ce încearcă să estimeze indirect gaura anionică urinară?",
+      "answer": "Excreția de NH₄⁺, prin raportul dintre Na⁺, K⁺ și Cl⁻ urinare; interpretarea are limite și depinde de anionii prezenți.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-201-card",
+      "sectionId": "kum-09-md-201",
+      "page": 201,
+      "question": "De ce tratamentul acidozei metabolice urmărește în primul rând cauza?",
+      "answer": "Bicarbonatul nu înlătură producția de acid ori defectul de eliminare și poate aduce sarcină de sodiu, volum și CO₂.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-09-md-202-card",
+      "sectionId": "kum-09-md-202",
+      "page": 202,
+      "question": "Ce întreține frecvent alcaloza metabolică după pierderile digestive?",
+      "answer": "Depleția de volum/clor și deficitul de K⁺ împiedică eliminarea eficientă a bicarbonatului; tratamentul depinde de volemie și cauză.",
+      "status": "beta"
+    }
+  ]
+}

@@ -3,6 +3,8 @@ import { TextInput, View, KeyboardAvoidingView, Platform } from "react-native";
 import { Screen, Card, Txt, Chip, Button, Icon, s } from "../components/ui";
 import { colors as c } from "../design/theme";
 import { usePreparation } from "../state/PreparationProvider";
+import { useLearning } from "../state/LearningProvider";
+import { RowLink } from "../components/ui";
 const answer = (q: string) =>
   /retard|planning|temps/i.test(q)
     ? "Vous pouvez commencer par une seule séance courte. Le calendrier local redistribue déjà votre travail restant selon vos disponibilités. Consultez-le pour voir le prochain créneau ; cette conversation préécrite ne modifie pas votre planning."
@@ -10,7 +12,10 @@ const answer = (q: string) =>
       ? "Reprenez une seule hésitation dans votre carnet. Notez ce qui vous a bloqué, puis essayez les questions de consolidation. Un petit objectif suffit pour reprendre confiance."
       : "Pour aujourd’hui, consultez la prochaine séance calculée dans votre accueil, puis prévoyez une pause. Terminez par une séance courte si votre énergie le permet. Ceci est une réponse de démonstration préécrite, sans analyse médicale.";
 export default function Coach() {
-  const { profile } = usePreparation();
+  const { profile, plan, today } = usePreparation();
+  const { learning } = useLearning();
+  const nextTask = plan.tasks.find(task => task.on === today);
+  const dueErrors = (learning.errorCards ?? []).filter(card => card.nextReviewOn <= today).length;
   const [messages, setMessages] = useState([
     {
       role: "coach",
@@ -36,6 +41,14 @@ export default function Coach() {
       title="Un coach à vos côtés"
       subtitle="Pour trouver le prochain pas, même les jours de doute."
     >
+      <Card>
+        <Txt bold>Votre préparation aujourd’hui</Txt>
+        {nextTask
+          ? <RowLink title="Prochaine partie à travailler" subtitle={nextTask.objectiveId} href={{ pathname: "/chapter", params: { id: nextTask.objectiveId } }} />
+          : <Txt>Aucune séance planifiée aujourd’hui. Votre calendrier reste accessible.</Txt>}
+        <RowLink title={`${dueErrors} erreur(s) à revoir`} subtitle="Les fiches en attente restent signalées comme non vérifiées." href="/errors" />
+        <RowLink title="Ouvrir le calendrier" icon="calendar-outline" href="/schedule" />
+      </Card>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ gap: 20, maxWidth: 800, width: "100%", alignSelf: "center" }}

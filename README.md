@@ -1,8 +1,8 @@
-> **État du 11 octobre 2026 : préparation au rezidențiat roumain.** Voir le [bilan de reprise et le guide multi-tours](docs/REPRISE-MULTI-TOURS.md) pour les fonctions utilisables, contenus disponibles et limites actuelles. Les descriptions historiques ci-dessous ne constituent pas une validation de couverture du programme.
+> **État du 11 octobre 2026 : application consacrée au concours roumain de rezidențiat, filière médecine.** Les chapitres et QCM pilotes sont encore partiels et demandent une relecture médicale. Voir le [bilan de reprise](docs/REPRISE-MULTI-TOURS.md) pour les disponibilités et limites.
 
 # Norya
 
-Maquette interactive d’une application de préparation médicale, développée avec Expo SDK 55, React Native 0.83, React 19.2, TypeScript strict et Expo Router. Une seule base de code iOS, Android et web, sans Vite ni enveloppe WebView.
+Application de révision construite avec Expo SDK 55, React Native 0.83, React 19.2, TypeScript strict et Expo Router. Une base de code pour iOS, Android et web.
 
 ## Démarrer
 
@@ -18,67 +18,56 @@ npm start
 - `npm run ios` : ouvrir le simulateur iOS sur macOS avec Xcode.
 - Sur téléphone : utiliser une version d’Expo Go compatible avec le SDK 55, puis scanner le QR code. Si l’Expo Go installé ne prend plus en charge ce SDK, un développement natif avec un development build compatible sera nécessaire.
 
-L’accueil s’ouvre directement sur Aurore pour faciliter la découverte. « Personnaliser mon parcours » lance les huit étapes d’onboarding ; le profil permet de les rouvrir.
+L’onboarding ne demande que la date du concours, le nombre de tours souhaités, les disponibilités et les jours de repos. Aucune vitesse de lecture ni année de concours distincte n’est demandée.
 
 ## Écrans livrés
 
-| Espace           | Interactions                                                                                                                |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Onboarding       | Bienvenue, prénom, concours, année, spécialités multiples facultatives, jours/heures, objectif, récapitulatif               |
-| Accueil          | Programme partagé, séance immédiate, progression, échéance, accès au coach et aux modules secondaires                       |
-| Calendrier       | Mois précédent/suivant, sélection du jour, vue hebdomadaire, détail du 24 septembre, deux tours, J−30, exemple d’adaptation |
-| Bibliothèque     | Recherche, filtres, six matières, fiches, approfondissements, liens et annotations                                          |
-| Entraînement     | Questions, dossier, LCA, examen blanc, entraînement personnalisé ; flashcards et decks locaux de méthode                   |
-| Podcasts         | Catalogue, playlists filtrées, lecteur avec synthèse vocale locale du texte éditorial, avance/recul, préférences, erreurs  |
-| Carnet d’erreurs | Filtres, mini-fiches, consolidation et mise à jour des notions revues                                                       |
-| Progression      | Premier tour, indicateurs fictifs, rangs A/B, matières, spécialités, activité et historique                                 |
-| Coach            | Saisie libre, suggestions, réponses préécrites, présentation du mode vocal                                                  |
-| Profil           | Prénom, préférences, parcours, notifications simulées, confidentialité, présentation de Plus                                |
+| Espace | Interactions |
+| --- | --- |
+| Accueil | Travail du jour, progression du tour et erreurs dues |
+| Bibliothèque | Recherche du programme Tematica et accès aux chapitres |
+| Chapitre | Trois modes : cours complet, fiches et flashcards; validation explicite des parties |
+| Entraînement | QCM Norya sans chronomètre, corrections et historique des erreurs |
+| Progression | Tours, validations, estimations et historique |
+| Espace personnel | Profil, erreurs, glossaire et écoute vocale des cours |
+| Calendrier | Planification des tours, rappels et échéances d’erreurs |
 
-Écrans complémentaires : fiche d’item, séance interactive et page introuvable. Aucun des dix espaces de la mission ne reste absent.
+Notes, surlignages et séances de QCM sont conservés localement. La lecture vocale est disponible depuis les cours; aucun podcast préenregistré fictif n’est proposé. Le Coach reste une démonstration locale, pas un assistant conversationnel médical.
 
 ## Architecture
 
 ```text
-app/                 Routes Expo Router ; cinq onglets principaux et écrans secondaires
+app/                 Routes Expo Router ; cinq espaces principaux et écrans secondaires
 src/screens/         Écrans métier
-src/components/      Primitives et compositions réutilisables
-src/design/          Palette, ombres et identité visuelle
-src/data/            Source des données fictives
-src/state/           État de démonstration partagé, en mémoire
-src/types/           Contrats TypeScript
-src/services/        Frontières documentées des futures intégrations
+src/components/      Primitives, tableaux et compositions réutilisables
+src/data/            Programme, contenus pédagogiques et sources déclarées
+src/domain/          Progression, estimation, QCM, erreurs et répétition espacée
+src/state/           Préparation et apprentissage persistés localement
+scripts/              Indexation privée incrémentale des annales
 ```
 
 Navigation inférieure sur téléphone/tablette, barre latérale sur grand écran. Mise en page adaptative, zones sûres et apparition animée des écrans. Palette ivoire, vert profond, sauge, abricot et lavande.
 
-## Périmètre de la démonstration
+## Contenus et limites connues
 
-- Profil unique Aurore, EDN & ECOS 2027, ophtalmologie et dermatologie.
-- Journée de référence : 24 septembre 2026 ; 3 séances, 65 minutes. La complétion est partagée entre accueil, calendrier et progression.
-- Premier tour : 124/367 items, 34 % arrondis. Il reste fixe car les exercices de méthode ne valident aucun item médical.
-- Date EDN **fictive et non officielle** : 18 octobre 2027. Objectif premier tour : 18 septembre 2027, exactement J−30. Deuxième tour : 19 septembre–17 octobre.
-- Les préférences d’onboarding sont modifiables ; le planning illustratif reste fixé à 2027. Les autres jours n’ont pas de programme détaillé.
-- Les fiches sont des structures éditoriales, sans recommandations cliniques inventées. Les exercices portent uniquement sur les méthodes d’apprentissage. Les différents formats d’examen partagent ce parcours illustratif ; leurs moteurs spécifiques restent à développer.
-- Les liens entre fiches illustrent la navigation, pas des relations médicales validées.
-- Les flashcards actuellement livrées portent uniquement sur les méthodes de travail et leur suivi est local à la session.
-- Le lecteur audio lit localement le titre et le descriptif éditorial via la synthèse vocale de l’appareil ; aucun fichier médical n’est généré ni lu. Le coach utilise des réponses locales préécrites.
-- Notes, profil, préférences et résultats sont perdus au rechargement. Aucun compte, Supabase, paiement, IA, secret ou service distant.
-- La filière roumaine est présentée comme future ; aucun programme de résidanat n’est implémenté.
+- Le programme contient 39 chapitres indexés. Quatre chapitres pilotes regroupent 24 parties, 40 flashcards et 30 QCM originaux Norya; les textes restent partiels et aucun n’est déclaré entièrement vérifié médicalement.
+- Cinq tableaux pédagogiques structurés sont disponibles. Les estimations de lecture sont calculées à partir des mots roumains, tableaux et illustrations renseignées, sans réglage demandé à l’étudiant. Elles restent approximatives et distinctes de la charge du calendrier.
+- Les QCM originaux ne sont pas des annales officielles. Aucun corrigé officiel ni droit de réutilisation n’a été confirmé pour les fichiers privés; aucun examen blanc complet ni classement historique vérifié n’est fourni.
+- L’importeur local `python scripts/import-annales.py` met à jour son index sans dupliquer les documents inchangés. Les PDF et métadonnées privées restent dans `references-privees/`, ignoré par Git; ils ne sont pas inclus dans l’export web.
+- Les données de préparation, notes, surlignages, séances QCM et mini-fiches d’erreurs sont locales à l’appareil. Aucun compte ni Supabase n’est configuré.
 
 ## Vérifications
 
 ```bash
 npm run typecheck
-npm run check
+npm test
 npm run export:web
-npx expo export --platform ios --platform android --output-dir /tmp/norya-native-export
 ```
 
 Le SDK et ses versions proviennent du [modèle officiel Expo SDK 55](https://expo.dev/changelog/sdk-55), et sont verrouillés par package-lock.json. Ne pas mettre à niveau React Native indépendamment d’Expo.
 
-Voir [docs/validation.md](docs/validation.md) pour les résultats et les limites des vérifications.
+TypeScript, les tests et l’export web sont les contrôles automatisés courants. Voir [docs/validation.md](docs/validation.md) pour les limites des vérifications sur appareils.
 
 ## Prochaines missions
 
-Validation sur appareils iOS/Android réels, accessibilité approfondie et réglages de production (icônes natives, splash, builds de distribution). Puis, sur instruction : contenus médicaux sourcés et validés, véritables formats d’examen, persistance/authentification, moteur de planification garantissant J−30, IA, génération/lecture audio réelle, abonnement et filière roumaine.
+Priorités : relire médicalement et compléter les chapitres pilotes, vérifier les sources et errata applicables, puis obtenir des annales avec corrigés officiels et droits de réutilisation établis. Les associations aux parties de cours doivent être contrôlées avant de servir à l’entraînement.

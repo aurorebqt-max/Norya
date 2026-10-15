@@ -50,6 +50,8 @@ export function decodeState(raw: string): LocalState {
     !strings(p.constraints.unavailableDates)
   )
     throw new Error("Profil local invalide.");
+  if (p.availabilityConfigured === undefined)
+    p.availabilityConfigured = parsed.onboarded === true;
   if (
     p.exam === "EDN & ECOS" ||
     p.exam === "EDN" ||

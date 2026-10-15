@@ -1,0 +1,281 @@
+{
+  "chapterId": "kum-08",
+  "courseSha256": "07a57a7033deaf1f4d7ba26ef6d80623b30244da08792df954e398d1f105ffac",
+  "status": "beta",
+  "humanMedicalValidation": false,
+  "notice": "Fișe și flashcards beta, documentate pe paginile indicate. Verificarea medicală umană nu a fost efectuată. Nu sunt protocoale de tratament; datele litigioase sunt marcate în curs și nu sunt folosite ca răspunsuri definitive.",
+  "sheets": [
+    {
+      "sectionId": "kum-08-md-151",
+      "page": 151,
+      "title": "K08-151 — Abilități clinice și priorități",
+      "text": "Identificarea focarului, aprecierea disfuncției de organ și inițierea tratamentului de urgență.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-152",
+      "page": 152,
+      "title": "K08-152 — Anamneză, investigații și disfuncția de organ",
+      "text": "Imunosupresia, antibioticele recente, contactul cu servicii medicale, colonizarea anterioară și călătoriile.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-153",
+      "page": 153,
+      "title": "K08-153 — Examenul obiectiv orientat spre sursă",
+      "text": "Endocardită posibilă; interpretarea necesită examinarea completă și documentarea focarului.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-154",
+      "page": 154,
+      "title": "K08-154 — Fiziopatologie, definiție și șoc septic",
+      "text": "Glasgow <15, frecvență respiratorie ≥22/min, TAS ≤100 mmHg; cel puțin două indică risc. Un scor mic nu exclude sepsisul.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-155",
+      "page": 155,
+      "title": "K08-155 — SOFA complet, pacienți vulnerabili și originea infecției",
+      "text": "Respirator, coagulare (trombocite), hepatic, cardiovascular, neurologic și renal.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-156",
+      "page": 156,
+      "title": "K08-156 — Stratificarea riscului și situații speciale",
+      "text": "Infecția de la locul injectării se poate disemina la valve, coloană și articulații; endocardita tricuspidiană poate produce emboli septici pulmonari.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-157",
+      "page": 157,
+      "title": "K08-157 — Tratamentul precoce",
+      "text": "O colecție avasculară ori un dispozitiv infectat poate necesita drenaj sau îndepărtare: controlul sursei.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-158",
+      "page": 158,
+      "title": "K08-158 — Microbiologie și controlul sursei",
+      "text": "Nu. Poate identifica un agent în probe negative după antibiotice, dar nu oferă direct sensibilitatea antimicrobiană.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-159",
+      "page": 159,
+      "title": "K08-159 — Administrarea prudentă a antibioticelor",
+      "text": "Necesitatea antibioticului, spectrul, doza, calea, durata, toxicitatea și posibilitatea de dezescaladare după evoluție și documentare.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-160",
+      "page": 160,
+      "title": "K08-160 — OPAT și alergia la antibiotice",
+      "text": "Nu. Trebuie precizate manifestările și cronologia reacției, nu păstrată automat o etichetă de alergie.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-161",
+      "page": 161,
+      "title": "K08-161 — Chimioprofilaxia",
+      "text": "Profilaxia se adresează unui risc și unor contacți/situații definite; schema sa nu reprezintă automat tratamentul bolii active.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-162",
+      "page": 162,
+      "title": "K08-162 — Antibiotice: doze, unități și condiții",
+      "text": "Nu. Leagă expunerea de testarea susceptibilității în ediție; necesită adaptare la focar, greutate, funcție renală și monitorizare.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-163",
+      "page": 163,
+      "title": "K08-163 — Betalactamine: mecanism și diferențe",
+      "text": "Ceftarolina și ceftobiprolul, de generația a cincea. Nu se extrapolează la toate cefalosporinele.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-164",
+      "page": 164,
+      "title": "K08-164 — Inhibitori, chinolone, aminoglicozide și glicopeptide",
+      "text": "Nefrotoxicitate și ototoxicitate auditivă/vestibulară; risc crescut la vârstnici și la asocierea altor medicamente toxice.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-165",
+      "page": 165,
+      "title": "K08-165 — Oxazolidinone, tetracicline, macrolide și polimixine",
+      "text": "Hemogramă săptămânală; expunerea prelungită aduce și risc de neuropatie periferică/optică.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-166",
+      "page": 166,
+      "title": "K08-166 — Alte antibiotice și interacțiuni",
+      "text": "Are efect asemănător amiloridului; riscul contează mai ales în disfuncție renală și asociere cu IECA sau alte medicamente care economisesc K⁺.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-167",
+      "page": 167,
+      "title": "K08-167 — Bacterii multirezistente: mecanisme și tratamente",
+      "text": "Modificarea precursorului D-Ala-D-Ala în D-Ala-D-Lac împiedică legarea eficientă și inhibarea sintezei peretelui.",
+      "status": "beta"
+    },
+    {
+      "sectionId": "kum-08-md-168",
+      "page": 168,
+      "title": "K08-168 — Limitele tratamentului CRE și încheiere",
+      "text": "Heterorezistența poate apărea în cursul tratamentului; sunt necesare reevaluarea clinică și microbiologică.",
+      "status": "beta"
+    }
+  ],
+  "flashcards": [
+    {
+      "id": "kum-08-md-151-card",
+      "sectionId": "kum-08-md-151",
+      "page": 151,
+      "question": "Care sunt cele trei direcții ale evaluării inițiale?",
+      "answer": "Identificarea focarului, aprecierea disfuncției de organ și inițierea tratamentului de urgență.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-152-card",
+      "sectionId": "kum-08-md-152",
+      "page": 152,
+      "question": "Ce modifică probabilitatea etiologică la anamneză?",
+      "answer": "Imunosupresia, antibioticele recente, contactul cu servicii medicale, colonizarea anterioară și călătoriile.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-153-card",
+      "sectionId": "kum-08-md-153",
+      "page": 153,
+      "question": "Ce sugerează un suflu nou sau modificat într-un context infecțios?",
+      "answer": "Endocardită posibilă; interpretarea necesită examinarea completă și documentarea focarului.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-154-card",
+      "sectionId": "kum-08-md-154",
+      "page": 154,
+      "question": "Care sunt criteriile qSOFA și ce semnifică?",
+      "answer": "Glasgow <15, frecvență respiratorie ≥22/min, TAS ≤100 mmHg; cel puțin două indică risc. Un scor mic nu exclude sepsisul.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-155-card",
+      "sectionId": "kum-08-md-155",
+      "page": 155,
+      "question": "Care sunt cele șase sisteme evaluate de SOFA?",
+      "answer": "Respirator, coagulare (trombocite), hepatic, cardiovascular, neurologic și renal.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-156-card",
+      "sectionId": "kum-08-md-156",
+      "page": 156,
+      "question": "De ce se caută focare la distanță la consumatorii de droguri injectabile?",
+      "answer": "Infecția de la locul injectării se poate disemina la valve, coloană și articulații; endocardita tricuspidiană poate produce emboli septici pulmonari.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-157-card",
+      "sectionId": "kum-08-md-157",
+      "page": 157,
+      "question": "De ce antibioticul singur poate fi insuficient?",
+      "answer": "O colecție avasculară ori un dispozitiv infectat poate necesita drenaj sau îndepărtare: controlul sursei.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-158-card",
+      "sectionId": "kum-08-md-158",
+      "page": 158,
+      "question": "PCR 16S înlocuiește antibiograma?",
+      "answer": "Nu. Poate identifica un agent în probe negative după antibiotice, dar nu oferă direct sensibilitatea antimicrobiană.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-159-card",
+      "sectionId": "kum-08-md-159",
+      "page": 159,
+      "question": "Ce se reevaluează în stewardship?",
+      "answer": "Necesitatea antibioticului, spectrul, doza, calea, durata, toxicitatea și posibilitatea de dezescaladare după evoluție și documentare.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-160-card",
+      "sectionId": "kum-08-md-160",
+      "page": 160,
+      "question": "Intoleranța digestivă este automat alergie la antibiotic?",
+      "answer": "Nu. Trebuie precizate manifestările și cronologia reacției, nu păstrată automat o etichetă de alergie.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-161-card",
+      "sectionId": "kum-08-md-161",
+      "page": 161,
+      "question": "De ce se separă chimioprofilaxia de tratamentul infecției?",
+      "answer": "Profilaxia se adresează unui risc și unor contacți/situații definite; schema sa nu reprezintă automat tratamentul bolii active.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-162-card",
+      "sectionId": "kum-08-md-162",
+      "page": 162,
+      "question": "Tabelul 8.8 este un ghid complet de prescriere?",
+      "answer": "Nu. Leagă expunerea de testarea susceptibilității în ediție; necesită adaptare la focar, greutate, funcție renală și monitorizare.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-163-card",
+      "sectionId": "kum-08-md-163",
+      "page": 163,
+      "question": "Care sunt excepțiile anti-MRSA dintre cefalosporine, conform erratei?",
+      "answer": "Ceftarolina și ceftobiprolul, de generația a cincea. Nu se extrapolează la toate cefalosporinele.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-164-card",
+      "sectionId": "kum-08-md-164",
+      "page": 164,
+      "question": "Ce toxicități majore trebuie urmărite la aminoglicozide?",
+      "answer": "Nefrotoxicitate și ototoxicitate auditivă/vestibulară; risc crescut la vârstnici și la asocierea altor medicamente toxice.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-165-card",
+      "sectionId": "kum-08-md-165",
+      "page": 165,
+      "question": "Ce monitorizare hematologică este descrisă pentru linezolid?",
+      "answer": "Hemogramă săptămânală; expunerea prelungită aduce și risc de neuropatie periferică/optică.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-166-card",
+      "sectionId": "kum-08-md-166",
+      "page": 166,
+      "question": "De ce trimetoprimul poate crește potasiul?",
+      "answer": "Are efect asemănător amiloridului; riscul contează mai ales în disfuncție renală și asociere cu IECA sau alte medicamente care economisesc K⁺.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-167-card",
+      "sectionId": "kum-08-md-167",
+      "page": 167,
+      "question": "Cum rezistă VRE la glicopeptide?",
+      "answer": "Modificarea precursorului D-Ala-D-Ala în D-Ala-D-Lac împiedică legarea eficientă și inhibarea sintezei peretelui.",
+      "status": "beta"
+    },
+    {
+      "id": "kum-08-md-168-card",
+      "sectionId": "kum-08-md-168",
+      "page": 168,
+      "question": "De ce un rezultat inițial de susceptibilitate nu încheie supravegherea CRE?",
+      "answer": "Heterorezistența poate apărea în cursul tratamentului; sunt necesare reevaluarea clinică și microbiologică.",
+      "status": "beta"
+    }
+  ]
+}

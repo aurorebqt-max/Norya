@@ -1,14 +1,14 @@
 import { Tabs, router, usePathname } from "expo-router";
-import { View, Pressable, useWindowDimensions } from "react-native";
+import { View, Pressable, ScrollView, useWindowDimensions } from "react-native";
 import { Icon, IconName, Txt, s } from "../../src/components/ui";
 import { colors as c } from "../../src/design/theme";
 import { usePreparation } from "../../src/state/PreparationProvider";
 const links: { name: string; title: string; icon: IconName }[] = [
   { name: "index", title: "Accueil", icon: "grid-outline" },
-  { name: "calendar", title: "Calendrier", icon: "calendar-outline" },
+  { name: "calendar", title: "Progression", icon: "stats-chart-outline" },
   { name: "library", title: "Bibliothèque", icon: "book-outline" },
   { name: "practice", title: "Entraînement", icon: "flash-outline" },
-  { name: "coach", title: "Coach Norya", icon: "sparkles-outline" },
+  { name: "coach", title: "Espace personnel", icon: "person-circle-outline" },
 ];
 export default function Layout() {
   const wide = useWindowDimensions().width >= 1100;
@@ -20,14 +20,17 @@ export default function Layout() {
         <View
           style={{
             width: 230,
+            flexShrink: 0,
             backgroundColor: c.paper,
-            padding: 25,
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 12,
             borderRightWidth: 1,
             borderColor: c.line,
-            gap: 26,
+            minHeight: 0,
           }}
         >
-          <View style={[s.row, { paddingVertical: 10 }]}>
+          <View style={[s.row, { paddingVertical: 10, marginBottom: 12 }]}>
             <View style={[s.iconBox, { backgroundColor: c.primary }]}>
               <Icon name="leaf" color="white" />
             </View>
@@ -38,84 +41,59 @@ export default function Layout() {
           <Txt size={10} color={c.muted} style={{ letterSpacing: 2 }}>
             VOTRE ESPACE
           </Txt>
-          <View style={{ flex: 1, gap: 8 }}>
-            {links.map((l) => (
-              <Pressable
-                key={l.name}
-                onPress={() =>
-                  router.navigate(
-                    l.name === "index" ? "/" : (("/" + l.name) as any),
-                  )
-                }
-                style={[
-                  s.row,
-                  {
-                    padding: 14,
-                    borderRadius: 13,
-                    backgroundColor:
-                      path === (l.name === "index" ? "/" : "/" + l.name)
-                        ? c.mint
-                        : "transparent",
-                  },
-                ]}
-              >
-                <Icon name={l.icon} size={20} />
-                <Txt size={14}>{l.title}</Txt>
-              </Pressable>
-            ))}
+          <ScrollView
+            style={{ flex: 1, minHeight: 0, marginTop: 8 }}
+            contentContainerStyle={{ gap: 4, paddingBottom: 12 }}
+            showsVerticalScrollIndicator
+          >
+            {links.filter((l) => l.name !== "coach").map((l) => {
+              const activePath = l.name === "index" ? "/" : `/${l.name}`;
+              return (
+                <Pressable
+                  key={l.name}
+                  onPress={() =>
+                    router.navigate(
+                      l.name === "index" ? "/" : (activePath as any),
+                    )
+                  }
+                  style={[
+                    s.row,
+                    {
+                      padding: 11,
+                      borderRadius: 13,
+                      backgroundColor: path === activePath ? c.mint : "transparent",
+                    },
+                  ]}
+                >
+                  <Icon name={l.icon} size={20} />
+                  <Txt size={14} numberOfLines={1} style={{ flex: 1 }}>
+                    {l.title}
+                  </Txt>
+                </Pressable>
+              );
+            })}
             <View
-              style={{ height: 1, backgroundColor: c.line, marginVertical: 18 }}
+              style={{ height: 1, backgroundColor: c.line, marginVertical: 12 }}
             />
             {[
+              { title: "Calendrier", path: "/schedule", icon: "calendar-outline" },
+              { title: "Coach Norya", path: "/mentor", icon: "sparkles-outline" },
+              { title: "Écoute des cours", path: "/podcasts", icon: "headset-outline" },
               { title: "Mes Decks", path: "/flashcards", icon: "albums-outline" },
-              { title: "Podcasts", path: "/podcasts", icon: "headset-outline" },
-              {
-                title: "Carnet d’erreurs",
-                path: "/errors",
-                icon: "layers-outline",
-              },
-              {
-                title: "Ma progression",
-                path: "/progress",
-                icon: "stats-chart-outline",
-              },
-              { title: "Référentiel privé", path: "/references", icon: "lock-closed-outline" },
+              { title: "Carnet d’erreurs", path: "/errors", icon: "layers-outline" },
             ].map((l) => (
               <Pressable
                 key={l.path}
                 onPress={() => router.push(l.path as any)}
-                style={[s.row, { padding: 14 }]}
+                style={[s.row, { padding: 11, borderRadius: 13 }]}
               >
                 <Icon name={l.icon as IconName} size={20} />
-                <Txt size={14}>{l.title}</Txt>
+                <Txt size={14} numberOfLines={1} style={{ flex: 1 }}>
+                  {l.title}
+                </Txt>
               </Pressable>
             ))}
-          </View>
-          <View
-            style={{
-              backgroundColor: c.mint,
-              borderRadius: 18,
-              padding: 16,
-              gap: 10,
-            }}
-          >
-            <Icon name="sparkles-outline" color={c.primary} />
-            <Txt bold>Un peu chaque jour, beaucoup à l’arrivée.</Txt>
-            <Txt size={12} color={c.muted}>
-              Votre avenir se construit ici.
-            </Txt>
-          </View>
-          <Pressable onPress={() => router.push("/profile")} style={s.row}>
-            <View style={[s.iconBox, { backgroundColor: c.peach }]}>
-              <Txt bold>{profile.name.charAt(0) || "N"}</Txt>
-            </View>
-            <View>
-              <Txt bold>{profile.name}</Txt>
-              <Txt size={12} color={c.muted}>
-                {profile.exam} • {profile.year}
-              </Txt>
-            </View>
-          </Pressable>
+          </ScrollView>
         </View>
       )}
       <View style={{ flex: 1 }}>
@@ -144,7 +122,7 @@ export default function Layout() {
               }}
             >
               <Txt size={11} color={c.primary}>
-                Rezidențiat 2026
+                Rezidențiat · Medicină
               </Txt>
             </View>
             <Pressable

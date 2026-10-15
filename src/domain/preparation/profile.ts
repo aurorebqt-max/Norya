@@ -1,5 +1,6 @@
 import type { PreparationProfile, Day } from "./types";
 import { addDays, daysBetween, isDay } from "./dates";
+export const AUTOMATIC_DAILY_CAPACITY_MINUTES = 240;
 export const WEEKDAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 export function examDay(profile: PreparationProfile): Day {
   return profile.examDate.official?.date ?? profile.examDate.provisional;
@@ -10,6 +11,10 @@ export function deadline(profile: PreparationProfile): Day {
   return profile.firstPassTarget < limit ? profile.firstPassTarget : limit;
 }
 export function weeklyCapacity(profile: PreparationProfile): number {
+  if (!profile.availabilityConfigured)
+    return Array.from({ length: 7 }, (_, day) => day).filter(
+      day => !profile.restDays.includes(day as (typeof profile.restDays)[number]),
+    ).length * AUTOMATIC_DAILY_CAPACITY_MINUTES;
   return profile.weeklyMinutes.reduce(
     (total, minutes, day) =>
       total + (profile.restDays.includes(day as 0) ? 0 : minutes),
@@ -34,12 +39,12 @@ export function createProfile(
     examDate: { provisional },
     specialties: [],
     weeklyMinutes: [120, 120, 120, 120, 120, 0, 0],
+    availabilityConfigured: false,
     restDays: [5, 6],
     startsOn: today,
     firstPassTarget: "",
     timeZone,
     targetPasses: 2,
-    minutesPerPage: 8,
     goal: "Avancer avec régularité",
     constraints: { unavailableDates: [], maxSessionMinutes: 30 },
   };
@@ -59,7 +64,6 @@ export function changeExamYear(
 export function validateProfile(p: PreparationProfile): string[] {
   const problems: string[] = [];
   if (!Number.isInteger(p.targetPasses ?? 2) || (p.targetPasses ?? 2) < 1 || (p.targetPasses ?? 2) > 10) problems.push("Choisissez de 1 à 10 tours.");
-  if (!Number.isFinite(p.minutesPerPage ?? 8) || (p.minutesPerPage ?? 8) < 1 || (p.minutesPerPage ?? 8) > 60) problems.push("Le rythme doit être compris entre 1 et 60 minutes par page.");
   if (isDay(p.startsOn) && isDay(examDay(p)) && p.startsOn >= examDay(p)) problems.push("Le début doit précéder le concours.");
   if (!p.id || !p.name.trim() || p.name.length > 60)
     problems.push("Indiquez un prénom (60 caractères maximum).");

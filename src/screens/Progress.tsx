@@ -17,6 +17,7 @@ import { usePreparation } from "../state/PreparationProvider";
 import { colors as c } from "../design/theme";
 import { addDays, weekday, formatDay } from "../domain/preparation/dates";
 import { emptyProgress } from "../domain/preparation/progress";
+import { romanianLessons } from "../data/romanianLessons";
 const labels = {
   "not-studied": "Non étudié",
   covered: "Parcouru",
@@ -40,6 +41,8 @@ export default function ProgressScreen() {
   const dailyMinutes = week.map((d) =>
     state.events.filter((e) => e.on === d).reduce((n, e) => n + e.minutes, 0),
   );
+  const lessonParts = romanianLessons.reduce((count, lesson) => count + lesson.sections.length, 0);
+  const reviewedLessons = romanianLessons.filter(lesson => lesson.coverage !== 'partial' && lesson.verification !== 'needs-review').length;
   return (
     <Screen
       title="Chaque pas compte"
@@ -113,6 +116,11 @@ export default function ProgressScreen() {
               deuxième(s) passage(s) terminé(s)
             </Txt>
           </Card>
+          <Card>
+            <Txt bold>Contenus pédagogiques Norya</Txt>
+            <Txt>{romanianLessons.length}/{objectives.length} chapitres possèdent du contenu · {lessonParts} parties.</Txt>
+            <Txt size={12} color={c.muted}>{reviewedLessons} chapitre entièrement vérifié à ce jour. Ce ratio de disponibilité des textes ne représente pas la couverture médicale complète du programme.</Txt>
+          </Card>
           <FinalConsolidation />
           <Card>
             <Txt bold size={20}>
@@ -148,8 +156,8 @@ export default function ProgressScreen() {
               ))}
             </View>
             <Txt size={12} color={c.muted}>
-              Minutes réellement enregistrées. Une journée sans saisie reste à
-              zéro.
+              Durées estimées associées aux parties terminées. Norya ne suit pas
+              le temps passé à l’écran.
             </Txt>
           </Card>
         </>
@@ -177,7 +185,7 @@ export default function ProgressScreen() {
                     subtitle={
                       labels[(state.progress[o.id] ?? emptyProgress()).status]
                     }
-                    href={{ pathname: "/study", params: { objectiveId: o.id } }}
+                    href={{ pathname: "/chapter", params: { id: o.id } }}
                   />
                 ))}
               </Card>
@@ -209,8 +217,8 @@ export default function ProgressScreen() {
               }
               icon="checkmark-circle-outline"
               href={{
-                pathname: "/study",
-                params: { objectiveId: e.objectiveId },
+                pathname: "/chapter",
+                params: { id: e.objectiveId },
               }}
             />
           ))}

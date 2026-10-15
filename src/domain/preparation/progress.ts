@@ -8,6 +8,10 @@ import type {
 import { addDays, assertDay } from "./dates";
 import { passProgress } from "./passes";
 export const REVIEW_INTERVALS = [1, 3, 7, 14, 30] as const;
+export function completionPercent(completed: number, total: number) {
+  if (!Number.isFinite(completed) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((completed / total) * 100)));
+}
 export function emptyProgress(): ObjectiveProgress {
   return {
     initialMinutes: 0,

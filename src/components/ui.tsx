@@ -31,16 +31,22 @@ export function Txt({
   size = 15,
   color = c.ink,
   bold = false,
+  selectable = false,
+  numberOfLines,
   style,
 }: {
   children: React.ReactNode;
   size?: number;
   color?: string;
   bold?: boolean;
+  selectable?: boolean;
+  numberOfLines?: number;
   style?: StyleProp<TextStyle>;
 }) {
   return (
     <Text
+      selectable={selectable}
+      numberOfLines={numberOfLines}
       style={[
         {
           fontSize: size,

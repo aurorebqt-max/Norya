@@ -1,94 +1,34 @@
-import { View } from "react-native";
 import { router } from "expo-router";
-import { Screen, Card, Txt, Icon, Button, RowLink, s } from "../components/ui";
-import { colors as c } from "../design/theme";
-const modes = [
-  {
-    id: "questions",
-    title: "Questions isolées",
-    subtitle: "Un objectif, une question à la fois.",
-    icon: "help-circle-outline",
-  },
-  {
-    id: "dossier",
-    title: "Dossiers progressifs",
-    subtitle: "Avancez étape par étape dans un dossier.",
-    icon: "documents-outline",
-  },
-  {
-    id: "lca",
-    title: "Lecture critique d’article",
-    subtitle: "Structurez votre analyse.",
-    icon: "reader-outline",
-  },
-  {
-    id: "examen",
-    title: "Examens blancs",
-    subtitle: "Prenez vos repères avant le jour J.",
-    icon: "timer-outline",
-  },
-] as const;
+import { Screen, Card, Txt, Button, RowLink } from "../components/ui";
+import { questionBank } from "../domain/learning/quiz";
+import { examRules } from "../data/examRules";
+import { historicalRezidentiatCutoffs } from "../data/historicalResults";
+
 export default function Practice() {
   return (
-    <Screen
-      title="À vous de jouer"
-      subtitle="S’entraîner, comprendre, recommencer. C’est ainsi qu’on progresse."
-    >
-      <Card style={{ backgroundColor: c.mint }}>
-        <View style={s.row}>
-          <Icon name="sparkles-outline" color={c.primary} />
-          <Txt bold size={20}>
-            Une séance pour vous
-          </Txt>
-        </View>
-        <Txt>
-          Consolidez vos habitudes de révision avec un entraînement guidé.
-        </Txt>
-        <Button
-          title="Lancer mon entraînement personnalisé"
-          icon="arrow-forward"
-          onPress={() => router.push("/session?mode=personnalise")}
-        />
+    <Screen title="S’entraîner" subtitle="Questions Norya, résultats sauvegardés et erreurs révisables.">
+      <Card>
+        <Txt size={12}>QCM ORIGINAUX NORYA</Txt>
+        <Txt bold size={24}>Une question à la fois, sans chronomètre.</Txt>
+        <Txt>{questionBank.length} questions originales disponibles. Elles sont distinctes des annales officielles ; leurs contenus attendent encore une relecture médicale.</Txt>
+        <Button title="Commencer une séance" icon="arrow-forward" onPress={() => router.push("/quiz")} />
       </Card>
       <Card>
-        <RowLink
-          title="Flashcards de méthode"
-          subtitle="Decks locaux, rappel actif et suivi de vos cartes vues."
-          icon="layers-outline"
-          href="/flashcards"
-        />
-        <Txt size={12} color={c.muted}>
-          Contenu éditorial non clinique · aucune connaissance médicale validée
-          n’est simulée.
-        </Txt>
+        <Txt bold size={20}>Résultats historiques et spécialités</Txt>
+        {historicalRezidentiatCutoffs.length
+          ? <Txt>Des seuils historiques sourcés sont disponibles. Ils décrivent une année passée et ne prédisent pas un rang futur.</Txt>
+          : <Txt>Aucune donnée officielle de classement par score, spécialité et centre n’est actuellement importée et vérifiée. Norya n’affiche donc ni rang estimé ni spécialité prétendument accessible.</Txt>}
       </Card>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
-        {modes.map((x) => (
-          <Card key={x.id} style={{ flexBasis: 300, flexGrow: 1 }}>
-            <RowLink
-              title={x.title}
-              subtitle={x.subtitle}
-              icon={x.icon}
-              href={"/training?mode=" + x.id}
-            />
-            <Txt size={12} color={c.muted}>
-              3 étapes de démonstration · Méthode d’apprentissage
-            </Txt>
-          </Card>
-        ))}
-      </View>
-      <RowLink
-        title="Votre carnet d’erreurs"
-        subtitle="Les points fragiles deviennent des points forts."
-        icon="layers-outline"
-        href="/errors"
-      />
-      <RowLink
-        title="Résultats et historique"
-        subtitle="Retrouvez le travail enregistré dans votre préparation."
-        icon="stats-chart-outline"
-        href="/progress"
-      />
+      <Card>
+        <Txt bold size={20}>Examen blanc</Txt>
+        <Txt>Pas encore disponible : le format de référence exige {examRules.questions} questions vérifiées (dont {examRules.singleCount} simples et {examRules.multipleCount} multiples), ainsi qu’un corrigé et des droits de réutilisation contrôlés. Les {questionBank.length} QCM Norya ne suffisent pas à simuler une épreuve complète.</Txt>
+        <Txt size={12}>Le document ministériel consulté concerne la session 2026 ; son statut d’adoption définitive n’est pas établi par le PDF seul. Le barème de l’entraînement reste provisoire.</Txt>
+      </Card>
+      <Card>
+        <RowLink title="Mes erreurs" subtitle="Questions ratées, historique et échéances locales." icon="layers-outline" href="/errors" />
+        <RowLink title="Mes flashcards" subtitle="Rappels espacés séparés de la validation de lecture." icon="albums-outline" href="/flashcards" />
+        <RowLink title="Ma progression" subtitle="Tours, validations et historique du calendrier." icon="stats-chart-outline" href="/progress" />
+      </Card>
     </Screen>
   );
 }

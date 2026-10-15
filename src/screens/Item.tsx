@@ -30,10 +30,10 @@ export default function Item() {
           <Txt>Cette fiche illustre la structure d’un futur contenu : objectifs pédagogiques, notions essentielles et points de vigilance.</Txt>
           <Txt bold>01 · Poser les repères</Txt>
           <Txt color={c.muted}>Le contenu médical sera intégré après sélection des sources et validation éditoriale.</Txt>
-          {objectives.filter((o) => o.subject === item.subject).map((o) => <RowLink key={o.id} title={o.title} subtitle={`${o.initialMinutes} min · ${state.progress[o.id]?.initialCompletedOn ? "Parcouru" : "Premier passage à terminer"}`} href={{ pathname: "/study", params: { objectiveId: o.id } }} />)}
+          {objectives.filter((o) => o.subject === item.subject).map((o) => <RowLink key={o.id} title={o.title} subtitle={state.progress[o.id]?.initialCompletedOn ? "Parcouru" : "À commencer"} href={{ pathname: "/chapter", params: { id: o.id } }} />)}
           <Button title="Choisir un chapitre du programme" onPress={() => router.push('/library')} />
         </>}
-        {tab === "Approfondir" && <><Txt bold size={22}>Aller plus loin</Txt><Txt>Les explications détaillées, références et recommandations datées prendront place ici. Aucun contenu clinique n’est simulé.</Txt><Button title="Préparer ma méthode avec le coach" secondary onPress={() => router.push("/coach")} /></>}
+        {tab === "Approfondir" && <><Txt bold size={22}>Aller plus loin</Txt><Txt>Les explications détaillées, références et recommandations datées prendront place ici. Aucun contenu clinique n’est simulé.</Txt><Button title="Préparer ma méthode avec le coach" secondary onPress={() => router.push("/mentor")} /></>}
         {tab === "Notions liées" && items.filter((x) => x.id !== item.id).slice(0, 2).map((x) => <RowLink key={x.id} title={x.subject} subtitle="Autre fiche à explorer" href={"/item?id=" + x.id} />)}
         {tab === "Mes annotations" && <><Txt bold>Votre espace pour faire des liens</Txt><TextInput multiline style={[s.input, { minHeight: 160, textAlignVertical: "top" }]} accessibilityLabel="Annotation personnelle" placeholder="Ce que je veux retenir…" value={note} onChangeText={(v) => { setNote(v); setSaved(false); }} /><Button title={saved ? "Annotation enregistrée" : "Enregistrer mon annotation"} onPress={() => void saveNote(id, note).then(() => setSaved(true)).catch(() => setSaved(false))} /><Txt size={12} color={c.muted}>Conservée sur cet appareil.</Txt></>}
       </Card>
@@ -143,7 +143,7 @@ function NephroticSheetView() {
         <Button title={busy ? "Validation…" : validated ? "Premier passage déjà validé" : "Valider le premier passage"} disabled={busy || validated} onPress={() => void complete()} />
         {!!message && <Txt color={c.primary}>{message}</Txt>}
       </Card>
-      {validated && <Card><Txt bold>Votre prochaine étape</Txt><Txt>Les cartes sont disponibles dans Mes Decks. Le mini-test reste facultatif.</Txt><Button title="Réviser les flashcards" onPress={() => router.push("/flashcards")} /><Button title="Faire le mini-test facultatif" secondary onPress={() => router.push("/mini-test")} /><Button title="Continuer le programme" secondary onPress={() => router.replace("/calendar")} /></Card>}
+      {validated && <Card><Txt bold>Votre prochaine étape</Txt><Txt>Les cartes sont disponibles dans Mes Decks. Le mini-test reste facultatif.</Txt><Button title="Réviser les flashcards" onPress={() => router.push("/flashcards")} /><Button title="Faire le mini-test facultatif" secondary onPress={() => router.push("/mini-test")} /><Button title="Continuer le programme" secondary onPress={() => router.replace("/schedule")} /></Card>}
       <Card><Txt bold>Sources et prudence</Txt><Txt size={13}>Référence publique de travail : KDIGO 2021. Les seuils et conduites individuelles doivent être vérifiés par un professionnel avant diffusion.</Txt><Button title="Voir les flashcards débloquées" secondary onPress={() => router.push("/flashcards")} /></Card>
     </Screen>
   );

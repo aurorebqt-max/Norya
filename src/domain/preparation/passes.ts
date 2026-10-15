@@ -1,4 +1,5 @@
 import type { Objective, ObjectiveProgress, PreparationProfile } from './types';
+export const PASS_WORK_MINUTES_PER_PAGE = 8;
 export function passProgress(p: ObjectiveProgress | undefined, pass: number) {
   if (p?.passes?.[pass]) return p.passes[pass];
   if (pass === 1) return { minutes: p?.initialMinutes ?? 0, completedOn: p?.initialCompletedOn };
@@ -6,7 +7,7 @@ export function passProgress(p: ObjectiveProgress | undefined, pass: number) {
   return { minutes: 0, completedOn: undefined };
 }
 export function passMinutes(o: Objective, profile: PreparationProfile, pass: number) {
-  const first = o.pages ? o.pages * (profile.minutesPerPage ?? 8) : o.initialMinutes;
+  const first = o.pages ? o.pages * PASS_WORK_MINUTES_PER_PAGE : o.initialMinutes;
   return Math.max(1, Math.ceil(first * (pass === 1 ? 1 : pass === 2 ? .65 : .4)));
 }
 export function passRemaining(o: Objective, p: ObjectiveProgress | undefined, profile: PreparationProfile, pass: number) {

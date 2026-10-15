@@ -1,0 +1,2423 @@
+{
+  "notice": "Archive des anciennes données de cours avant import Markdown. Jamais une source médicale pour les nouveaux textes.",
+  "lessons": [
+    {
+      "id": "norya-rebuild-kum-08-v2",
+      "version": "2.0.0",
+      "updatedOn": "2026-10-11",
+      "verification": "needs-review",
+      "coverage": "partial",
+      "chapterId": "kum-08",
+      "title": {
+        "ro": "Sepsisul și tratamentul infecțiilor bacteriene",
+        "fr": "Sepsis et traitement des infections bactériennes"
+      },
+      "status": "Reconstrucție originală, în ordinea titlurilor și subsecțiunilor Kumar, pagini imprimées 151–168 (PDF 174–191), după extracție integrală și inspecție vizuală a tuturor paginilor. Cadranul de doze 8.8 este examinat dar nu transcris/validat rând cu rând; erratumul nu este confirmat pentru ediție; relectura medicală umană nu a fost efectuată. Cursul rămâne parțial.",
+      "sections": [
+        {
+          "id": "kum-08-v2-clinical-skills",
+          "title": {
+            "ro": "Abilități clinice în infecții și sepsis",
+            "fr": "Compétences cliniques en infection et sepsis"
+          },
+          "pages": "151",
+          "sourcePdfPages": "174",
+          "text": {
+            "ro": "Capitolul începe prin a plasa sepsisul în practica de urgență: poate apărea atât la prezentarea în serviciul de urgență, cât și în timpul unei internări medicale sau chirurgicale. Cazurile complicate pot necesita terapie intensivă, iar infecționistul poate coordona infecțiile complexe, diseminate și tratamentul antibiotic parenteral în ambulatoriu. Competențele urmărite sunt recunoașterea, inițierea promptă a măsurilor Sepsis Six, identificarea complicațiilor și alegerea responsabilă a antimicrobienelor.",
+            "fr": "Le chapitre situe d’abord le sepsis dans la pratique urgente : il peut être présent dès l’arrivée aux urgences ou survenir pendant une hospitalisation médicale ou chirurgicale. Les formes compliquées peuvent nécessiter les soins intensifs ; l’infectiologue peut coordonner les infections complexes ou disséminées et l’antibiothérapie parentérale ambulatoire. Les compétences visées sont le repérage, le démarrage rapide des mesures Sepsis Six, l’identification des complications et l’usage raisonné des antimicrobiens."
+          },
+          "express": {
+            "ro": "Repérer le sepsis, agir sans retard, reconnaître les complications et choisir les antibiotiques avec discernement.",
+            "fr": "Reconnaître le sepsis, agir rapidement, repérer les complications et raisonner l’antibiothérapie."
+          }
+        },
+        {
+          "id": "kum-08-v2-anamnesis",
+          "title": {
+            "ro": "Anamneza orientată spre infecție",
+            "fr": "Anamnèse orientée vers l’infection"
+          },
+          "pages": "151–152",
+          "sourcePdfPages": "174–175",
+          "text": {
+            "ro": "Precizează durata și evoluția simptomelor sistemice — febră, frisoane, rigiditate, indispoziție, confuzie sau vărsături — apoi caută simptome care localizează focarul: tuse, spută și dispnee pentru torace; disurie, incontinență ori durere de flanc pentru tractul urinar; cefalee și meningism pentru sistemul nervos central; durere în abdomenul superior, icter și vărsături pentru căile biliare; celulită și durere pentru piele și țesuturile moi. Întreabă despre imunosupresie (inclusiv diabet, asplenie și HIV), sepsis anterior, tratamente imunosupresoare sau antibiotice recente, contacte recente cu serviciile medicale, germeni rezistenți anterior și călătorii.",
+            "fr": "Précisez la durée et l’évolution des symptômes systémiques — fièvre, frissons, raideur, malaise, confusion ou vomissements — puis recherchez des signes localisateurs : toux, expectoration et dyspnée pour le thorax ; dysurie, incontinence ou douleur lombaire pour les voies urinaires ; céphalée et méningisme pour le système nerveux central ; douleur abdominale haute, ictère et vomissements pour les voies biliaires ; cellulite et douleur pour la peau et les tissus mous. Recherchez immunodépression (dont diabète, asplénie et VIH), sepsis antérieur, traitements immunosuppresseurs ou antibiotiques récents, contacts avec les soins, bactéries résistantes connues et voyages."
+          },
+          "express": {
+            "ro": "Durée et symptômes systémiques, foyer probable, vulnérabilités, antibiotiques/soins récents, résistances et voyages.",
+            "fr": "Durée, symptômes, foyer, vulnérabilités, expositions aux soins/antibiotiques, résistances et voyages."
+          }
+        },
+        {
+          "id": "kum-08-v2-examination",
+          "title": {
+            "ro": "Examen obiectiv și căutarea focarului",
+            "fr": "Examen clinique et recherche du foyer"
+          },
+          "pages": "153",
+          "sourcePdfPages": "176",
+          "text": {
+            "ro": "Examinarea trebuie să fie sistematică atunci când sursa nu este evidentă. Urmărește temperatura, tahipneea ca semn de deteriorare, tahicardia, hipotensiunea și hipoxia; evaluează aspectul general, tegumentele, pulsul și perfuzia periferică. Examinează toracele și spatele, sistemul nervos central, jugularele și cordul, dispozitivele intravasculare, abdomenul, regiunea genitală, picioarele și toate extremitățile. Caută meningism, consolidare, sensibilitate vertebrală ori de flanc, suflu nou, secreție sau indurație la cateter, peritonită, sensibilitate abdominală localizată, ulcer infectat, celulită, fasceită necrozantă și articulație tumefiată. Figura 8.1 este o hartă clinică orientativă, nu o listă exhaustivă.",
+            "fr": "L’examen doit être systématique lorsque le foyer n’est pas évident. Suivez température, tachypnée — signe de détérioration —, tachycardie, hypotension et hypoxie ; évaluez l’état général, la peau, le pouls et la perfusion périphérique. Examinez thorax et dos, système nerveux central, jugulaires et cœur, dispositifs intravasculaires, abdomen, région génitale, pieds et extrémités. Recherchez méningisme, condensation, douleur rachidienne ou lombaire, souffle nouveau, écoulement ou induration au cathéter, péritonite, douleur abdominale localisée, ulcère infecté, cellulite, fasciite nécrosante et articulation tuméfiée. La figure 8.1 est une carte d’orientation, non une liste exhaustive."
+          },
+          "express": {
+            "ro": "Examen complet guidé par l’anatomie : constantes, perfusion, cœur/poumons, abdomen, peau, dispositifs, articulations et SNC.",
+            "fr": "Examen systématique orienté par les foyers : constantes, perfusion, organes, peau, dispositifs et articulations."
+          }
+        },
+        {
+          "id": "kum-08-v2-introduction",
+          "title": {
+            "ro": "Introducere",
+            "fr": "Introduction"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "Autorii descriu sepsisul ca o complicație severă a infecției, produsă când răspunsul imun inadecvat generează disfuncție de organ. Disfuncția multiplă de organ asociată șocului septic este mecanismul fiziopatologic terminal al decesului prin infecție. În caseta de deschidere a ediției sunt citate estimări globale de 49 de milioane de cazuri și 11 milioane de decese anual; acestea sunt datele raportate de manual, nu o actualizare epidemiologică independentă.",
+            "fr": "Les auteurs décrivent le sepsis comme une complication grave de l’infection, dans laquelle une réponse immunitaire inadéquate entraîne une défaillance d’organe. La défaillance multiviscérale du choc septique constitue le mécanisme physiopathologique terminal du décès infectieux. L’encadré introductif de l’édition cite 49 millions de cas et 11 millions de décès par an dans le monde ; ce sont les chiffres rapportés par le manuel, non une actualisation épidémiologique indépendante."
+          },
+          "express": {
+            "ro": "Réponse immunitaire inadaptée à l’infection → défaillance d’organe, parfois multiviscérale.",
+            "fr": "Une réponse immunitaire inadéquate à l’infection peut entraîner une défaillance multiviscérale."
+          }
+        },
+        {
+          "id": "kum-08-v2-pathophysiology",
+          "title": {
+            "ro": "Fiziopatologie",
+            "fr": "Physiopathologie"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "Componente microbiene bacteriene, fungice sau virale (PAMP) activează imunitatea înnăscută prin receptori Toll-like și lectină de tip C de suprafață, precum și receptori NOD-like și RIG-I-like intracelulari. Macrofagele, monocitele, granulocitele, celulele NK și dendritice participă la răspuns. Semnalizarea induce TNF-α, IL‑1 și IL‑6, proteine de fază acută (complement, fibrinogen și CRP), microparticule pro-oxidante/procoagulante și capcane extracelulare neutrofile (NET). Împreună cu factorul tisular, acestea favorizează imunotromboza: microbii sunt capturați în microtrombi, care recrutează și activează leucocite. Răspunsul local poate controla infecția, dar activarea excesivă produce leziune a gazdei, disfuncție mitocondrială cu producție redusă de ATP, activare difuză a complementului, permeabilitate vasculară crescută, coagulare intravasculară diseminată și hipoperfuzie microvasculară. Catabolismul poate întreține acest cerc vicios.",
+            "fr": "Des composants microbiens bactériens, fongiques ou viraux (PAMP) activent l’immunité innée via les récepteurs Toll-like et lectine C de surface, ainsi que NOD-like et RIG-I-like intracellulaires. Macrophages, monocytes, granulocytes, cellules NK et dendritiques participent à la réponse. La signalisation induit TNF-α, IL‑1 et IL‑6, protéines de phase aiguë (complément, fibrinogène, CRP), microparticules pro-oxydantes/procoagulantes et pièges extracellulaires des neutrophiles (NET). Avec le facteur tissulaire, ces éléments favorisent l’immunothrombose : les microbes sont piégés dans des microthrombi qui recrutent et activent des leucocytes. Une réponse locale peut contrôler l’infection ; sa dérégulation lèse l’hôte, altère les mitochondries et la production d’ATP, active diffusément complément et coagulation, augmente la perméabilité vasculaire et détériore la perfusion microvasculaire. Le catabolisme peut entretenir ce cercle vicieux."
+          },
+          "express": {
+            "ro": "PAMP → immunité innée/cytokines/NET et microthrombi ; dérégulation → fuite capillaire, hypoperfusion et atteinte d’organe.",
+            "fr": "PAMP activent inflammation et immunothrombose ; leur dérégulation provoque fuite capillaire, hypoperfusion et défaillance."
+          }
+        },
+        {
+          "id": "kum-08-v2-organ-dysfunction",
+          "title": {
+            "ro": "Disfuncția de organ",
+            "fr": "Défaillance d’organe"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "Disfuncțiile se potențează reciproc și dezechilibrează homeostazia. După repleție, debitul cardiac crește la mulți pacienți, dar sindromul și acidoza pot deprima contractilitatea. Vasoplegia reduce rezistența periferică; extravazarea plasmei și proteinelor produce edem și reduce livrarea oxigenului celular. Leziunea pulmonară poate evolua spre SDRA; afectarea epiteliului intestinal contribuie la malabsorbție și translocare bacteriană; insuficiența renală acută este asociată cu mortalitate crescută; encefalopatia septică variază de la somnolență/confuzie la comă.",
+            "fr": "Les défaillances s’aggravent mutuellement et déséquilibrent l’homéostasie. Après remplissage, le débit cardiaque augmente chez beaucoup de patients, mais le syndrome et l’acidose peuvent déprimer la contractilité. La vasoplégie réduit les résistances périphériques ; l’extravasation de plasma et de protéines crée un œdème et diminue l’apport d’oxygène aux cellules. L’atteinte pulmonaire peut évoluer vers le SDRA ; la lésion épithéliale intestinale contribue à la malabsorption et à la translocation bactérienne ; l’insuffisance rénale aiguë est associée à une mortalité accrue ; l’encéphalopathie septique va de la somnolence/confusion au coma."
+          },
+          "express": {
+            "ro": "Atteinte interconnectée : cardiocirculatoire, pulmonaire, intestinale, rénale et neurologique.",
+            "fr": "Les défaillances circulatoire, pulmonaire, digestive, rénale et cérébrale interagissent."
+          }
+        },
+        {
+          "id": "kum-08-v2-sepsis3",
+          "title": {
+            "ro": "Definiția Sepsis-3",
+            "fr": "Définition Sepsis-3"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "Niciun biomarker unic nu stabilește diagnosticul. După definițiile SIRS din 1991 și revizuirea din 2001, consensul Sepsis-3 din 2016 definește sepsisul ca disfuncție de organ amenințătoare de viață, provocată de răspunsul anormal al gazdei la infecție. SIRS nu mai definește sepsisul, iar termenul nu trebuie folosit pentru o infecție simplă — de exemplu, „urosepsis” pentru orice ITU poate fi înșelător. În terapie intensivă, o creștere acută SOFA de cel puțin 2 puncte față de nivelul inițial indică disfuncție de organ în contextul infecției.",
+            "fr": "Aucun biomarqueur isolé ne pose le diagnostic. Après les critères SIRS de 1991 et leur révision de 2001, le consensus Sepsis-3 de 2016 définit le sepsis comme une défaillance d’organe menaçant la vie due à une réponse anormale de l’hôte à l’infection. Le SIRS ne définit plus le sepsis et le terme ne doit pas désigner une infection simple — par exemple, « urosepsis » pour toute infection urinaire est trompeur. En soins intensifs, une hausse aiguë du SOFA d’au moins 2 points par rapport au niveau initial indique une défaillance d’organe dans le contexte infectieux."
+          },
+          "express": {
+            "ro": "Définition Sepsis-3 : infection + réponse dérégulée de l’hôte + défaillance d’organe ; SIRS seul ne suffit pas.",
+            "fr": "Sepsis-3 associe infection et défaillance d’organe due à une réponse dérégulée ; le SIRS ne suffit pas."
+          }
+        },
+        {
+          "id": "kum-08-v2-septic-shock",
+          "title": {
+            "ro": "Șocul septic",
+            "fr": "Choc septique"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "Șocul septic desemnează sepsisul cu disfuncție circulatorie și metabolică asociată unui risc de deces semnificativ crescut. Criteriile clinice Sepsis-3 prezentate în manual sunt necesitatea vasopresorului pentru menținerea presiunii arteriale medii (PAM) la cel puțin 65 mmHg și lactat seric peste 2 mmol/L, în pofida resuscitării volemice adecvate. Lactatul sau hipotensiunea luate izolat nu înlocuiesc această asociere contextuală.",
+            "fr": "Le choc septique désigne un sepsis avec dysfonction circulatoire et métabolique, associé à un risque de décès nettement accru. Les critères cliniques Sepsis-3 du manuel sont le besoin d’un vasopresseur pour maintenir une pression artérielle moyenne (PAM) d’au moins 65 mmHg et un lactate sérique supérieur à 2 mmol/L malgré un remplissage adéquat. Lactate ou hypotension isolés ne remplacent pas cette association contextuelle."
+          },
+          "express": {
+            "ro": "Vasopresseur pour PAM ≥65 mmHg + lactate >2 mmol/L malgré remplissage adéquat.",
+            "fr": "Choc septique : vasopresseur pour PAM ≥65 et lactate >2 malgré remplissage adéquat."
+          }
+        },
+        {
+          "id": "kum-08-v2-recognition",
+          "title": {
+            "ro": "Recunoașterea sepsisului și instrumentele de risc",
+            "fr": "Reconnaître le sepsis et utiliser les outils de risque"
+          },
+          "pages": "154",
+          "sourcePdfPages": "177",
+          "text": {
+            "ro": "qSOFA a fost propus ca instrument rapid de stratificare prognostică pentru pacientul cu infecție. Este pozitiv dacă sunt prezente cel puțin două dintre: Glasgow <15, frecvență respiratorie ≥22/min și tensiune sistolică ≤100 mmHg. În Regatul Unit, NEWS2 ≥5 este prezentat ca prag de risc crescut; nici NEWS2, nici qSOFA nu diagnostichează sau exclud sepsisul, ci indică necesitatea evaluării. Pragurile de recunoaștere din acest capitol sunt cele ale ediției și ale surselor sale, nu reguli universale actualizate.",
+            "fr": "Le qSOFA a été proposé comme outil rapide de stratification pronostique chez le patient infecté. Il est positif lorsque deux critères au moins sont présents : Glasgow <15, fréquence respiratoire ≥22/min et pression systolique ≤100 mmHg. Au Royaume-Uni, NEWS2 ≥5 est présenté comme seuil de risque élevé ; ni NEWS2 ni qSOFA ne diagnostiquent ou n’excluent le sepsis : ils signalent le besoin d’évaluer. Les seuils de ce chapitre sont ceux de l’édition et de ses sources, non des règles universelles actualisées."
+          },
+          "express": {
+            "ro": "qSOFA ≥2/3 est un signal de risque, pas un test diagnostique ; NEWS2 ≥5 est le repère britannique cité.",
+            "fr": "qSOFA ≥2/3 signale un risque, sans poser le diagnostic ; NEWS2 ≥5 est le repère britannique cité."
+          }
+        },
+        {
+          "id": "kum-08-v2-sofa",
+          "title": {
+            "ro": "Scorul SOFA și grila din Cadranul 8.2",
+            "fr": "Score SOFA et grille de l’encadré 8.2"
+          },
+          "pages": "155",
+          "sourcePdfPages": "178",
+          "text": {
+            "ro": "Cadranul 8.2 împarte evaluarea în șase domenii, scorate de la 0 la 4: raportul PaO₂/FiO₂ (kPa), trombocite (×10⁹/L), bilirubină (µmol/L), suport cardiovascular, Glasgow și funcția renală (creatinină µmol/L și diureză). Grila imprimă, între altele, pragurile PaO₂/FiO₂ <53,3, <40, <26,7 și <13,3 kPa (ultimele două niveluri cu ventilație mecanică); trombocite ≥150, <150, <100, <50 și <20; bilirubină <20, 20–32, 33–101, 102–204 și >204; Glasgow 15, 13–14, 10–12, 6–9 și <6; creatinină <110, 110–170, 171–299, 300–440 și >440. Categoriile cardiovasculare se bazează pe PAM și niveluri/droguri vasoactive. Pentru diureză, textul tabelului include <500 ml/zi și <200 ml/zi la scorurile înalte. Aceste limite reproduc grila din ediția examinată; calculul clinic complet trebuie făcut cu tabelul și contextul pacientului, fără inferențe dintr-un singur parametru.",
+            "fr": "L’encadré 8.2 répartit l’évaluation en six domaines, cotés de 0 à 4 : rapport PaO₂/FiO₂ (kPa), plaquettes (×10⁹/L), bilirubine (µmol/L), soutien cardiovasculaire, Glasgow et fonction rénale (créatinine µmol/L et diurèse). La grille imprime notamment PaO₂/FiO₂ <53,3, <40, <26,7 et <13,3 kPa (les deux derniers niveaux avec ventilation mécanique) ; plaquettes ≥150, <150, <100, <50 et <20 ; bilirubine <20, 20–32, 33–101, 102–204 et >204 ; Glasgow 15, 13–14, 10–12, 6–9 et <6 ; créatinine <110, 110–170, 171–299, 300–440 et >440. Les catégories cardiovasculaires reposent sur la PAM et les doses/agents vasoactifs. Pour la diurèse, le tableau indique <500 ml/j et <200 ml/j aux niveaux élevés. Ces seuils reproduisent la grille de l’édition examinée ; utiliser le tableau complet et le contexte clinique, sans inférer le score d’un paramètre isolé."
+          },
+          "express": {
+            "ro": "SOFA : six systèmes, scores 0–4 ; seuils PaO₂/FiO₂, plaquettes, bilirubine, PAM/vasopresseurs, Glasgow et rein.",
+            "fr": "SOFA cote six systèmes de 0 à 4 : respiration, coagulation, foie, circulation, neurologie et rein."
+          }
+        },
+        {
+          "id": "kum-08-v2-risk-groups",
+          "title": {
+            "ro": "Grupele aflate la risc",
+            "fr": "Groupes à risque"
+          },
+          "pages": "154–155",
+          "sourcePdfPages": "177–178",
+          "text": {
+            "ro": "Riscul de progresie depinde de virulență, inocul, sediu, răspunsul gazdei, fond genetic, comorbidități și tratamente. Manualul enumeră vârstnici peste 65 de ani și nou-născuți, antecedente de sepsis, afecțiuni imunosupresoare (HIV, asplenie, ciroză, boli autoimune), imunosupresie iatrogenă inclusiv corticoizi sistemici, dispozitive permanente care traversează barierele, sarcină și dependență de alcool sau droguri intravenoase.",
+            "fr": "Le risque d’évolution dépend de la virulence, de l’inoculum, du foyer, de la réponse de l’hôte, du terrain génétique, des comorbidités et des traitements. Le manuel cite les personnes âgées de plus de 65 ans et les nouveau-nés, un sepsis antérieur, les maladies immunodépressives (VIH, asplénie, cirrhose, maladies auto-immunes), l’immunosuppression iatrogène dont les corticoïdes systémiques, les dispositifs permanents franchissant les barrières, la grossesse et la dépendance à l’alcool ou aux drogues injectables."
+          },
+          "express": {
+            "ro": "Risque accru : extrêmes d’âge, sepsis antérieur, immunodépression, dispositifs, grossesse et certaines dépendances.",
+            "fr": "Repérer terrain, âge, immunodépression, dispositifs et expositions qui augmentent le risque."
+          }
+        },
+        {
+          "id": "kum-08-v2-inpatient-surveillance",
+          "title": {
+            "ro": "Supravegherea intraspitalicească",
+            "fr": "Surveillance à l’hôpital"
+          },
+          "pages": "155",
+          "sourcePdfPages": "178",
+          "text": {
+            "ro": "Pacienții internați au risc mai mare decât cei din comunitate; spitalul trebuie să repereze deteriorarea și să aibă răspuns medical prompt. NEWS2 cuantifică abaterea parametrilor de la normal, iar deteriorarea fiziologică poate preceda stopul cardiac. Pragul local de alarmă nu înlocuiește semnele clinice; un NEWS2 de cel puțin 2 din 5 sau semne îngrijorătoare pot declanșa evaluarea urgentă și comunicarea structurată SBAR. Nu există test binar: clinicianul integrează evoluția, istoricul, leziunea renală acută și lactatul. O valoare mare a lactatului are valoare prognostică și poate semnala disfuncție chiar când pacientul pare temporar stabil; testele point-of-care pot scurta întârzierea.",
+            "fr": "Les patients hospitalisés ont davantage de risque que ceux de la communauté ; l’hôpital doit détecter l’aggravation et permettre une réponse rapide. NEWS2 quantifie l’écart des paramètres à la normale, et une détérioration physiologique peut précéder l’arrêt cardiaque. Le seuil local d’alerte ne remplace pas les signes cliniques ; NEWS2 d’au moins 2 sur 5 ou signes inquiétants peuvent déclencher une évaluation urgente et une transmission SBAR. Il n’existe pas de test binaire : intégrer évolution, antécédents, atteinte rénale aiguë et lactate. Un lactate élevé a une valeur pronostique et peut signaler une défaillance malgré une apparente stabilité ; les tests au point de soins peuvent réduire le délai."
+          },
+          "express": {
+            "ro": "Surveillance dynamique : score d’alerte + jugement clinique, réévaluation rapide, SBAR et lactate interprété dans le contexte.",
+            "fr": "Détecter l’aggravation par la surveillance, les signes cliniques, la réévaluation et le lactate."
+          }
+        },
+        {
+          "id": "kum-08-v2-origin",
+          "title": {
+            "ro": "Originea sepsisului",
+            "fr": "Origine du sepsis"
+          },
+          "pages": "155",
+          "sourcePdfPages": "178",
+          "text": {
+            "ro": "Sepsisul comunitar este definit în capitol ca debut în primele 48 de ore de la internare; cel intraspitalicesc, după 48 de ore. Sepsisul asociat asistenței medicale include pacienți externați în ultimele 30 de zile, persoane din îngrijire cronică și pacienți care accesează tratament ambulator precum hemodializa. Comunitarul poate implica germeni virulenți, adesea susceptibili, cu focar urinar, biliar sau respirator; endocardita și meningita sunt mai rare. Nosocomialul este frecvent asociat dispozitivelor/procedurilor și organismelor mai puțin virulente, dar multirezistente. Profilaxia adecvată reduce unele infecții procedurale; dispozitivele infectate ori obstruate pot necesita îndepărtare ca parte a controlului sursei.",
+            "fr": "Le chapitre définit le sepsis communautaire par un début dans les 48 premières heures d’hospitalisation, et le sepsis nosocomial au-delà de 48 heures. Le sepsis associé aux soins concerne notamment les patients sortis dans les 30 derniers jours, les résidents en soins chroniques et les patients suivis en ambulatoire, par exemple pour hémodialyse. Le sepsis communautaire implique souvent des agents virulents mais sensibles, avec foyer urinaire, biliaire ou respiratoire ; endocardite et méningite sont moins fréquentes. Le sepsis nosocomial est souvent lié aux dispositifs/procédures et à des organismes moins virulents mais multirésistants. La prophylaxie réduit certaines infections procédurales ; un dispositif infecté ou obstrué peut devoir être retiré."
+          },
+          "express": {
+            "ro": "Repères de l’édition : communautaire ≤48 h ; nosocomial >48 h ; tenir compte des soins récents et des dispositifs.",
+            "fr": "Distinguer communauté, soins récents et infection nosocomiale ; rechercher dispositifs et résistances."
+          }
+        },
+        {
+          "id": "kum-08-v2-clinical-picture",
+          "title": {
+            "ro": "Tablou clinic",
+            "fr": "Tableau clinique"
+          },
+          "pages": "156",
+          "sourcePdfPages": "179",
+          "text": {
+            "ro": "Manifestările evoluează de la infecție localizată la disfuncție de organ; progresia poate fi lentă sau abruptă în câteva ore. Nu există semn patognomonic. Sunt descrise rigiditate, dispnee, mialgii, vărsături, piele marmorată și stare generală alterată, alături de semnele focarului și răspuns sistemic: tahicardie, tahipnee, hipotensiune, vasodilatație/periferie caldă, oligurie, confuzie și somnolență. Imunodeprimații pot avea semne inflamatorii discrete. Analizele pot arăta leucocitoză și CRP crescută, creatinină/bilirubină crescute, trombocitopenie; radiografia poate arăta infiltrate, ECG aritmii, iar imagistica poate localiza sursa.",
+            "fr": "Les manifestations évoluent d’une infection localisée vers une défaillance d’organe ; la progression peut être lente ou brutale en quelques heures. Aucun signe n’est pathognomonique. Sont décrits frissons, dyspnée, myalgies, vomissements, marbrures et altération générale, avec signes du foyer et réponse systémique : tachycardie, tachypnée, hypotension, vasodilatation/périphérie chaude, oligurie, confusion et somnolence. Les immunodéprimés peuvent avoir peu de signes inflammatoires. Les examens peuvent montrer leucocytose et CRP élevées, hausse de créatinine/bilirubine, thrombopénie ; la radiographie peut montrer des infiltrats, l’ECG une arythmie, et l’imagerie localiser le foyer."
+          },
+          "express": {
+            "ro": "Continuum local → systémique → défaillance ; associer clinique, biologie, ECG et imagerie selon le foyer.",
+            "fr": "Tableau variable, sans signe unique ; rechercher réponse systémique et défaillances avec les examens adaptés."
+          }
+        },
+        {
+          "id": "kum-08-v2-travel",
+          "title": {
+            "ro": "Sepsis la persoanele întoarse din călătorii",
+            "fr": "Sepsis au retour de voyage"
+          },
+          "pages": "156",
+          "sourcePdfPages": "179",
+          "text": {
+            "ro": "Documentează atent boala, destinațiile, datele și debutul simptomelor. Caută expuneri tropicale precum înțepături de insecte sau înot în apă dulce și întreabă despre profilaxia antimalarică și imunizare. Manualul atrage atenția la febra hemoragică virală în primele 21 de zile după întoarcerea din zonă endemică și MERS-CoV la simptome respiratorii în primele 14 zile. Investigațiile minime menționate includ hemoculturi, screening pentru malarie și analize sanguine de rutină.",
+            "fr": "Documentez précisément la maladie, les destinations, les dates et le début des symptômes. Recherchez les expositions tropicales — piqûres d’insectes ou baignade en eau douce — et interrogez sur prophylaxie antipaludique et immunisation. Le manuel attire l’attention sur la fièvre hémorragique virale dans les 21 jours suivant le retour d’une zone endémique et sur le MERS-CoV en cas de symptômes respiratoires dans les 14 jours. Le bilan minimal cité comprend hémocultures, dépistage du paludisme et analyses sanguines usuelles."
+          },
+          "express": {
+            "ro": "Destination + dates + expositions ; repères de 21 j pour fièvre hémorragique et 14 j pour MERS dans l’édition.",
+            "fr": "Documenter destination, période et expositions ; inclure hémocultures et dépistage du paludisme."
+          }
+        },
+        {
+          "id": "kum-08-v2-injecting-drugs",
+          "title": {
+            "ro": "Sepsis la consumatorii de droguri injectabile",
+            "fr": "Sepsis chez les usagers de drogues injectables"
+          },
+          "pages": "156",
+          "sourcePdfPages": "179",
+          "text": {
+            "ro": "Tromboflebita infectată și abcesele locale la locul injecției sunt focare uzuale. Agenții frecvenți menționați sunt MSSA, MRSA și Streptococcus pyogenes. Diseminarea stafilococică poate afecta valve, coloană și articulații; endocardita tricuspidiană poate produce emboli pulmonari și abcese pulmonare. Pot fi necesare săptămâni de tratament după controlul sursei, precum drenajul colecțiilor ori lavajul articular; pneumonia de aspirație și empiemul sunt favorizate de reflexul de tuse redus și starea de conștiență fluctuantă. Rar, contaminarea soluției cu suc de lămâie este asociată fungemiei și endoftalmitei.",
+            "fr": "La thrombophlébite infectée et les abcès au point d’injection sont des foyers fréquents. Les agents cités sont MSSA, MRSA et Streptococcus pyogenes. La dissémination staphylococcique peut toucher valves, rachis et articulations ; l’endocardite tricuspide peut provoquer embolies et abcès pulmonaires. Plusieurs semaines de traitement peuvent être nécessaires après contrôle du foyer, par drainage ou lavage articulaire ; pneumonie d’aspiration et empyème sont favorisés par une toux diminuée et une conscience fluctuante. Rarement, une solution contaminée par du jus de citron est associée à fongémie et endophtalmie."
+          },
+          "express": {
+            "ro": "Rechercher abcès/thrombophlébite, endocardite et foyers métastatiques ; prévoir contrôle de source et traitement prolongé si complication.",
+            "fr": "Rechercher foyer d’injection et dissémination vers cœur, poumon, os ou articulations."
+          }
+        },
+        {
+          "id": "kum-08-v2-neutropenia",
+          "title": {
+            "ro": "Pacienții neutropenici",
+            "fr": "Patients neutropéniques"
+          },
+          "pages": "157",
+          "sourcePdfPages": "180",
+          "text": {
+            "ro": "În context hemato-oncologic, sepsisul survine adesea după chimioterapie. Manualul subliniază riscul de Pseudomonas și menționează ca tratament empiric piperacilină/tazobactam, cu sau fără aminoglicozid. Aceasta este opțiunea raportată de sursa de examen, nu recomandare terapeutică individuală actualizată.",
+            "fr": "En hémato-oncologie, le sepsis survient souvent après chimiothérapie. Le manuel souligne le risque de Pseudomonas et cite comme traitement empirique pipéracilline-tazobactam, avec ou sans aminoside. Il s’agit de l’option rapportée par la source d’examen, non d’une recommandation individuelle actualisée."
+          },
+          "express": {
+            "ro": "Neutropénie après chimiothérapie : risque de Pseudomonas ; le manuel cite pipéracilline-tazobactam ± aminoside.",
+            "fr": "Neutropénie fébrile : tenir compte du risque de Pseudomonas et de la source locale."
+          }
+        },
+        {
+          "id": "kum-08-v2-immobilized",
+          "title": {
+            "ro": "Pacienții imobilizați",
+            "fr": "Patients immobilisés"
+          },
+          "pages": "157",
+          "sourcePdfPages": "180",
+          "text": {
+            "ro": "Pacienții aflați în faza acută pot necesita terapie intensivă. Cateterele venoase centrale, cateterele urinare și sondele endotraheale sunt surse importante de infecție; pachetele de inserție și întreținere reduc riscul de germeni multirezistenți. Prevenirea escarelor implică saltele adecvate și repoziționare periodică. La leziunea medulară, infecția sub nivelul leziunii poate produce semne de disautonomie mai curând decât simptome infecțioase obișnuite.",
+            "fr": "Les patients en phase aiguë peuvent nécessiter les soins intensifs. Cathéters veineux centraux, sondes urinaires et sondes endotrachéales sont des sources importantes d’infection ; les protocoles de pose et d’entretien réduisent le risque de bactéries multirésistantes. La prévention des escarres repose sur un matelas adapté et des changements de position réguliers. En cas de lésion médullaire, une infection située sous la lésion peut provoquer des signes de dysautonomie plutôt que des symptômes infectieux habituels."
+          },
+          "express": {
+            "ro": "Dispositifs, prévention des escarres et signes atypiques de dysautonomie après lésion médullaire.",
+            "fr": "Prévenir les infections liées aux dispositifs et repérer les présentations atypiques."
+          }
+        },
+        {
+          "id": "kum-08-v2-sepsis-six",
+          "title": {
+            "ro": "Tratamentul sepsisului și Sepsis Six",
+            "fr": "Traitement du sepsis et Sepsis Six"
+          },
+          "pages": "157",
+          "sourcePdfPages": "180",
+          "text": {
+            "ro": "Principiul secțiunii este tratamentul imediat al infecției concomitent cu susținerea organelor; pacientul poate necesita terapie intensivă. Caseta 8.4 enumeră șase acțiuni: oxigen pentru SpO₂ >94%, recoltarea hemoculturilor, antibiotic empiric cu spectru larg, administrarea rapidă de lichide, măsurarea lactatului și monitorizarea orară a diurezei/bilanțului hidric. Acestea sunt elementele din caseta ediției, nu un protocol universal ce înlocuiește evaluarea clinică sau ghidurile curente.",
+            "fr": "Le principe est de traiter immédiatement l’infection tout en soutenant les organes ; le patient peut nécessiter les soins intensifs. L’encadré 8.4 énumère six actions : oxygène pour SpO₂ >94 %, hémocultures, antibiotique empirique à large spectre, administration rapide de liquides, mesure du lactate et surveillance horaire de la diurèse/bilan hydrique. Ce sont les éléments de l’encadré de l’édition, non un protocole universel remplaçant l’évaluation clinique ou les recommandations actuelles."
+          },
+          "express": {
+            "ro": "Sepsis Six : oxygène, cultures, antibiotique, liquides, lactate, diurèse/bilan horaires.",
+            "fr": "Six actions initiales : oxygène, hémocultures, antibiotique, liquides, lactate et suivi de la diurèse."
+          }
+        },
+        {
+          "id": "kum-08-v2-surviving-sepsis",
+          "title": {
+            "ro": "Recomandările Surviving Sepsis Campaign",
+            "fr": "Recommandations Surviving Sepsis Campaign"
+          },
+          "pages": "157",
+          "sourcePdfPages": "180",
+          "text": {
+            "ro": "Cadranul 8.5 prezintă recomandările SSC disponibile în ediție: screening organizat la pacienții acuți cu risc ridicat; culturi înaintea antibioticului; antimicrobiene IV în prima oră de la recunoaștere, inițial empirice și largi, apoi de-escaladare după identificarea agentului și susceptibilității, cu evaluare zilnică; diagnostic anatomic rapid și control urgent al sursei; cristaloide ca primă intenție; albumină de luat în considerare când sunt necesare volume mari și evitarea hidroxietil-amidonului. Ghidurile citate sunt din perioada manualului; nu sunt prezentate ca actualizare a conduitei din 2026.",
+            "fr": "L’encadré 8.5 présente les recommandations SSC disponibles dans l’édition : dépistage organisé des patients aigus à haut risque ; cultures avant antibiotiques ; antimicrobiens IV dans l’heure suivant la reconnaissance, d’abord empiriques et larges, puis désescalade après identification et antibiogramme, avec réévaluation quotidienne ; diagnostic anatomique rapide et contrôle urgent du foyer ; cristalloïdes en première intention ; albumine à envisager si grands volumes et éviter l’hydroxyéthylamidon. Les recommandations citées datent de la période du manuel ; elles ne constituent pas une actualisation de la conduite en 2026."
+          },
+          "express": {
+            "ro": "SSC du manuel : dépistage, cultures, antibiotique rapide/désescalade, contrôle du foyer et cristalloïdes.",
+            "fr": "Suivre le cadre de l’édition avec réévaluation quotidienne et contrôle précoce du foyer."
+          }
+        },
+        {
+          "id": "kum-08-v2-fluid-resuscitation",
+          "title": {
+            "ro": "Resuscitarea volemică și lichidele",
+            "fr": "Remplissage vasculaire et fluides"
+          },
+          "pages": "157",
+          "sourcePdfPages": "180",
+          "text": {
+            "ro": "SSC din manual recomandă cel puțin 30 ml/kg de cristaloid în primele trei ore și PAM 65 mmHg, cu continuarea lichidelor ghidată de evaluarea hemodinamică și variabile dinamice. Textul avertizează că bolusurile mari nu sunt benefice tuturor: studii din medii cu resurse reduse au raportat mortalitate crescută în ciuda ameliorării inițiale a perfuziei, posibil prin lipsa suportului efectelor adverse și leziune de reperfuzie. Cadranul favorizează cristaloidele, permite considerarea albuminei la volume mari și recomandă evitarea hidroxietil-amidonului. Volumul și țintele trebuie contextualizate și reevaluate.",
+            "fr": "La SSC du manuel recommande au moins 30 ml/kg de cristalloïdes dans les trois premières heures et une PAM de 65 mmHg, avec poursuite guidée par l’évaluation hémodynamique et des variables dynamiques. Le texte avertit que les grands bolus ne conviennent pas à tous : des études en milieux à ressources limitées ont rapporté une mortalité accrue malgré une amélioration initiale de la perfusion, possiblement par manque de soutien face aux effets indésirables et par lésion de reperfusion. L’encadré privilégie les cristalloïdes, permet d’envisager l’albumine pour de grands volumes et recommande d’éviter l’hydroxyéthylamidon. Volumes et cibles exigent contextualisation et réévaluation."
+          },
+          "express": {
+            "ro": "Repère du manuel : cristalloïdes 30 ml/kg en 3 h ; réévaluer la réponse, la surcharge et le contexte.",
+            "fr": "Le volume initial cité n’est pas universel : mesurer la réponse et réévaluer les risques."
+          }
+        },
+        {
+          "id": "kum-08-v2-antibiotics-and-source",
+          "title": {
+            "ro": "Antibioterapia inițială și controlul sursei",
+            "fr": "Antibiothérapie initiale et contrôle du foyer"
+          },
+          "pages": "157–158",
+          "sourcePdfPages": "180–181",
+          "text": {
+            "ro": "Sursa afirmă că întârzierea antibioticului eficient după instalarea hipotensiunii se asociază cu mortalitate mai mare; studiul retrospectiv citat estimează creșterea riscului cu 7,6% pentru fiecare oră, iar datele ulterioare susțin relația dintre timp și mortalitate. Aceste valori aparțin studiilor citate și nu trebuie transformate într-o predicție individuală. Antibioticul singur nu vindecă un abces profund, o proteză infectată ori un dispozitiv intravascular infectat: poate fi necesară chirurgie sau drenaj percutan. Controlul anatomic prompt al sursei completează tratamentul antimicrobian.",
+            "fr": "La source associe le retard d’un antibiotique actif après l’apparition de l’hypotension à une mortalité accrue ; l’étude rétrospective citée estime une hausse du risque de 7,6 % par heure, et des données ultérieures confirment le lien entre délai et mortalité. Ces chiffres appartiennent aux études citées et ne sont pas une prédiction individuelle. L’antibiotique seul ne guérit pas un abcès profond, une prothèse infectée ou un dispositif intravasculaire contaminé : chirurgie ou drainage percutané peuvent être nécessaires. Le contrôle anatomique rapide du foyer complète l’antibiothérapie."
+          },
+          "express": {
+            "ro": "Antibiothérapie précoce + contrôle anatomique du foyer ; les chiffres d’études ne prédisent pas un cas individuel.",
+            "fr": "Ne pas opposer antibiotiques et contrôle de source : traiter les deux dimensions."
+          }
+        },
+        {
+          "id": "kum-08-v2-cultures",
+          "title": {
+            "ro": "Probe, culturi și investigații microbiologice",
+            "fr": "Prélèvements, cultures et examens microbiologiques"
+          },
+          "pages": "158",
+          "sourcePdfPages": "181",
+          "text": {
+            "ro": "Manualul insistă asupra hemoculturilor înainte de antibiotic, inclusiv în sepsis acut, cu minimum 5 ml în flacoane aerob și anaerob la adult; excepția este suspiciunea de septicemie meningococică, când antibioticul nu se amână. Alte probe — urină din jet mijlociu, LCR, scaun, vârf de cateter și puroi — se aleg după focar și stabilitate. Culturile pure ajută la localizare și susceptibilitate, dar antibioticele prealabile pot negativiza rezultatul; majoritatea rezultatelor devin utile la circa 72 de ore. În infecțiile cronice stabile, probele profunde pot fi preferate înainte de terapia empirică, iar tampoanele superficiale sunt rareori utile. Imagistica poate identifica colecții drenabile.",
+            "fr": "Le manuel insiste sur les hémocultures avant antibiotique, y compris en sepsis aigu, avec au moins 5 ml dans des flacons aérobie et anaérobie chez l’adulte ; exception : suspicion de sepsis méningococcique, sans retarder l’antibiotique. Les autres prélèvements — urine de milieu de jet, LCR, selles, extrémité de cathéter et pus — dépendent du foyer et de la stabilité. Les cultures pures aident à localiser et à déterminer la sensibilité, mais une antibiothérapie préalable peut les rendre négatives ; la plupart des résultats sont exploitables vers 72 heures. Dans les infections chroniques stables, privilégier les prélèvements profonds avant l’empirisme ; les écouvillons superficiels sont rarement utiles. L’imagerie peut trouver une collection à drainer."
+          },
+          "express": {
+            "ro": "Prélèvements avant traitement si cela ne retarde pas l’urgence ; résultats microbiologiques réévalués vers 72 h.",
+            "fr": "Choisir les prélèvements selon le foyer, sans retarder l’antibiotique urgent."
+          }
+        },
+        {
+          "id": "kum-08-v2-molecular-diagnostics",
+          "title": {
+            "ro": "Identificarea moleculară a agenților",
+            "fr": "Identification moléculaire des agents"
+          },
+          "pages": "158",
+          "sourcePdfPages": "181",
+          "text": {
+            "ro": "Culturile rămân standardul descris, dar pot necesita aproximativ 24 de ore pentru pozitivare și 48 de ore pentru identificare fermă și pot fi negative după antibiotic. PCR 16S amplifică și secvențiază regiuni variabile ale genei ribozomale conservate pentru identificarea bacteriilor din țesut/puroi, însă nu oferă antibiogramă; este utilă după expunere la antibiotice. MALDI‑TOF fragmentează proteine într-o matrice și produce un profil spectral specific speciei; uneori poate recunoaște mecanisme de rezistență, inclusiv diferențierea MRSA/MSSA. Caseta 8.6 subliniază că utilizarea tehnologiilor moleculare nu era încă larg răspândită în contextul descris.",
+            "fr": "Les cultures restent la référence décrite, mais peuvent nécessiter environ 24 heures avant positivité et 48 heures pour une identification ferme, et devenir négatives après antibiotiques. La PCR 16S amplifie et séquence des régions variables d’un gène ribosomal conservé pour identifier des bactéries dans tissu/pus, sans fournir d’antibiogramme ; elle est utile après antibiothérapie. MALDI‑TOF fragmente des protéines dans une matrice et produit un profil spectral propre à l’espèce ; il peut parfois reconnaître des mécanismes de résistance, dont différencier MRSA et MSSA. L’encadré 8.6 précise que ces technologies n’étaient pas encore largement répandues dans le contexte décrit."
+          },
+          "express": {
+            "ro": "PCR 16S identifie sans antibiogramme ; MALDI‑TOF identifie par spectre protéique et peut repérer certaines résistances.",
+            "fr": "Méthodes moléculaires plus rapides, mais la PCR 16S ne remplace pas la susceptibilité."
+          }
+        },
+        {
+          "id": "kum-08-v2-antimicrobial-stewardship",
+          "title": {
+            "ro": "Administrarea prudentă a tratamentului antimicrobian",
+            "fr": "Bon usage des antimicrobiens"
+          },
+          "pages": "159",
+          "sourcePdfPages": "182",
+          "text": {
+            "ro": "Stewardship-ul este folosirea antibioticului potrivit pentru boala potrivită, în doza și durata potrivite, pentru a limita rezistența. Obiectivele britanice istorice CQUIN/NHS au urmărit reducerea prescrierii, în special carbapeneme și piperacilină/tazobactam, și revizuirea la 72 de ore; în medicina generală erau urmărite și ciprofloxacina și amoxicilină/clavulanat, cu nitrofurantoină preferată trimetoprimului în anumite ITU joase necomplicate. Aceste ținte reflectă cadrul britanic relatat în carte și nu sunt presupuse a fi standarde românești actuale.",
+            "fr": "Le bon usage consiste à choisir l’antibiotique adapté à la maladie, à la bonne dose et pour la bonne durée, afin de limiter les résistances. Les objectifs historiques britanniques CQUIN/NHS visaient à réduire les prescriptions, notamment carbapénèmes et pipéracilline-tazobactam, et à réévaluer à 72 heures ; en médecine générale, ils concernaient aussi ciprofloxacine et amoxicilline/acide clavulanique, avec nitrofurantoïne préférée au triméthoprime pour certaines infections urinaires basses simples. Ces objectifs reflètent le contexte britannique rapporté par le livre, pas un standard roumain actuel présumé."
+          },
+          "express": {
+            "ro": "Antibiotique, dose et durée adaptés ; les cibles CQUIN citées sont historiques et britanniques.",
+            "fr": "Réévaluer l’utilité, réduire l’exposition inutile et distinguer les politiques nationales."
+          }
+        },
+        {
+          "id": "kum-08-v2-empirical-choice",
+          "title": {
+            "ro": "Înaintea antibioterapiei empirice",
+            "fr": "Avant l’antibiothérapie empirique"
+          },
+          "pages": "159",
+          "sourcePdfPages": "182",
+          "text": {
+            "ro": "Regimul empiric depinde de politica locală și prevalența rezistenței. Localizează poarta de intrare prin anamneză, examen și investigații; consultă culturi/colonizări anterioare, de exemplu ESBL, care pot schimba necesitatea unei carbapeneme. Înainte de prescriere, decide calea, frecvența și durata, monitorizarea toxicității și a concentrațiilor (de exemplu aminoglicozide), ajustarea renală/hepatică, nevoia de terapie adjuvantă în infecția severă cu S. aureus și alternativa la alergia la penicilină.",
+            "fr": "Le régime empirique dépend de la politique locale et de la prévalence des résistances. Localisez la porte d’entrée par anamnèse, examen et investigations ; consultez les cultures/colonisations antérieures, par exemple ESBL, qui peuvent modifier le recours à une carbapénème. Avant prescription, choisissez voie, fréquence et durée, surveillance de toxicité et des concentrations (par exemple aminosides), adaptation rénale/hépatique, éventuel adjuvant dans une infection grave à S. aureus et alternative en cas d’allergie à la pénicilline."
+          },
+          "express": {
+            "ro": "Choix empirique = foyer + résistances locales/antécédents + organes + allergies + paramètres de prescription.",
+            "fr": "Individualiser l’empirisme selon foyer, résistances, fonctions d’organes et allergies."
+          }
+        },
+        {
+          "id": "kum-08-v2-72-hour-review",
+          "title": {
+            "ro": "Antibioterapia după 72 de ore",
+            "fr": "Réévaluation à 72 heures"
+          },
+          "pages": "159",
+          "sourcePdfPages": "182",
+          "text": {
+            "ro": "Când culturile sunt disponibile, capitolul propune cinci decizii: oprire dacă reevaluarea infirmă infecția; trecere la tratament oral/de-escaladare în infecții necomplicate dacă pacientul este stabil și se ameliorează; schimbare pentru focar neașteptat sau rezistență (manualul exemplifică bacteriemia E. coli ESBL cu carbapenemă IV); continuare IV în infecții complicate precum meningită sau artrită septică; ori OPAT pentru pacient selectat. Dacă este posibilă calea orală, spectrul îngust reduce riscul C. difficile și colonizării cu multirezistente, menținând eficacitatea.",
+            "fr": "Lorsque les cultures sont disponibles, le chapitre propose cinq décisions : arrêter si la réévaluation écarte l’infection ; passer à la voie orale/désescalader pour une infection simple si le patient est stable et s’améliore ; modifier en cas de foyer inattendu ou de résistance (le manuel cite une bactériémie à E. coli ESBL traitée par carbapénème IV) ; poursuivre l’IV pour une infection compliquée comme méningite ou arthrite septique ; ou choisir l’OPAT chez un patient sélectionné. Si la voie orale est possible, un spectre étroit réduit le risque de C. difficile et de colonisation multirésistante tout en conservant l’efficacité."
+          },
+          "express": {
+            "ro": "À 72 h : arrêter, désescalader/oral, changer, poursuivre IV ou organiser OPAT.",
+            "fr": "Décider à partir des cultures, de l’évolution, du foyer et de la complexité."
+          }
+        },
+        {
+          "id": "kum-08-v2-opat",
+          "title": {
+            "ro": "Antibioterapia parenterală în ambulatoriu (OPAT)",
+            "fr": "Antibiothérapie parentérale ambulatoire (OPAT)"
+          },
+          "pages": "159–160",
+          "sourcePdfPages": "182–183",
+          "text": {
+            "ro": "OPAT poate începe din urgență/ambulator pentru a evita internarea, poate continua după ameliorarea unei infecții care a necesitat spitalizare ori după controlul sursei. Exemplele includ celulită, infecții urinare rezistente, osteomielită, infecție articulară/proteză, ulcer diabetic, endocardită, empiem și abcese cerebrale/hepatice la pacient stabil. Selecția ține cont de vârstă, comorbidități, severitate și aderență; textul ediției exclude persoanele cu adicție IV și tulburări psihiatrice severe. Sunt descrise administrări comunitare la domiciliu sau zilnice în ambulator/spital, uneori prin doze zilnice unice (ceftriaxonă, ertapenem, amikacină, teicoplanină, daptomicină), pompe elastomerice și echipe multidisciplinare.",
+            "fr": "L’OPAT peut débuter aux urgences/en ambulatoire pour éviter une admission, poursuivre après amélioration d’une infection hospitalisée ou après contrôle du foyer. Exemples : cellulite, infection urinaire résistante, ostéomyélite, infection articulaire/prothétique, ulcère diabétique, endocardite, empyème et abcès cérébral/hépatique chez un patient stable. La sélection tient compte de l’âge, des comorbidités, de la gravité et de l’observance ; le texte de l’édition exclut les usagers de drogues IV et les troubles psychiatriques sévères. Sont décrits soins à domicile ou passages quotidiens en ambulatoire/hôpital, parfois en dose quotidienne unique (ceftriaxone, ertapénem, amikacine, teicoplanine, daptomycine), pompes élastomériques et équipes pluridisciplinaires."
+          },
+          "express": {
+            "ro": "OPAT : patient stable et sélectionné, accès au suivi, service structuré et modalité adaptée.",
+            "fr": "L’OPAT exige sélection, stabilité, observance et surveillance organisée."
+          }
+        },
+        {
+          "id": "kum-08-v2-opat-monitoring",
+          "title": {
+            "ro": "Furnizarea și monitorizarea serviciului OPAT",
+            "fr": "Organisation et surveillance de l’OPAT"
+          },
+          "pages": "160",
+          "sourcePdfPages": "183",
+          "text": {
+            "ro": "Pentru tratamentul IV prelungit, pot fi necesare Hickman/PICC; montarea calificată reduce riscul infecțios. Se pot utiliza auto-administrarea sau pompe elastomerice. Echipele pot include medici, asistente, servicii comunitare și farmaciști, cu discuții multidisciplinare și acces la infecționist. Monitorizează clinic, biologic și imagistic când este indicat; hemogramă, uree/electroliți, CRP și funcție hepatică cel puțin săptămânal, plus concentrații medicamentoase când e nevoie. Riscurile includ reacții adverse, infecție/tromboflebită pe acces central, C. difficile, recidivă și reinternare; trebuie să existe acces clar la îngrijire secundară.",
+            "fr": "Un traitement IV prolongé peut nécessiter Hickman/PICC ; une pose qualifiée réduit le risque infectieux. Auto-administration ou pompes élastomériques sont possibles. L’équipe peut réunir médecins, infirmiers, soins communautaires et pharmaciens, avec concertation multidisciplinaire et accès à un infectiologue. Surveiller cliniquement, biologiquement et par imagerie si indiqué ; hémogramme, urée/électrolytes, CRP et fonction hépatique au moins chaque semaine, plus concentrations médicamenteuses si nécessaire. Risques : effets indésirables, infection/thrombophlébite de l’accès central, C. difficile, rechute et réhospitalisation ; l’accès aux soins secondaires doit être organisé."
+          },
+          "express": {
+            "ro": "OPAT : surveillance hebdomadaire minimale des bilans cités et vigilance sur accès veineux, toxicité et rechute.",
+            "fr": "Organiser l’équipe, les bilans, les concentrations utiles et l’accès rapide aux soins."
+          }
+        },
+        {
+          "id": "kum-08-v2-allergy",
+          "title": {
+            "ro": "Evaluarea riscului alergic",
+            "fr": "Évaluer le risque allergique"
+          },
+          "pages": "160",
+          "sourcePdfPages": "183",
+          "text": {
+            "ro": "Manualul notează că aproximativ 10% declară alergie la penicilină, dar proporția de alergie reală ar fi în jur de 1%. Reacțiile imediate IgE apar tipic în minute până la o oră și pot include edem facial, erupție și dispnee severă/anafilaxie; reacțiile tardive apar după zile sau săptămâni și, rar, includ Stevens–Johnson sau necroliză epidermică toxică. Documentează molecula, intervalul până la reacție, manifestările (erupție, wheezing, edem, pierderea conștienței), durata și toleranța ulterioară la medicamente similare. Alergia IgE severă impune evitarea penicilinelor și, conform textului, a cefalosporinelor/carbapenemelor; reacția non-severă poate permite folosirea prudentă a unor beta-lactamine alternative. Trimiterea la alergologie se consideră la alergii multiple, lipsa unei alternative sigure, tratament îndelungat sau nevoie de penicilină de primă linie. Desensibilizarea se face gradual și supravegheat.",
+            "fr": "Le manuel indique qu’environ 10 % des personnes déclarent une allergie à la pénicilline, mais que l’allergie vraie serait proche de 1 %. Les réactions immédiates IgE surviennent typiquement en quelques minutes à une heure et peuvent inclure œdème facial, éruption et dyspnée sévère/anaphylaxie ; les réactions tardives apparaissent après des jours ou semaines et incluent rarement Stevens–Johnson ou nécrolyse épidermique toxique. Documentez la molécule, le délai, les signes (rash, sifflements, œdème, perte de conscience), la durée et la tolérance ultérieure de médicaments proches. Une allergie IgE sévère impose d’éviter pénicillines et, selon le texte, céphalosporines/carbapénèmes ; une réaction non sévère peut permettre prudemment d’autres bêta-lactamines. Envisager l’allergologie en cas d’allergies multiples, absence d’alternative sûre, traitement prolongé ou besoin de pénicilline de première intention. La désensibilisation est progressive et surveillée."
+          },
+          "express": {
+            "ro": "Caractériser délai, signes et gravité ; distinguer immédiat IgE d’une réaction tardive et documenter les expositions.",
+            "fr": "Évaluer précisément la réaction avant d’exclure une classe entière ; avis spécialisé si nécessaire."
+          }
+        },
+        {
+          "id": "kum-08-v2-chemoprophylaxis",
+          "title": {
+            "ro": "Chemoprofilaxia antibiotică",
+            "fr": "Chimioprophylaxie antibiotique"
+          },
+          "pages": "161",
+          "sourcePdfPages": "184",
+          "text": {
+            "ro": "Beneficiul profilaxiei pentru endocardită este contestat în textul citat: bacteriemia procedurală nu înseamnă automat risc suficient, iar nici antecedentul de endocardită, proteza valvulară sau șuntul chirurgical nu impun de fiecare dată profilaxie. Cadranul 8.7 listează situații din recomandările NICE ale perioadei: profilaxia sepsisului meningococic sever după splenectomie/disfuncție splenică cu fenoximetilpenicilină; prevenirea recurenței febrei reumatice cu fenoximetilpenicilină ori sulfadiazină dacă alergie; chimioprofilaxie pentru contacții meningococici/H. influenzae cu rifampicină și alternative specificate; izoniazidă pentru anumite contacte TB. Tabelul afirmă că profilaxia endocarditei pentru procedurile dentare, respiratorii, genitourinare și digestive enumerate nu este recomandată; insistă pe igiena orală și investigarea promptă a infecțiilor. Pentru majoritatea intervențiilor, profilaxia chirurgicală nu depășește 24 h și adesea este doză unică la inducție. Aceste regimuri sunt istoric-sursă și cer confruntare cu recomandările curente.",
+            "fr": "Le bénéfice de la prophylaxie de l’endocardite est contesté dans le texte cité : une bactériémie procédurale n’implique pas toujours un risque suffisant, et antécédent d’endocardite, prothèse valvulaire ou shunt n’imposent pas systématiquement une prophylaxie. L’encadré 8.7 énumère des situations des recommandations NICE de l’époque : prévention du sepsis méningococcique sévère après splénectomie/dysfonction splénique par phénoxyméthylpénicilline ; prévention des récidives de rhumatisme articulaire aigu par phénoxyméthylpénicilline ou sulfadiazine en cas d’allergie ; prophylaxie des contacts méningococciques/H. influenzae par rifampicine et alternatives précisées ; isoniazide pour certains contacts tuberculeux. Le tableau ne recommande pas la prophylaxie de l’endocardite pour les procédures dentaires, respiratoires, génito-urinaires et digestives citées ; il insiste sur l’hygiène orale et l’évaluation rapide des infections. Pour la plupart des interventions, la prophylaxie chirurgicale ne dépasse pas 24 h et est souvent une dose unique à l’induction. Ces schémas sont historiques et doivent être confrontés aux recommandations actuelles."
+          },
+          "express": {
+            "ro": "Caseta 8.7 : situații profilactice distincte; regimurile ediției nu sunt automat prescripții actuale.",
+            "fr": "Distinguer prophylaxie des contacts, asplénie, tuberculose et règles d’endocardite ; vérifier les recommandations en vigueur."
+          }
+        },
+        {
+          "id": "kum-08-v2-antibiotic-principles",
+          "title": {
+            "ro": "Terapiile antibiotice: principii farmacologice",
+            "fr": "Antibiotiques : principes pharmacologiques"
+          },
+          "pages": "161",
+          "sourcePdfPages": "184",
+          "text": {
+            "ro": "Administrarea la timp a unui agent activ este esențială. Selecția definitivă sau empirică presupune înțelegerea absorbției, distribuției, metabolismului și eliminării; în forme severe, calea parenterală poate asigura mai rapid concentrații sistemice și tisulare. Distinge activitatea bactericidă de bacteriostatică și adaptează doza la parametrii farmacocinetici/farmacodinamici, sediu, funcție de organ și susceptibilitate.",
+            "fr": "Administrer à temps un agent actif est essentiel. Le choix définitif ou empirique suppose de comprendre absorption, distribution, métabolisme et élimination ; dans les formes graves, la voie parentérale peut assurer plus rapidement des concentrations systémiques et tissulaires. Distinguer activité bactéricide et bactériostatique, et adapter la dose aux paramètres pharmacocinétiques/pharmacodynamiques, au foyer, aux fonctions d’organes et à la sensibilité."
+          },
+          "express": {
+            "ro": "Choix et dose dépendent de PK/PD, du foyer, de la gravité, de la voie et des organes.",
+            "fr": "Relier activité, exposition, voie et fonction d’organe."
+          }
+        },
+        {
+          "id": "kum-08-v2-dose-table",
+          "title": {
+            "ro": "Dozele uzuale din Cadranul 8.8",
+            "fr": "Doses usuelles de l’encadré 8.8"
+          },
+          "pages": "162",
+          "sourcePdfPages": "185",
+          "text": {
+            "ro": "Cadranul 8.8 a fost inspectat vizual și conține doze standard, maxime și excepții pentru peniciline, cefalosporine, carbapeneme, fluorochinolone, aminoglicozide, glicopeptide, macrolide, tetracicline, oxazolidinone și alte clase. Nu reproducem aici o transcriere neverificată rând cu rând: unele celule se referă la infecții/speciații diferite, monitorizare terapeutică, funcție renală și susceptibilitate, iar tabelul avertizează explicit că nu este ghid complet de dozare și nu înlocuiește recomandările locale/naționale. Până la validarea independentă a fiecărei molecule, dozele numerice din acest tabel-sursă nu sunt prezentate ca schemă de învățat sau prescris.",
+            "fr": "L’encadré 8.8 a été inspecté visuellement ; il contient doses standard, maximales et exceptions pour pénicillines, céphalosporines, carbapénèmes, fluoroquinolones, aminosides, glycopeptides, macrolides, tétracyclines, oxazolidinones et autres classes. Nous n’en reproduisons pas ici une transcription non vérifiée ligne par ligne : certaines cellules dépendent du foyer/de l’espèce, du suivi thérapeutique, de la fonction rénale et de la sensibilité, et le tableau précise qu’il n’est pas un guide complet et ne remplace pas les recommandations locales/nationales. En attendant une validation indépendante de chaque molécule, les doses numériques de ce tableau-source ne sont pas présentées comme schéma à mémoriser ou prescrire."
+          },
+          "express": {
+            "ro": "Tableau 8.8 consulté ; transcription et vérification indépendante des doses restent nécessaires avant publication pédagogique.",
+            "fr": "Les doses de l’édition ne sont ni transcrites intégralement ni validées pour la pratique actuelle."
+          }
+        },
+        {
+          "id": "kum-08-v2-beta-lactam-principle",
+          "title": {
+            "ro": "Antibiotice β-lactamice: mecanism",
+            "fr": "Antibiotiques β-lactamines : mécanisme"
+          },
+          "pages": "162–163",
+          "sourcePdfPages": "185–186",
+          "text": {
+            "ro": "Penicilinele, cefalosporinele, monobactamii și carbapenemele au nucleu β-lactamic. Acestea se leagă de proteinele de legare a penicilinei/peptidaze implicate în ultima etapă a sintezei peretelui bacterian și sunt în general bactericide, cu efect dependent de timp. β-lactamazele pot inactiva clasa; enzimele ESBL și carbapenemazele pot produce rezistențe extinse.",
+            "fr": "Pénicillines, céphalosporines, monobactames et carbapénèmes partagent un noyau β-lactame. Ils se lient aux protéines liant la pénicilline/peptidases impliquées dans l’étape finale de synthèse de la paroi bactérienne et sont généralement bactéricides, avec activité dépendante du temps. Les β-lactamases peuvent inactiver la classe ; ESBL et carbapénémases peuvent produire des résistances étendues."
+          },
+          "express": {
+            "ro": "β-lactamines : paroi bactérienne, effet bactéricide dépendant du temps ; β-lactamases = résistance.",
+            "fr": "Comprendre cible de paroi et mécanismes de β-lactamases."
+          }
+        },
+        {
+          "id": "kum-08-v2-penicillins",
+          "title": {
+            "ro": "Penicilinele",
+            "fr": "Pénicillines"
+          },
+          "pages": "162–163",
+          "sourcePdfPages": "186",
+          "text": {
+            "ro": "Benzilpenicilinele sunt parenterale și rămân utile în infecții severe sensibile; nu se folosesc empiric în infecții severe fără confirmarea susceptibilității. Penicilina se utilizează pentru streptococi sensibili, inclusiv endocardită și infecții severe cu S. pyogenes, de regulă combinată în fasceită necrozantă/gangrenă gazoasă. Flucloxacilina este opțiune de primă intenție pentru infecții severe MSSA și stafilococi producători de penicilinază. Amoxicilina acoperă streptococi, pneumococi, enterococi și unii Gram-negativi, dar este sensibilă la β-lactamază; amoxicilină/clavulanat are risc de icter colestatic mai mare decât amoxicilina singură. Ticarcilina/piperacilina extind acoperirea Gram-negativă, inclusiv Pseudomonas (piperacilină/tazobactam). Pivmecillinamul poate acoperi anumiți Gram-negativi urinari, inclusiv unele ESBL, dar nu Pseudomonas; temocilina acoperă Gram-negativi inclusiv unele ESBL, fără Pseudomonas/Acinetobacter. Reacțiile includ hipersensibilitate, nefrită interstițială și encefalopatie; amoxicilina/ampicilina produc erupție frecventă în mononucleoză infecțioasă.",
+            "fr": "La benzylpénicilline est parentérale et reste utile dans les infections graves sensibles ; ne pas l’employer empiriquement dans une infection grave sans sensibilité confirmée. Elle traite les streptocoques sensibles, dont endocardite et infections graves à S. pyogenes, généralement en association dans fasciite nécrosante/gangrène gazeuse. La flucloxacilline est un choix de première intention pour les infections graves à MSSA et les staphylocoques producteurs de pénicillinase. L’amoxicilline couvre streptocoques, pneumocoques, entérocoques et certains Gram négatifs, mais est sensible aux β-lactamases ; amoxicilline/clavulanate expose davantage à l’ictère cholestatique que l’amoxicilline seule. Ticarcilline/pipéracilline élargissent la couverture Gram négative, dont Pseudomonas (pipéracilline/tazobactam). Pivmécillinam peut couvrir certains Gram négatifs urinaires, dont certaines ESBL, mais pas Pseudomonas ; témocilline couvre des Gram négatifs dont certaines ESBL, sans Pseudomonas/Acinetobacter. Effets : hypersensibilité, néphrite interstitielle, encéphalopathie ; amoxicilline/ampicilline provoquent souvent un rash en mononucléose."
+          },
+          "express": {
+            "ro": "Distinguer spectres et exceptions au sein des pénicillines ; tenir compte β-lactamases et réactions allergiques.",
+            "fr": "Pénicillines : spectre variable, allergie et résistances ; flucloxacilline pour MSSA selon la source."
+          }
+        },
+        {
+          "id": "kum-08-v2-cephalosporins",
+          "title": {
+            "ro": "Cefalosporinele",
+            "fr": "Céphalosporines"
+          },
+          "pages": "163",
+          "sourcePdfPages": "186",
+          "text": {
+            "ro": "Cefalosporinele rezistă la penicilinazele stafilococice, dar nu acoperă enterococii sau bacilii Gram-negativi anaerobi; activitatea anti-Pseudomonas aparține doar unor molecule, precum ceftazidimă și cefepimă. Ceftarolina și ceftobiprolul sunt a cincea generație. Manualul imprimat conține o formulare despre MRSA, iar erratumul furnizat o corectează; aplicabilitatea exactă la această ediție nu este confirmată, deci formularea nu este folosită ca informație validată aici. Generațiile II/III se rezervă unor infecții severe deoarece ESBL poate compromite terapia empirică și expunerea crește riscul C. difficile. Toxicitatea seamănă cu cea a penicilinelor, reacțiile alergice încrucișate sunt posibile, iar vechile molecule au fost mai nefrotoxice.",
+            "fr": "Les céphalosporines résistent aux pénicillinases staphylococciques, mais ne couvrent ni entérocoques ni bacilles Gram négatifs anaérobies ; l’activité anti-Pseudomonas concerne seulement certaines molécules, dont ceftazidime et céfépime. Ceftaroline et ceftobiprole sont de cinquième génération. Le manuel imprimé contient une formulation sur MRSA que l’erratum fourni corrige ; son applicabilité exacte à cette édition n’étant pas confirmée, elle n’est pas présentée ici comme validée. Les générations II/III sont réservées à certaines infections graves, car ESBL peut compromettre l’empirisme et l’exposition augmente le risque de C. difficile. Toxicité similaire aux pénicillines, réactions croisées possibles, et néphrotoxicité plus marquée avec les anciennes molécules."
+          },
+          "express": {
+            "ro": "Couverture anti-Pseudomonas limitée à certaines molécules ; vérifier ESBL, allergie croisée et erratum non confirmé.",
+            "fr": "Les céphalosporines diffèrent selon la génération ; ne pas généraliser leur spectre."
+          }
+        },
+        {
+          "id": "kum-08-v2-monobactams",
+          "title": {
+            "ro": "Monobactamii",
+            "fr": "Monobactames"
+          },
+          "pages": "163",
+          "sourcePdfPages": "186",
+          "text": {
+            "ro": "Aztreonamul este singurul membru disponibil menționat și are spectru limitat la bacili Gram-negativi aerobi. Poate fi alternativă la aminoglicozid în terapie combinată pentru anumite sepsisuri abdominale și este activ față de unele tulpini producătoare de metalo-β-lactamază și față de Pseudomonas, inclusiv în fibroza chistică.",
+            "fr": "L’aztréonam est le seul membre disponible cité et son spectre se limite aux bacilles Gram négatifs aérobies. Il peut remplacer un aminoside dans certaines associations pour sepsis abdominal et agit sur certaines souches productrices de métallo-β-lactamase ainsi que sur Pseudomonas, notamment dans la mucoviscidose."
+          },
+          "express": {
+            "ro": "Aztreonam : Gram négatifs aérobies seulement ; certaines métallo-β-lactamases et Pseudomonas.",
+            "fr": "Spectre étroit des monobactames : bacilles Gram négatifs aérobies."
+          }
+        },
+        {
+          "id": "kum-08-v2-carbapenems",
+          "title": {
+            "ro": "Carbapenemele",
+            "fr": "Carbapénèmes"
+          },
+          "pages": "163",
+          "sourcePdfPages": "186",
+          "text": {
+            "ro": "Imipenemul, meropenemul, doripenemul și ertapenemul au spectru larg asupra multor Gram-pozitivi, Gram-negativi și anaerobi, dar nu MRSA. Ertapenemul nu acoperă Pseudomonas sau Acinetobacter. Imipenemul se asociază cu cilastatină deoarece este inactivat parțial renal. Carbapenemele sunt folosite în infecții severe cu Gram-negativi producători ESBL, infecții nosocomiale și infecții mixte aerobe/anaerobe când rezistența este probabilă. Greața, vărsăturile și diareea apar la mai puțin de 5% în textul sursei; imipenemul și ertapenemul pot provoca convulsii, iar pentru meningită sursa indică meropenem în locul acestora.",
+            "fr": "Imipénem, méropénem, doripénem et ertapénem couvrent largement de nombreux Gram positifs, Gram négatifs et anaérobies, mais pas MRSA. L’ertapénem ne couvre ni Pseudomonas ni Acinetobacter. L’imipénem est associé à la cilastatine car il est partiellement inactivé par le rein. Les carbapénèmes sont utilisés dans les infections graves à Gram négatifs producteurs d’ESBL, les infections nosocomiales et infections mixtes aérobies/anaérobies lorsque la résistance est probable. Nausées, vomissements et diarrhée concernent moins de 5 % selon la source ; imipénem et ertapénem peuvent provoquer des convulsions, et le manuel indique le méropénem pour la méningite."
+          },
+          "express": {
+            "ro": "Large spectre sans MRSA ; ertapenem sans Pseudomonas/Acinetobacter ; imipenem + cilastatine.",
+            "fr": "Réserver au contexte de résistance ; connaître l’exception d’ertapénem et l’association à cilastatine."
+          }
+        },
+        {
+          "id": "kum-08-v2-beta-lactamase-inhibitors",
+          "title": {
+            "ro": "Asocieri β-lactamă/inhibitor de β-lactamază",
+            "fr": "Associations β-lactamine/inhibiteur de β-lactamase"
+          },
+          "pages": "163–164",
+          "sourcePdfPages": "186–187",
+          "text": {
+            "ro": "Acidul clavulanic, sulbactamul și tazobactamul sunt inhibitori clasici combinați cu β-lactamine; tazobactamul protejează piperacilina, iar sulbactamul ampicilina. Ceftolozan/tazobactam este de asemenea menționat. Avibactamul este descris ca inhibitor non-β-lactamic asociat ceftazidimei și activ împotriva majorității ESBL și a unor carbapenemaze Enterobacterales, inclusiv KPC și OXA-48, în contextul textului.",
+            "fr": "Acide clavulanique, sulbactam et tazobactam sont des inhibiteurs classiques associés aux β-lactamines ; tazobactam protège pipéracilline et sulbactam ampicilline. Ceftolozane/tazobactam est également cité. L’avibactam est décrit comme inhibiteur non β-lactame associé à la ceftazidime, actif contre la plupart des ESBL et certaines carbapénémases d’Enterobacterales, dont KPC et OXA-48, dans le contexte du texte."
+          },
+          "express": {
+            "ro": "Inhibiteurs : restaurer/protéger l’activité de la molécule partenaire contre certaines β-lactamases.",
+            "fr": "L’association et le mécanisme de résistance déterminent l’activité ; ne pas extrapoler à toutes les enzymes."
+          }
+        },
+        {
+          "id": "kum-08-v2-quinolones",
+          "title": {
+            "ro": "Chinolonele",
+            "fr": "Quinolones"
+          },
+          "pages": "164",
+          "sourcePdfPages": "187",
+          "text": {
+            "ro": "Chinolonele inhibă ADN-giraza și topoizomeraza IV. Ciprofloxacina are activitate față de multe Gram-negative, inclusiv Pseudomonas, și unele Gram-pozitive; textul citează infecții hematogene Gram-negative, osoase/articulare, urinare/respiratorii, portaj meningococic, unele ITS și diaree severă de călătorie. Levofloxacina/moxifloxacina sunt opțiuni respiratorii, inclusiv pentru patogeni atipici; unele chinolone se folosesc în TB. Rezistența E. coli/Klebsiella este descrisă ca >80% în multe țări la data sursei. Reacțiile includ tulburări digestive, fotosensibilitate, neurotoxicitate, tendinopatie/ruptură chiar în primele 48 h și prelungirea QT/torsada vârfurilor; evitați sarcina/copiii și asocierea cu steroizi dacă beneficiul nu justifică riscul și evitați combinațiile QT când se poate.",
+            "fr": "Les quinolones inhibent ADN-gyrase et topoisomérase IV. La ciprofloxacine agit sur de nombreux Gram négatifs, dont Pseudomonas, et certains Gram positifs ; le texte cite bactériémies à Gram négatifs, infections osseuses/articulaires, urinaires/respiratoires, portage méningococcique, certaines IST et diarrhée sévère du voyageur. Levofloxacine/moxifloxacine sont des options respiratoires, y compris contre les atypiques ; certaines quinolones sont utilisées dans la tuberculose. La résistance d’E. coli/Klebsiella est décrite >80 % dans de nombreux pays à la date de la source. Effets : troubles digestifs, photosensibilité, neurotoxicité, tendinopathie/rupture dès les premières 48 h et allongement QT/torsades ; éviter grossesse/enfants et association aux corticoïdes si le bénéfice ne justifie pas le risque, et éviter les associations allongeant le QT si possible."
+          },
+          "express": {
+            "ro": "Quinolones : ADN-gyrase/topoisomérase ; risques tendineux, neurologiques et QT, résistance locale à vérifier.",
+            "fr": "Spectre utile mais résistance et effets tendineux/QT limitent l’emploi."
+          }
+        },
+        {
+          "id": "kum-08-v2-aminoglycosides",
+          "title": {
+            "ro": "Aminoglicozidele",
+            "fr": "Aminosides"
+          },
+          "pages": "164",
+          "sourcePdfPages": "187",
+          "text": {
+            "ro": "Gentamicina și tobramicina inhibă funcția ribozomală/producția proteică și sunt parenterale, active față de multe Gram-negative inclusiv Pseudomonas. Dozele mici pot fi sinergice cu penicilinele în endocardită enterococică/streptococică. Amikacina rezistă mai bine unor enzime de modificare și se rezervă germenilor rezistenți la gentamicină. Nefrotoxicitatea este dependentă de doză; ototoxicitatea vestibulară/auditivă este mai probabilă la vârstnici, cu medicamente nefrotoxice/diuretice. Dozarea uzuală unică zilnică necesită monitorizarea concentrației (sursa menționează recoltare la 6–14 h și nomogramă); regimurile pentru endocardită sunt diferite. Evită în miastenia gravis din cauza blocadei neuromusculare.",
+            "fr": "Gentamicine et tobramycine inhibent la fonction ribosomale/synthèse protéique, sont parentérales et actives sur de nombreux Gram négatifs dont Pseudomonas. À faible dose, elles peuvent être synergiques avec les pénicillines dans l’endocardite entérocoque/streptocoque. L’amikacine résiste mieux à certaines enzymes modificatrices et se réserve aux organismes résistants à la gentamicine. Néphrotoxicité dose-dépendante ; ototoxicité vestibulaire/auditive plus probable chez les personnes âgées et avec médicaments néphrotoxiques/diurétiques. La dose quotidienne unique nécessite le suivi des concentrations (prélèvement à 6–14 h et nomogramme selon la source) ; les schémas d’endocardite diffèrent. Éviter dans la myasthénie en raison du bloc neuromusculaire."
+          },
+          "express": {
+            "ro": "Aminosides : Gram négatifs, concentration surveillée, néphro-/ototoxicité et prudence en myasthénie.",
+            "fr": "Surveiller les concentrations et les toxicités rénale, auditive et neuromusculaire."
+          }
+        },
+        {
+          "id": "kum-08-v2-glycopeptides",
+          "title": {
+            "ro": "Glicopeptidele",
+            "fr": "Glycopeptides"
+          },
+          "pages": "164",
+          "sourcePdfPages": "187",
+          "text": {
+            "ro": "Glicopeptidele inhibă sinteza peretelui și acționează asupra Gram-pozitivilor. Vancomicina IV este utilizată pentru MRSA și alți Gram-pozitivi multirezistenți; poate trata meningita pneumococică rezistentă la penicilină în combinație cu alte antibiotice active. Este lent bactericidă, cu nefro-/ototoxicitate și necesar de monitorizare a nivelurilor și funcției renale; extravazarea poate produce necroză/tromboflebită, iar perfuzia rapidă reacție histaminică („red man”). Teicoplanina este mai puțin nefrotoxică, permite dozare zilnică sau de trei ori pe săptămână în unele scheme și necesită monitorizare predoză.",
+            "fr": "Les glycopeptides inhibent la synthèse de la paroi et agissent sur les Gram positifs. La vancomycine IV traite MRSA et d’autres Gram positifs multirésistants ; elle peut traiter une méningite pneumococcique résistante à la pénicilline en association avec d’autres agents actifs. Sa bactéricidie est lente ; néphro-/ototoxicité imposent le suivi des concentrations et de la fonction rénale ; extravasation peut provoquer nécrose/thrombophlébite et perfusion rapide réaction histaminique (« red man »). La teicoplanine est moins néphrotoxique, permet une administration quotidienne ou trois fois par semaine dans certains schémas et requiert un suivi pré-dose."
+          },
+          "express": {
+            "ro": "Vancomycine : Gram positifs/MRSA, suivi rénal et pharmacologique ; perfuser prudemment.",
+            "fr": "Glycopeptides : cible paroi Gram positif et nécessité de surveillance."
+          }
+        },
+        {
+          "id": "kum-08-v2-lipopeptides",
+          "title": {
+            "ro": "Lipopeptidele",
+            "fr": "Lipopeptides"
+          },
+          "pages": "164",
+          "sourcePdfPages": "187",
+          "text": {
+            "ro": "Daptomicina IV are spectru asemănător vancomicinei și este utilizată în infecții complicate cutanate/de țesuturi moi, inclusiv MRSA, precum și ca alternativă în endocardită, infecții osteoarticulare și bacteriemii Gram-pozitive. Dalbavancina are timp de eliminare prelungit și poate fi utilizată în doză unică pentru infecții tegumentare și de țesuturi moi, potrivit textului.",
+            "fr": "La daptomycine IV a un spectre proche de la vancomycine ; elle est utilisée dans les infections compliquées de la peau/des tissus mous, dont MRSA, et comme alternative dans endocardite, infections ostéoarticulaires et bactériémies à Gram positif. La dalbavancine, à élimination prolongée, peut être utilisée en dose unique pour certaines infections cutanées et des tissus mous selon le texte."
+          },
+          "express": {
+            "ro": "Daptomycine : infections graves à Gram positif ; dalbavancine : longue demi-vie.",
+            "fr": "Connaître les usages décrits des lipopeptides et leur place dans le traitement ciblé."
+          }
+        },
+        {
+          "id": "kum-08-v2-oxazolidinones",
+          "title": {
+            "ro": "Oxazolidinonele",
+            "fr": "Oxazolidinones"
+          },
+          "pages": "164–165",
+          "sourcePdfPages": "187–188",
+          "text": {
+            "ro": "Linezolidul și tedizolidul inhibă sinteza proteică prin legarea de ARN-ul ribozomal 23S, împiedicând complexul funcțional 70S. Acoperă Gram-pozitivi inclusiv MRSA, VRE și pneumococ rezistent; linezolidul are biodisponibilitate orală aproape completă și poate trata bacteriemie, pneumonie nosocomială, infecții cutanate și osoase. Efectele includ tulburări digestive, cefalee, rash, hipertensiune, citopenii și neuropatie optică/periferică după tratament îndelungat (>28 zile); activitatea de inhibitor MAO poate interacționa cu medicamente serotoninergice/adrenergice. Hemograma se monitorizează săptămânal. Tedizolidul are mai puțină mielotoxicitate și dozare zilnică în comparație cu linezolidul de două ori pe zi, după text.",
+            "fr": "Linezolid et tedizolid inhibent la synthèse protéique en se liant à l’ARN ribosomal 23S, empêchant le complexe fonctionnel 70S. Ils couvrent des Gram positifs dont MRSA, VRE et pneumocoque résistant ; le linezolid a une biodisponibilité orale presque complète et peut traiter bactériémie, pneumonie nosocomiale et infections cutanées ou osseuses. Effets : troubles digestifs, céphalées, rash, hypertension, cytopénies et neuropathie optique/périphérique après traitement prolongé (>28 jours) ; l’activité inhibitrice de MAO peut interagir avec les médicaments sérotoninergiques/adrénergiques. Hémogramme hebdomadaire. Selon le texte, tedizolid est moins myélotoxique et quotidien, contre deux prises quotidiennes pour linezolid."
+          },
+          "express": {
+            "ro": "Oxazolidinones : Gram positifs résistants, excellente voie orale du linezolid, interactions et NFS hebdomadaire.",
+            "fr": "Surveiller cytopénies, neuropathies et interactions sérotoninergiques/adrénergiques."
+          }
+        },
+        {
+          "id": "kum-08-v2-tetracyclines",
+          "title": {
+            "ro": "Tetraciclinele și tigeciclina",
+            "fr": "Tétracyclines et tigécycline"
+          },
+          "pages": "165",
+          "sourcePdfPages": "188",
+          "text": {
+            "ro": "Tetraciclinele (inclusiv doxiciclina/minociclina) inhibă sinteza proteică prin funcția ribozomală și sunt bacteriostatice. Tigeciclina poate ocoli pompele de eflux și acoperă unele VRE, MRSA și Gram-negative precum Acinetobacter, dar nu Pseudomonas sau Proteus; se utilizează în anumite infecții complicate cutanate și intraabdominale, uneori în combinații pentru rezistențe severe. Manualul citează avertisment FDA privind incertitudinea eficacității în infecții grave, mai ales pneumonie asociată ventilației. Antiacidele și fierul reduc absorbția tetraciclinelor; fotosensibilitatea, efectele digestive, agravarea insuficienței renale și colorarea dinților în dezvoltare limitează utilizarea, astfel că sunt evitate la sarcină și copii; doxiciclina este mai sigură renal.",
+            "fr": "Les tétracyclines (dont doxycycline/minocycline) inhibent la synthèse protéique via le ribosome et sont bactériostatiques. La tigécycline contourne certaines pompes d’efflux et couvre certains VRE, MRSA et Gram négatifs comme Acinetobacter, mais pas Pseudomonas ni Proteus ; elle est utilisée dans certaines infections compliquées cutanées/intra-abdominales, parfois en association contre des résistances sévères. Le manuel cite l’avertissement FDA sur l’incertitude d’efficacité dans les infections graves, notamment pneumonie sous ventilation. Antiacides et fer réduisent l’absorption ; photosensibilité, troubles digestifs, aggravation rénale et coloration des dents en développement limitent l’emploi ; éviter grossesse et enfants ; doxycycline est plus sûre pour le rein."
+          },
+          "express": {
+            "ro": "Tigécycline : exceptions Pseudomonas/Proteus ; prudence en infection grave, grossesse, enfance et fonction rénale.",
+            "fr": "Tétracyclines : inhibiteurs protéiques ; interactions avec fer/antiacides et précautions d’âge/grossesse."
+          }
+        },
+        {
+          "id": "kum-08-v2-macrolides",
+          "title": {
+            "ro": "Macrolidele",
+            "fr": "Macrolides"
+          },
+          "pages": "165",
+          "sourcePdfPages": "188",
+          "text": {
+            "ro": "Eritromicina, claritromicina și azitromicina inhibă sinteza proteică. Eritromicina poate înlocui penicilina în unele alergii și este utilă pentru patogeni respiratori, Legionella, Mycoplasma, pertussis, Campylobacter și Chlamydia; claritromicina poate fi mai bine tolerată. Azitromicina are timp de înjumătățire lung, dar nivelul seric scăzut o face nepotrivită pentru bacteriemie; spectrul include unele Salmonella/Shigella. Interacțiuni cu teofilină, carbamazepină, digoxin și ciclosporină pot impune ajustări. Reacțiile digestive, iritația venoasă IV și prelungirea QT/torsada vârfurilor trebuie avute în vedere.",
+            "fr": "Érythromycine, clarithromycine et azithromycine inhibent la synthèse protéique. L’érythromycine peut remplacer la pénicilline dans certaines allergies et est utile contre des agents respiratoires, Legionella, Mycoplasma, coqueluche, Campylobacter et Chlamydia ; la clarithromycine peut être mieux tolérée. L’azithromycine a une longue demi-vie, mais sa faible concentration sérique la rend inadaptée à la bactériémie ; son spectre inclut Salmonella/Shigella. Interactions avec théophylline, carbamazépine, digoxine et ciclosporine peuvent nécessiter des ajustements. Troubles digestifs, irritation veineuse IV et allongement QT/torsades sont à considérer."
+          },
+          "express": {
+            "ro": "Macrolides : atypiques respiratoires et plusieurs agents ; interactions médicamenteuses et QT.",
+            "fr": "Vérifier interactions et risque de QT, notamment avec d’autres médicaments concernés."
+          }
+        },
+        {
+          "id": "kum-08-v2-polymyxins",
+          "title": {
+            "ro": "Polimixinele și colistimetatul",
+            "fr": "Polymyxines et colistiméthate"
+          },
+          "pages": "165–166",
+          "sourcePdfPages": "188–189",
+          "text": {
+            "ro": "Polimixina B și colistimetatul (polimixina E) au fost readuse în utilizare ca opțiuni de rezervă pentru Gram-negative multirezistente, mai ales Enterobacterales producătoare de carbapenemază. Colistimetatul este prodrog transformat in vivo, ceea ce complică dozarea. Legarea lipopolizaharidului perturbă membrana; spectrul exclude Proteus și Providencia. Administrarea IV în infecții severe implică risc important de nefro- și neurotoxicitate și necesită dozare/supraveghere atentă. Rezistența plasmidică prin MCR‑1 a fost descrisă, la momentul sursei, mai ales în tulpini de interes veterinar din Asia de Sud și Sud-Est.",
+            "fr": "Polymyxine B et colistiméthate (polymyxine E) ont été réintroduits comme options de dernier recours contre les Gram négatifs multirésistants, surtout Enterobacterales producteurs de carbapénémase. Le colistiméthate est un promédicament transformé in vivo, compliquant le dosage. La liaison au lipopolysaccharide perturbe la membrane ; le spectre exclut Proteus et Providencia. L’administration IV dans les infections graves comporte des risques importants de néphro- et neurotoxicité et exige une surveillance attentive. Une résistance plasmidique par MCR‑1 était décrite à la date de la source surtout dans des souches d’intérêt vétérinaire en Asie du Sud et du Sud-Est."
+          },
+          "express": {
+            "ro": "Polymyxines : recours contre certains Gram négatifs résistants ; toxicité rénale/neurologique majeure.",
+            "fr": "Dernier recours, spectre et toxicités imposent surveillance et susceptibilité."
+          }
+        },
+        {
+          "id": "kum-08-v2-fusidate",
+          "title": {
+            "ro": "Fusidatul de sodiu",
+            "fr": "Fusidate de sodium"
+          },
+          "pages": "166",
+          "sourcePdfPages": "189",
+          "text": {
+            "ro": "Fusidatul inhibă sinteza proteică și pătrunde celular; este folosit în infecții cu S. aureus producător de penicilinază, inclusiv osteomielită și endocardită, și ca adjuvant în sepsis stafilococic. Absorbția orală este bună, dar monoterapia poate selecta rapid rezistența, de aceea se asociază cu alt anti-stafilococic. Reacțiile digestive sunt frecvente, hepatotoxicitatea ocazională; evită asocierea cu statine. Utilizarea topică în impetigo trebuie limitată pentru a reduce rezistența.",
+            "fr": "Le fusidate inhibe la synthèse protéique et pénètre dans les cellules ; il est utilisé dans les infections à S. aureus producteur de pénicillinase, dont ostéomyélite/endocardite, et en adjuvant du sepsis staphylococcique. Bonne absorption orale, mais la monothérapie sélectionne rapidement une résistance ; l’associer à un autre antistaphylococcique. Troubles digestifs fréquents, hépatotoxicité occasionnelle ; éviter l’association aux statines. Limiter l’usage topique dans l’impétigo afin de réduire les résistances."
+          },
+          "express": {
+            "ro": "Fusidate : association anti-staphylococcique pour éviter une résistance rapide ; éviter statines.",
+            "fr": "Ne pas employer seul dans les infections staphylococciques selon la source."
+          }
+        },
+        {
+          "id": "kum-08-v2-sulfonamides-trimethoprim",
+          "title": {
+            "ro": "Sulfamidele și trimetoprimul",
+            "fr": "Sulfamides et triméthoprime"
+          },
+          "pages": "166",
+          "sourcePdfPages": "189",
+          "text": {
+            "ro": "Sulfamidele blochează sinteza acidului folic microbian; trimetoprimul inhibă reducerea dihidrofolatului la tetrahidrofolat. Co-trimoxazolul este utilizat pentru Pneumocystis jirovecii, listerioză și unele infecții rezistente; trimetoprimul singur este utilizat empiric în unele ITU. Rezistența la sulfamide poate fi plasmidică. Co-trimoxazolul poate produce erupții severe (inclusiv Stevens–Johnson/necroliză), trombocitopenie, deficit de folat/anemie megaloblastică și hemoliză în deficit G6PD; potențează anticoagulantele și hipoglicemiantele. Trimetoprimul poate cauza hiperpotasemie, mai ales cu IECA ori diuretice economisitoare de potasiu, de aceea se monitorizează rinichiul și potasiul în situațiile de risc.",
+            "fr": "Les sulfamides bloquent la synthèse d’acide folique microbien ; le triméthoprime inhibe la réduction du dihydrofolate en tétrahydrofolate. Le cotrimoxazole traite Pneumocystis jirovecii, listériose et certaines infections résistantes ; triméthoprime seul est utilisé empiriquement pour certaines infections urinaires. La résistance aux sulfamides peut être plasmidique. Cotrimoxazole peut provoquer rash grave (dont Stevens–Johnson/nécrolyse), thrombopénie, déficit folique/anémie mégaloblastique et hémolyse en déficit G6PD ; il potentialise anticoagulants et hypoglycémiants. Le triméthoprime peut entraîner une hyperkaliémie, notamment avec IEC ou diurétiques épargneurs de potassium ; surveiller rein et potassium chez les patients à risque."
+          },
+          "express": {
+            "ro": "Cotrimoxazole : réactions cutanées/hématologiques et hémolyse G6PD ; triméthoprime : hyperkaliémie/interactions.",
+            "fr": "Repérer toxicités foliques, G6PD, coagulation et potassium."
+          }
+        },
+        {
+          "id": "kum-08-v2-nitroimidazoles",
+          "title": {
+            "ro": "Nitroimidazolii",
+            "fr": "Nitroimidazolés"
+          },
+          "pages": "166",
+          "sourcePdfPages": "189",
+          "text": {
+            "ro": "Metronidazolul, tinidazolul și nimorazolul sunt activi împotriva anaerobilor și unor protozoare; reducerea grupului nitro produce intermediari care rup ADN-ul microbian. Metronidazolul este utilizat în infecții cu Bacteroides, profilaxia chirurgiei colonului, infecții moderate cu C. difficile, amebiază, giardioză și Trichomonas; poate fi administrat oral, rectal sau IV. Reacția de tip disulfiram cu etanol, creșterea efectului warfarinei, gustul metalic și neuropatia la utilizare prelungită sunt riscuri citate; dozele mari în sarcină/alăptare se evită dacă beneficiul nu justifică riscul.",
+            "fr": "Métronidazole, tinidazole et nimorazole agissent sur les anaérobies et certains protozoaires ; la réduction du groupe nitro forme des intermédiaires qui rompent l’ADN microbien. Le métronidazole est utilisé contre Bacteroides, en prophylaxie de chirurgie colique, dans les infections modérées à C. difficile, amibiase, giardiase et trichomonase ; voie orale, rectale ou IV. Réaction de type disulfirame avec éthanol, potentialisation de la warfarine, goût métallique et neuropathie en traitement prolongé sont les risques cités ; éviter fortes doses pendant grossesse/allaitement si le bénéfice ne justifie pas le risque."
+          },
+          "express": {
+            "ro": "Métronidazole : anaérobies/protozoaires ; prévenir interaction alcool-warfarine et neuropathie prolongée.",
+            "fr": "Connaître spectre anaérobie et interactions du métronidazole."
+          }
+        },
+        {
+          "id": "kum-08-v2-clindamycin",
+          "title": {
+            "ro": "Clindamicina",
+            "fr": "Clindamycine"
+          },
+          "pages": "166",
+          "sourcePdfPages": "189",
+          "text": {
+            "ro": "Utilizarea clindamicinei este limitată de asocierea cu C. difficile. Este activă față de coci Gram-pozitivi, inclusiv stafilococi rezistenți la penicilină, și anaerobi precum Bacteroides; este folosită în celulită streptococică/stafilococică severă și osteomielită. Reduce producția de toxine TSST‑1 și alfa-toxină și poate avea rol în infecții cu S. aureus producător de PVL. Riscul de C. difficile rămâne important.",
+            "fr": "L’usage de la clindamycine est limité par son association à C. difficile. Elle agit sur les cocci Gram positifs, dont staphylocoques résistants à la pénicilline, et les anaérobies comme Bacteroides ; elle est utilisée dans la cellulite streptococcique/staphylococcique grave et l’ostéomyélite. Elle réduit la production de toxines TSST‑1 et alpha et peut jouer un rôle dans les infections à S. aureus producteur de PVL. Le risque de C. difficile reste important."
+          },
+          "express": {
+            "ro": "Clindamycine : inhibition de certaines toxines, mais risque C. difficile.",
+            "fr": "Associer activité anti-toxinique et vigilance sur C. difficile."
+          }
+        },
+        {
+          "id": "kum-08-v2-nitrofurantoin",
+          "title": {
+            "ro": "Nitrofurantoina",
+            "fr": "Nitrofurantoïne"
+          },
+          "pages": "166",
+          "sourcePdfPages": "189",
+          "text": {
+            "ro": "Nitrofurantoina orală este folosită pentru ITU necomplicate și acoperă mulți patogeni urinari, dar nu Proteus; rezistența a rămas rară în descrierea sursei. Numai o fracțiune a medicamentului este excretată urinar, ceea ce o face nepotrivită pentru ITU complicată sau pielonefrită. Reacțiile principale sunt greața și, rar, neuropatia periferică (mai ales în disfuncție renală); poate provoca hemoliză în deficit G6PD.",
+            "fr": "La nitrofurantoïne orale traite les infections urinaires simples et couvre de nombreux agents urinaires, sauf Proteus ; la résistance était rare dans la description de la source. Seule une fraction du médicament est excrétée dans les urines, ce qui la rend inadaptée aux infections urinaires compliquées ou à la pyélonéphrite. Effets principaux : nausées et, rarement, neuropathie périphérique (notamment en insuffisance rénale) ; risque d’hémolyse en déficit G6PD."
+          },
+          "express": {
+            "ro": "Nitrofurantoïne : infection urinaire basse simple, pas pyélonéphrite ni Proteus ; prudence rénale/G6PD.",
+            "fr": "Relier l’usage à une infection urinaire basse et vérifier fonction rénale et G6PD."
+          }
+        },
+        {
+          "id": "kum-08-v2-mupirocin",
+          "title": {
+            "ro": "Mupirocinul",
+            "fr": "Mupirocine"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "Mupirocinul topic inhibă sinteza proteică și ARN bacterian. Este folosit mai ales pentru decolonizarea nazală a S. aureus, inclusiv MRSA, pentru infecții cutanate minore și unele infecții de la inserția cateterului de dializă. Rezistența plasmidică MupA poate cauza eșec; utilizarea excesivă trebuie evitată.",
+            "fr": "La mupirocine topique inhibe la synthèse protéique et de l’ARN bactérien. Elle sert surtout à décoloniser le nez de S. aureus, dont MRSA, et à traiter certaines infections cutanées mineures ou au site d’insertion d’un cathéter de dialyse. La résistance plasmidique MupA peut entraîner un échec ; éviter l’usage excessif."
+          },
+          "express": {
+            "ro": "Mupirocine topique : décolonisation/peau ; résistance MupA possible.",
+            "fr": "Usage local ciblé et prudent de la mupirocine."
+          }
+        },
+        {
+          "id": "kum-08-v2-fosfomycin",
+          "title": {
+            "ro": "Fosfomicina",
+            "fr": "Fosfomycine"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "Fosfomicina inhibă biosinteza peptidoglicanului și necesită un sistem de transport glucidic. Este activă asupra multor Gram-pozitivi și E. coli, inclusiv unele tulpini ESBL, dar enzima FosA produsă de unele Gram-negative o poate distruge; semnificația clinică era incertă în sursă. Este disponibilă oral și IV și este folosită mai ales pentru ITU rezistente, cu testare a susceptibilității interpretată conform standardelor adecvate.",
+            "fr": "La fosfomycine inhibe la biosynthèse du peptidoglycane et nécessite un transporteur glucidique. Elle agit sur de nombreux Gram positifs et E. coli, dont certaines souches ESBL, mais l’enzyme FosA de certains Gram négatifs peut la détruire ; sa portée clinique était incertaine dans la source. Disponible par voie orale et IV, elle est surtout utilisée contre certaines infections urinaires résistantes, avec interprétation de la sensibilité selon les standards adaptés."
+          },
+          "express": {
+            "ro": "Fosfomycine : cible paroi, utile contre certaines E. coli ESBL ; tenir compte de FosA et du test.",
+            "fr": "Interpréter susceptibilité et enzyme FosA avant de conclure à l’activité."
+          }
+        },
+        {
+          "id": "kum-08-v2-rifaximin",
+          "title": {
+            "ro": "Rifaximina",
+            "fr": "Rifaximine"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "Rifaximina este o rifamicină cu absorbție gastrointestinală redusă. Manualul o menționează pentru encefalopatie portosistemică, prevenția diareei călătorului și posibil pe termen scurt în sindromul intestinului iritabil.",
+            "fr": "La rifaximine est une rifamycine faiblement absorbée par le tube digestif. Le manuel la cite dans l’encéphalopathie porto-systémique, la prévention de la diarrhée du voyageur et éventuellement à court terme dans le syndrome de l’intestin irritable."
+          },
+          "express": {
+            "ro": "Rifaximine peu absorbée : usages digestifs cités, distincts du traitement systémique du sepsis.",
+            "fr": "Connaître son absorption digestive faible et ses indications citées."
+          }
+        },
+        {
+          "id": "kum-08-v2-mrsa",
+          "title": {
+            "ro": "Infecțiile cu MRSA",
+            "fr": "Infections à MRSA"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "Rezistența la meticilină rezultă din modificarea PBP2a, care nu este inhibată de meticilină/flucloxacilină. Infecțiile simple se asociază frecvent dispozitivelor și necesită îndepărtarea sursei; aproximativ 5% pot disemina către os, articulații sau valve. Manualul descrie vancomicina IV cu nivel țintă 15–20 mg/L și monitorizare renală, cel puțin două săptămâni pentru forma descrisă și considerarea unui al doilea agent în infecții complicate, fără beneficiu clinic demonstrat pentru rifampicină adjuvantă în studiul citat. Linezolidul oral/IV este alternativă fără nefrotoxicitate, dar cere hemogramă săptămânală din cauza mielosupresiei și atenție la neuropatie de durată. Abordarea empirică a infecțiilor comunitare cutanate diferă de epidemiologia britanică și americană descrisă.",
+            "fr": "La résistance à la méticilline vient d’une modification de PBP2a, non inhibée par méticilline/flucloxacilline. Les infections simples sont souvent liées à un dispositif et nécessitent contrôle de source ; environ 5 % peuvent se disséminer vers os, articulations ou valves. Le manuel décrit vancomycine IV avec cible 15–20 mg/L et surveillance rénale, au moins deux semaines pour la forme décrite, et envisager un second agent dans les infections compliquées, sans bénéfice clinique démontré de rifampicine adjuvante dans l’étude citée. Linezolid oral/IV est une alternative sans néphrotoxicité, mais exige une NFS hebdomadaire pour myélosuppression et vigilance neuropathique au long cours. L’empirisme des infections cutanées communautaires dépend des épidémiologies britannique/américaine décrites."
+          },
+          "express": {
+            "ro": "MRSA : PBP2a, contrôle de source, vancomycine ou linezolid selon contexte, susceptibilité et surveillance.",
+            "fr": "Relier mécanisme PBP2a, dispositif, diffusion et toxicités des options décrites."
+          }
+        },
+        {
+          "id": "kum-08-v2-vre",
+          "title": {
+            "ro": "Enterococii rezistenți la vancomicină",
+            "fr": "Entérocoques résistants à la vancomycine"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "VRE modifică precursorul peptidoglicanului de D-Ala-D-Ala la D-Ala-D-Lac, reducând legarea vancomicinei și teicoplaninei. Infecțiile sunt adesea nosocomiale; virulența este redusă, dar tratamentul dificil. Focarele frecvente sunt urinar și biliar. Textul indică linezolid ca opțiune orală și daptomicină ori tigeciclină IV; endocardita este excepția clinică cu consecințe deosebit de importante.",
+            "fr": "Les VRE modifient le précurseur du peptidoglycane de D-Ala-D-Ala en D-Ala-D-Lac, diminuant la liaison de vancomycine et teicoplanine. Les infections sont souvent nosocomiales ; la virulence est faible, mais le traitement difficile. Les foyers fréquents sont urinaires et biliaires. Le texte cite le linezolid comme option orale et daptomycine ou tigécycline IV ; l’endocardite est l’exception aux conséquences cliniques majeures."
+          },
+          "express": {
+            "ro": "VRE : modification D-Ala-D-Lac ; options citées linezolid, daptomycine ou tigécycline selon site.",
+            "fr": "Comprendre la cible modifiée et le caractère souvent nosocomial des VRE."
+          }
+        },
+        {
+          "id": "kum-08-v2-carbapenem-resistant-pseudomonas",
+          "title": {
+            "ro": "Pseudomonas rezistent la carbapeneme",
+            "fr": "Pseudomonas résistant aux carbapénèmes"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "Rezistența provine frecvent din eflux crescut ori reducerea porinelor/permeabilității, nu doar din carbapenemaze. Se asociază des dispozitivelor și tractului respirator inferior. În monorezistență, opțiunile citate includ ciprofloxacină, gentamicină, ceftazidimă și piperacilină/tazobactam; multirezistența poate lăsa colistin IV ca opțiune, cu monitorizarea nivelurilor și toxicității renale/neurologice. Ceftolozan/tazobactam este descris ca opțiune mai nouă activă asupra unor tulpini multirezistente și mai puțin toxică decât colistinul.",
+            "fr": "La résistance vient souvent d’un efflux accru ou d’une diminution des porines/de la perméabilité, pas seulement de carbapénémases. Elle est fréquemment liée aux dispositifs et aux voies respiratoires basses. En monorésistance, les options citées sont ciprofloxacine, gentamicine, ceftazidime et pipéracilline/tazobactam ; la multirésistance peut ne laisser que colistine IV, avec suivi des concentrations et toxicités rénale/neurologique. Ceftolozane/tazobactam est décrit comme option plus récente active sur certaines souches multirésistantes et moins toxique que la colistine."
+          },
+          "express": {
+            "ro": "Distinguer efflux/porines ; traitement guidé par susceptibilité et toxicité.",
+            "fr": "Résistance de Pseudomonas et traitements exigent antibiogramme et surveillance spécialisée."
+          }
+        },
+        {
+          "id": "kum-08-v2-esbl",
+          "title": {
+            "ro": "Enterobacterii producătoare de ESBL",
+            "fr": "Entérobactéries productrices d’ESBL"
+          },
+          "pages": "167",
+          "sourcePdfPages": "190",
+          "text": {
+            "ro": "ESBL inactivează majoritatea β-lactaminelor, inclusiv peniciline, cefalosporine și aztreonam. Sediul frecvent este urinar; pot apărea și infecții digestive/hepatobiliare, adesea cu rezistență asociată la chinolone, cotrimoxazol și gentamicină. Manualul descrie carbapenema drept tratament principal al infecției severe; ertapenemul IV o dată pe zi poate facilita OPAT. Amikacina sau temocilina sunt prezentate ca opțiuni de protejare a carbapenemelor în funcție de sediu. Tabelul și textul sursei avertizează să nu se înlocuiască automat carbapenema doar pe baza unei MIC favorabile la piperacilină/tazobactam, având în vedere comparația clinică citată.",
+            "fr": "Les ESBL inactivent la plupart des β-lactamines, dont pénicillines, céphalosporines et aztréonam. Le foyer est souvent urinaire ; infections digestives/hépato-biliaires et résistances associées aux quinolones, cotrimoxazole et gentamicine sont possibles. Le manuel décrit la carbapénème comme traitement principal de l’infection grave ; ertapénem IV quotidien peut faciliter l’OPAT. Amikacine ou témocilline sont présentées comme options d’épargne selon le foyer. Le texte avertit de ne pas remplacer automatiquement la carbapénème sur la seule base d’une MIC favorable à pipéracilline/tazobactam, compte tenu de la comparaison clinique citée."
+          },
+          "express": {
+            "ro": "ESBL : β-lactamines inactivées, résistances associées fréquentes ; traitement ciblé selon foyer et susceptibilité.",
+            "fr": "Identifier le mécanisme ESBL et choisir l’option guidée par foyer/sensibilité."
+          }
+        },
+        {
+          "id": "kum-08-v2-cre",
+          "title": {
+            "ro": "Enterobacterii rezistente la carbapeneme (CRE)",
+            "fr": "Entérobactéries résistantes aux carbapénèmes (CRE)"
+          },
+          "pages": "167–168",
+          "sourcePdfPages": "190–191",
+          "text": {
+            "ro": "Carbapenemazele pot inactiva carbapenemele și alte β-lactamine; mecanismele enumerate sunt KPC, NDM, VIM, IMP și OXA. ITU este un focar frecvent. Tulpinile OXA‑48/KPC pot rămâne susceptibile la chinolone/aminoglicozide, iar rezistența la ceftazidimă/avibactam era descrisă ca rară în cadrul sursei; NDM tinde să reziste antibioticelor uzuale, cu posibile excepții colistin, fosfomicină și tigeciclină, dar testarea nu este standardizată. Textul avertizează asupra rezistenței/heterorezistenței la Klebsiella și asupra selectării în cursul terapiei. Pentru tulpinile CRE cu sensibilitate intermediară, manualul menționează meropenem în bolus sau infuzie la MIC 8–16 mg/L; colistinul este descris ca opțiune principală în unele contexte, cu tigeciclină/fosfomicină adjuvante doar după susceptibilitate. Mecanismul exact și antibiograma sunt esențiale; aceste regimuri istorice nu constituie recomandare de tratament actual.",
+            "fr": "Les carbapénémases peuvent inactiver carbapénèmes et autres β-lactamines ; mécanismes cités : KPC, NDM, VIM, IMP et OXA. Le foyer est souvent urinaire. Les souches OXA‑48/KPC peuvent rester sensibles aux quinolones/aminosides, et la résistance à ceftazidime/avibactam était décrite comme rare dans le contexte de la source ; NDM tend à résister aux antibiotiques usuels, avec exceptions possibles colistine, fosfomycine et tigécycline, mais les tests ne sont pas standardisés. Le texte signale résistance/hétéro-résistance chez Klebsiella et sélection sous traitement. Pour des CRE à sensibilité intermédiaire, le manuel cite méropénem en bolus ou perfusion à MIC 8–16 mg/L ; la colistine est décrite comme option principale dans certains contextes, tigécycline/fosfomycine seulement en adjuvant selon sensibilité. Le mécanisme et l’antibiogramme sont essentiels ; ces schémas historiques ne sont pas une recommandation actuelle."
+          },
+          "express": {
+            "ro": "CRE : identifier carbapénémase, foyer et antibiogramme ; la source souligne les tests non standardisés et l’hétéro-résistance.",
+            "fr": "Mécanisme CRE et susceptibilité guident seuls une stratégie spécialisée ; prudence face aux schémas anciens."
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "kum-08-exam-1",
+          "notion": "Définition",
+          "sectionIndex": 6,
+          "pages": "154",
+          "prompt": {
+            "ro": "Despre sepsis, sunt corecte:",
+            "fr": "Concernant le sepsis, sont exactes :"
+          },
+          "answer": 0,
+          "answers": [
+            0,
+            2
+          ],
+          "choices": [
+            {
+              "ro": "Implică disfuncție de organ amenințătoare de viață",
+              "fr": "Il implique une défaillance d’organe menaçant la vie"
+            },
+            {
+              "ro": "Este definit doar prin febră",
+              "fr": "Il est défini par la fièvre seule"
+            },
+            {
+              "ro": "Răspunsul gazdei la infecție este dereglat",
+              "fr": "La réponse de l’hôte à l’infection est dérégulée"
+            },
+            {
+              "ro": "O urocultură pozitivă demonstrează singură sepsisul",
+              "fr": "Une culture urinaire positive prouve seule le sepsis"
+            },
+            {
+              "ro": "Absența febrei îl exclude",
+              "fr": "L’absence de fièvre l’exclut"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Disfuncția este elementul care diferențiază sepsisul de o infecție simplă.",
+              "fr": "La défaillance distingue le sepsis d’une infection simple."
+            },
+            {
+              "ro": "Febra nu este suficientă.",
+              "fr": "La fièvre ne suffit pas."
+            },
+            {
+              "ro": "Leziunea rezultă și din răspunsul gazdei.",
+              "fr": "La réponse de l’hôte contribue aux lésions."
+            },
+            {
+              "ro": "Documentarea infecției nu demonstrează singură disfuncția de organ.",
+              "fr": "Documenter l’infection ne prouve pas seul une défaillance."
+            },
+            {
+              "ro": "Nu există această regulă de excludere.",
+              "fr": "Ce n’est pas un critère d’exclusion."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-sepsis3"
+        },
+        {
+          "id": "kum-08-exam-2",
+          "notion": "Choc septique",
+          "sectionIndex": 7,
+          "pages": "152, 154",
+          "prompt": {
+            "ro": "După repleție adecvată, ce asociere susține șocul septic?",
+            "fr": "Après remplissage adéquat, quelle association étaye le choc septique ?"
+          },
+          "answer": 0,
+          "answers": [
+            0
+          ],
+          "choices": [
+            {
+              "ro": "Vasopresor pentru PAM ≥65 și lactat >2 mmol/L",
+              "fr": "Vasopresseur pour PAM ≥65 et lactate >2 mmol/L"
+            },
+            {
+              "ro": "Febră izolată",
+              "fr": "Fièvre isolée"
+            },
+            {
+              "ro": "Tahicardie izolată",
+              "fr": "Tachycardie isolée"
+            },
+            {
+              "ro": "Cultură pozitivă fără disfuncție",
+              "fr": "Culture positive sans défaillance"
+            },
+            {
+              "ro": "Leucocitoză izolată",
+              "fr": "Hyperleucocytose isolée"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Cele două criterii se asociază în contextul sepsisului.",
+              "fr": "Les deux critères s’associent dans le contexte du sepsis."
+            },
+            {
+              "ro": "Nu demonstrează șocul.",
+              "fr": "Elle ne démontre pas un choc."
+            },
+            {
+              "ro": "Este nespecifică.",
+              "fr": "Elle est non spécifique."
+            },
+            {
+              "ro": "Nu definește sepsisul sau șocul.",
+              "fr": "Elle ne définit ni sepsis ni choc."
+            },
+            {
+              "ro": "Nu constituie criteriul hemodinamic și metabolic.",
+              "fr": "Elle ne constitue pas le critère hémodynamique et métabolique."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-septic-shock"
+        },
+        {
+          "id": "kum-08-exam-3",
+          "notion": "Physiopathologie",
+          "sectionIndex": 4,
+          "pages": "154",
+          "prompt": {
+            "ro": "Ce mecanisme poate contribui la disfuncția de organ în sepsis?",
+            "fr": "Quel mécanisme peut contribuer à une défaillance d’organe lors d’un sepsis ?"
+          },
+          "answer": 0,
+          "answers": [
+            0
+          ],
+          "choices": [
+            {
+              "ro": "Vasodilatație și creșterea permeabilității capilare",
+              "fr": "Vasodilatation et augmentation de la perméabilité capillaire"
+            },
+            {
+              "ro": "Oprirea universală a inflamației",
+              "fr": "Arrêt universel de l’inflammation"
+            },
+            {
+              "ro": "Doar temperatura crescută",
+              "fr": "La seule élévation de température"
+            },
+            {
+              "ro": "O cultură pozitivă fără răspuns al gazdei",
+              "fr": "Une culture positive sans réponse de l’hôte"
+            },
+            {
+              "ro": "Creșterea obligatorie a perfuziei tuturor organelor",
+              "fr": "Une augmentation obligatoire de la perfusion de tous les organes"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Ambele pot altera perfuzia și distribuția lichidului.",
+              "fr": "Les deux peuvent altérer perfusion et distribution des liquides."
+            },
+            {
+              "ro": "Răspunsul inflamator este dereglat, nu universal absent.",
+              "fr": "La réponse inflammatoire est dérégulée, pas universellement absente."
+            },
+            {
+              "ro": "Febra singură nu explică disfuncția multiorganică.",
+              "fr": "La fièvre seule n’explique pas la défaillance multiviscérale."
+            },
+            {
+              "ro": "Nu descrie mecanismul leziunii.",
+              "fr": "Cela ne décrit pas le mécanisme des lésions."
+            },
+            {
+              "ro": "Microcirculația poate fi neomogenă și ineficientă.",
+              "fr": "La microcirculation peut être hétérogène et inefficace."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-pathophysiology"
+        },
+        {
+          "id": "kum-08-exam-4",
+          "notion": "Bilan initial",
+          "sectionIndex": 2,
+          "pages": "151–153, 157–159",
+          "prompt": {
+            "ro": "Evaluarea inițială a sepsisului trebuie să combine:",
+            "fr": "L’évaluation initiale du sepsis doit associer :"
+          },
+          "answer": 0,
+          "answers": [
+            0
+          ],
+          "choices": [
+            {
+              "ro": "Căutarea infecției, evaluarea organelor și identificarea focarului",
+              "fr": "Recherche de l’infection, évaluation des organes et identification du foyer"
+            },
+            {
+              "ro": "Doar temperatura",
+              "fr": "La température seule"
+            },
+            {
+              "ro": "Așteptarea culturilor înaintea oricărui suport urgent",
+              "fr": "Attendre les cultures avant tout soutien urgent"
+            },
+            {
+              "ro": "Antibiotice fără reevaluare ulterioară",
+              "fr": "Antibiotiques sans réévaluation ultérieure"
+            },
+            {
+              "ro": "Un examen izolat fără context clinic",
+              "fr": "Un examen isolé sans contexte clinique"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Aceste trei direcții structurează bilanțul descris.",
+              "fr": "Ces trois axes structurent le bilan décrit."
+            },
+            {
+              "ro": "Nu evaluează disfuncția de organ.",
+              "fr": "Cela n’évalue pas la défaillance d’organe."
+            },
+            {
+              "ro": "Recoltările nu trebuie să întârzie îngrijirea urgentă.",
+              "fr": "Les prélèvements ne doivent pas retarder la prise en charge urgente."
+            },
+            {
+              "ro": "Tratamentul empiric trebuie reevaluat.",
+              "fr": "Le traitement empirique doit être réévalué."
+            },
+            {
+              "ro": "Raționamentul se bazează pe ansamblul clinic și biologic.",
+              "fr": "Le raisonnement repose sur l’ensemble clinique et biologique."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-examination"
+        },
+        {
+          "id": "kum-08-exam-5",
+          "notion": "Sepsis Six",
+          "sectionIndex": 18,
+          "pages": "157",
+          "prompt": {
+            "ro": "Care element aparține pachetului Sepsis Six prezentat în ediția de referință?",
+            "fr": "Quel élément appartient au Sepsis Six présenté dans l’édition de référence ?"
+          },
+          "answer": 0,
+          "answers": [
+            0
+          ],
+          "choices": [
+            {
+              "ro": "Măsurarea lactatului",
+              "fr": "Mesure du lactate"
+            },
+            {
+              "ro": "O doză fixă identică de antibiotic pentru toți",
+              "fr": "Une dose fixe identique d’antibiotique pour tous"
+            },
+            {
+              "ro": "Amânarea evaluării diurezei",
+              "fr": "Reporter l’évaluation de la diurèse"
+            },
+            {
+              "ro": "Omiterea hemoculturilor",
+              "fr": "Omettre les hémocultures"
+            },
+            {
+              "ro": "Folosirea qSOFA ca test diagnostic",
+              "fr": "Utiliser le qSOFA comme test diagnostique"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Măsurarea lactatului face parte din cele șase acțiuni ale pachetului descris.",
+              "fr": "La mesure du lactate fait partie des six actions du paquet décrit."
+            },
+            {
+              "ro": "Alegerea și doza depind de pacient și de focar.",
+              "fr": "Le choix et la dose dépendent du patient et du foyer."
+            },
+            {
+              "ro": "Monitorizarea diurezei este inclusă în pachet.",
+              "fr": "La surveillance de la diurèse est incluse."
+            },
+            {
+              "ro": "Hemoculturile fac parte din pachet.",
+              "fr": "Les hémocultures font partie du paquet."
+            },
+            {
+              "ro": "qSOFA este un instrument de risc, nu un test diagnostic.",
+              "fr": "Le qSOFA est un outil de risque, pas un test diagnostique."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-sepsis-six"
+        },
+        {
+          "id": "kum-08-exam-6",
+          "notion": "Prélèvements",
+          "sectionIndex": 22,
+          "pages": "158",
+          "prompt": {
+            "ro": "În suspiciunea de sepsis meningococic, recoltarea culturilor trebuie să:",
+            "fr": "En cas de suspicion de sepsis méningococcique, le prélèvement des cultures doit :"
+          },
+          "answer": 0,
+          "answers": [
+            0
+          ],
+          "choices": [
+            {
+              "ro": "Nu întârzie administrarea antibioticelor",
+              "fr": "Ne pas retarder l’administration des antibiotiques"
+            },
+            {
+              "ro": "Aibă prioritate față de orice suport urgent",
+              "fr": "Être prioritaire sur tout soutien urgent"
+            },
+            {
+              "ro": "Înlocuiască evaluarea clinică",
+              "fr": "Remplacer l’évaluation clinique"
+            },
+            {
+              "ro": "Se facă numai după confirmarea disfuncției de organ",
+              "fr": "Être fait uniquement après confirmation de la défaillance d’organe"
+            },
+            {
+              "ro": "Fie omisă în toate formele de sepsis",
+              "fr": "Être omis dans tous les sepsis"
+            }
+          ],
+          "choiceReasons": [
+            {
+              "ro": "Cartea precizează că tratamentul nu trebuie amânat pentru recoltare în această situație.",
+              "fr": "Le livre précise que le traitement ne doit pas attendre le prélèvement dans cette situation."
+            },
+            {
+              "ro": "Recoltarea nu trebuie să întârzie îngrijirea urgentă.",
+              "fr": "Le prélèvement ne doit pas retarder les soins urgents."
+            },
+            {
+              "ro": "Culturile documentează microorganismul, nu înlocuiesc evaluarea pacientului.",
+              "fr": "Les cultures documentent le microorganisme, sans remplacer l’évaluation du patient."
+            },
+            {
+              "ro": "Investigațiile sunt parte din evaluarea inițială.",
+              "fr": "Les prélèvements font partie du bilan initial."
+            },
+            {
+              "ro": "Culturile rămân utile când pot fi recoltate fără întârziere nejustificată.",
+              "fr": "Les cultures restent utiles si elles peuvent être prélevées sans retard injustifié."
+            }
+          ],
+          "explanation": {
+            "ro": "Compară fiecare afirmație cu noțiunea din fișă și verifică pagina indicată.",
+            "fr": "Comparez chaque proposition à la notion de la fiche et à la page indiquée."
+          },
+          "sectionId": "kum-08-v2-cultures"
+        }
+      ]
+    },
+    {
+      "id": "norya-rebuild-kum-09-v1",
+      "version": "1.0.0",
+      "updatedOn": "2026-10-11",
+      "verification": "needs-review",
+      "coverage": "partial",
+      "chapterId": "kum-09",
+      "title": {
+        "ro": "Echilibrul hidro-electrolitic și acido-bazic",
+        "fr": "Équilibre hydro-électrolytique et acido-basique"
+      },
+      "status": "Reconstrucție Norya distinctă, ordonnée selon le passage exigible du manuel complet. Les portions encore non transcrites sont signalées dans la cartographie documentaire; relecture médicale humaine non effectuée.",
+      "sections": [
+        {
+          "id": "kum-09-rebuild-compartments",
+          "title": {
+            "ro": "Apa totală, compartimente și osmolalitate",
+            "fr": "Eau totale, compartiments et osmolalité"
+          },
+          "pages": "172–173",
+          "sourcePdfPages": "195–196",
+          "text": {
+            "ro": "Apa totală reprezintă aproximativ 50–60% din masa slabă la bărbat și 40–50% la femeie; exemplul manualului pentru un bărbat de 70 kg este circa 42 L. Lichidul intracelular este aproximativ 28 L, interstițiul 9,4 L, iar plasma 4,6 L. Membranele celulare separă spațiul intracelular de cel extracelular; capilarele separă plasma de interstițiu. Na⁺ predomină extracelular, K⁺ intracelular; ureea traversează compartimentele și este osmotic inactivă pentru distribuția apei. Apa se deplasează către compartimentul cu particule osmotic active. De aceea, apa liberă se distribuie în toate compartimentele, soluția salină izotonă rămâne predominant extracelular, iar coloidul susține inițial volumul intravascular prin presiunea oncotică.",
+            "fr": "L’eau totale représente environ 50–60 % de la masse maigre chez l’homme et 40–50 % chez la femme ; l’exemple du manuel pour un homme de 70 kg est d’environ 42 L. Le compartiment intracellulaire représente environ 28 L, l’interstitium 9,4 L et le plasma 4,6 L. Les membranes cellulaires séparent l’intracellulaire de l’extracellulaire ; les capillaires séparent plasma et interstitium. Na⁺ prédomine à l’extérieur et K⁺ à l’intérieur des cellules ; l’urée traverse les compartiments et est osmotiquement inactive pour la distribution de l’eau. L’eau se déplace vers les particules osmotiques actives. L’eau libre se distribue donc dans tous les compartiments, le sérum salé isotonique reste surtout extracellulaire et le colloïde soutient initialement le volume intravasculaire par pression oncotique."
+          },
+          "express": {
+            "ro": "42 L la 70 kg; intracelular 28 L, interstițial 9,4 L, plasmă 4,6 L; Na extracelular, K intracelular.",
+            "fr": "42 L pour 70 kg ; intracellulaire 28 L, interstitiel 9,4 L, plasma 4,6 L ; Na extracellulaire, K intracellulaire."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-volume-control",
+          "title": {
+            "ro": "Volumul extracelular și controlul renal al sodiului",
+            "fr": "Volume extracellulaire et contrôle rénal du sodium"
+          },
+          "pages": "173–176",
+          "sourcePdfPages": "196–199",
+          "text": {
+            "ro": "Cantitatea totală de sodiu corporal determină în principal volumul extracelular; concentrația plasmatică a sodiului reflectă în special raportul dintre cationii schimbabili și apa totală. Rinichiul adaptează excreția de sodiu la volumul arterial circulant efectiv (VASE), nu doar la volumul extracelular vizibil. Scăderea debitului cardiac ori vasodilatația arterială pot produce subumplere arterială chiar în prezența edemelor. Baroreceptori, sistem simpatic, renină–angiotensină–aldosteron, ADH și peptide natriuretice modifică filtrarea și reabsorbția tubulară. În nefron, aproximativ 60–70% din sodiul filtrat se reabsoarbe proximal, 20–25% în ansa Henle, circa 5% distal și 4% în ductele colectoare; segmentele distale reglează fin excreția, potasiul și acidul.",
+            "fr": "La quantité totale de sodium corporel détermine principalement le volume extracellulaire ; la natrémie reflète surtout le rapport entre cations échangeables et eau totale. Le rein adapte l’excrétion sodée au volume artériel circulant efficace (VACE), pas seulement au volume extracellulaire visible. Baisse du débit cardiaque ou vasodilatation artérielle peuvent créer une sous-remplissage artériel malgré des œdèmes. Barorécepteurs, système sympathique, rénine–angiotensine–aldostérone, ADH et peptides natriurétiques modifient filtration et réabsorption tubulaires. Dans le néphron, environ 60–70 % du sodium filtré est réabsorbé proximalement, 20–25 % dans l’anse, environ 5 % distalement et 4 % dans les canaux collecteurs ; les segments distaux règlent finement excrétion, potassium et acide."
+          },
+          "express": {
+            "ro": "Cantitatea totală de Na controlează volumul extracelular; VASE controlează răspunsul renal și neurohormonal.",
+            "fr": "Le sodium total règle le volume extracellulaire ; le VACE règle les réponses rénales et neurohormonales."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-edema-diuretics",
+          "title": {
+            "ro": "Edemele, depleția volemică și diureticele",
+            "fr": "Œdèmes, déplétion volémique et diurétiques"
+          },
+          "pages": "176–183",
+          "sourcePdfPages": "199–206",
+          "text": {
+            "ro": "Edemul apare prin dezechilibrul presiunilor hidrostatice și oncotice, permeabilitate crescută, drenaj limfatic insuficient ori retenție renală de sare și apă. În insuficiență cardiacă, ciroză și hipoalbuminemie, VASE scăzut activează retenția neurohormonală chiar dacă lichidul extracelular este crescut. Depleția poate proveni din pierderi digestive, renale sau cutanate; sepsisul și ciroza pot mima hipovolemia prin vasodilatație și extravazare. Diureticele de ansă blochează NKCC2 și sunt cele mai potente; tiazidele blochează cotransportul Na–Cl distal și reduc excreția calciului; spironolactona/eplerenona antagonizează aldosteronul, iar amiloridul/triamterenul blochează ENaC; acetazolamida inhibă anhidraza carbonică; vaptanii blochează receptorii V2. Rezistența la diuretic cere verificarea absorbției, RFG și retenției de sodiu; combinațiile potențează diureza, dar pot provoca dezechilibre electrolitice severe.",
+            "fr": "L’œdème résulte d’un déséquilibre des pressions hydrostatique/oncotique, d’une perméabilité accrue, d’un drainage lymphatique insuffisant ou d’une rétention rénale de sel et d’eau. Dans l’insuffisance cardiaque, la cirrhose et l’hypoalbuminémie, un VACE bas active la rétention neurohormonale malgré l’excès extracellulaire. La déplétion peut provenir de pertes digestives, rénales ou cutanées ; sepsis et cirrhose peuvent simuler l’hypovolémie par vasodilatation et fuite capillaire. Les diurétiques de l’anse bloquent NKCC2 et sont les plus puissants ; les thiazidiques bloquent le cotransport Na–Cl distal et réduisent l’excrétion calcique ; spironolactone/éplérénone antagonisent l’aldostérone, amiloride/triamtérène bloquent ENaC ; acétazolamide inhibe l’anhydrase carbonique ; vaptans bloquent V2. En cas de résistance, vérifiez absorption, DFG et rétention sodée ; les associations renforcent la diurèse mais peuvent provoquer de graves troubles électrolytiques."
+          },
+          "express": {
+            "ro": "Edem ≠ volum circulant eficient; clasa diureticului corespunde segmentului tubular și efectelor sale.",
+            "fr": "Œdème ≠ volume circulant efficace ; chaque classe diurétique cible un segment et a ses effets propres."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-sodium",
+          "title": {
+            "ro": "Tulburările sodiului: hiponatremia și hipernatremia",
+            "fr": "Troubles du sodium : hyponatrémie et hypernatrémie"
+          },
+          "pages": "183–187",
+          "sourcePdfPages": "206–210",
+          "text": {
+            "ro": "Hiponatremia trebuie interpretată după osmolalitate și status volemic; diferențiază hipovolemia, euvolemia/SIADH și hipervolemia și verifică glicemia, funcția renală, tiroida, cortizolul, medicamentele și osmolaritatea urinară. Simptomele neurologice pot apărea la scădere rapidă; convulsiile și coma reprezintă urgență. Manualul descrie soluție salină 3% în hiponatremia simptomatică severă și subliniază monitorizarea frecventă a sodiului și evitarea corecției prea rapide: reperul său general este cel mult 8 mmol/L în 24 h și 18 mmol/L în 48 h, cu prudență suplimentară la alcoolism, ciroză, malnutriție și hipokaliemie. Hipernatremia indică de regulă deficit de apă; estimează cauza și accesul la apă, corectează deficitul treptat și tratează hipovolemia circulatorie înaintea apei libere. Valorile și regimurile exacte trebuie citite în tabelele sursă și nu folosite ca prescripție individuală.",
+            "fr": "Interprétez l’hyponatrémie selon osmolalité et volémie ; distinguez hypovolémie, euvolémie/SIADH et hypervolémie, puis vérifiez glycémie, fonction rénale, thyroïde, cortisol, médicaments et osmolalité urinaire. Les symptômes neurologiques peuvent suivre une chute rapide ; convulsions et coma sont des urgences. Le manuel décrit le sérum salé à 3 % en cas de symptômes sévères et souligne surveillance fréquente de la natrémie et prévention d’une correction trop rapide : repère général de l’édition, au plus 8 mmol/L en 24 h et 18 mmol/L en 48 h, avec prudence accrue en cas d’alcoolisme, cirrhose, malnutrition ou hypokaliémie. L’hypernatrémie indique généralement un déficit en eau ; recherchez sa cause et l’accès à l’eau, corrigez progressivement et traitez l’hypovolémie circulatoire avant l’eau libre. Les valeurs et schémas exacts doivent être vérifiés dans les tableaux sources et ne sont pas une prescription individuelle."
+          },
+          "express": {
+            "ro": "Hyponatremie: osmolalitate + volemie + simptomatologie; evită supracorecția. Hipernatremie: deficit de apă, corecție atentă.",
+            "fr": "Hyponatrémie : osmolalité + volémie + symptômes ; éviter la surcorrection. Hypernatrémie : déficit en eau, correction prudente."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-potassium",
+          "title": {
+            "ro": "Tulburările potasiului și urgența hiperkaliemiei",
+            "fr": "Troubles du potassium et urgence hyperkaliémique"
+          },
+          "pages": "187–190",
+          "sourcePdfPages": "210–213",
+          "text": {
+            "ro": "Hipokaliemia rezultă din pierderi digestive/renale, aport redus, redistribuire intracelulară sau exces mineralocorticoid. Potasiul urinar >20 mmol/zi orientează spre pierdere renală; <20 mmol/zi, spre aport redus ori pierdere extrarenală. Hipokaliemia severă (<2,5 mmol/L) poate provoca slăbiciune; verifică magneziul, ECG, medicamentele și echilibrul acido-bazic, deoarece deficitul de magneziu poate împiedica răspunsul la suplimentare. Hiperkaliemia poate reflecta insuficiență renală, medicamente care reduc excreția, deficit de aldosteron, acidoză, liză celulară sau pseudohiperkaliemie. Confirmă un rezultat neașteptat fără întârzierea tratamentului când există modificări ECG ori instabilitate. În forme severe, tratează separat protecția cardiacă, deplasarea temporară a K⁺ intracelular și eliminarea potasiului; ECG progresiv din manual leagă undele T ascuțite, prelungirea conducerii și lărgirea QRS de agravare.",
+            "fr": "L’hypokaliémie provient de pertes digestives/rénales, apport réduit, transfert intracellulaire ou excès minéralocorticoïde. Une kaliurèse >20 mmol/j oriente vers une perte rénale ; <20 mmol/j, vers apport faible ou perte extrarénale. Une hypokaliémie sévère (<2,5 mmol/L) peut causer faiblesse ; vérifiez magnésium, ECG, médicaments et équilibre acido-basique, car l’hypomagnésémie peut empêcher la correction. L’hyperkaliémie peut refléter insuffisance rénale, médicaments réduisant l’excrétion, déficit d’aldostérone, acidose, lyse cellulaire ou pseudohyperkaliémie. Confirmez un résultat inattendu sans retarder le traitement si ECG anormal ou instabilité. Dans les formes sévères, distinguez protection cardiaque, transfert intracellulaire transitoire et élimination du potassium ; l’ECG du manuel relie ondes T pointues, ralentissement de conduction et élargissement du QRS à l’aggravation."
+          },
+          "express": {
+            "ro": "Kaliurie și ECG orientează cauza și riscul; în hiperkaliemia severă, protejează cordul și elimină K⁺.",
+            "fr": "Kaliurèse et ECG orientent cause et risque ; dans l’hyperkaliémie sévère, protéger le cœur et éliminer K⁺."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-acid-base",
+          "title": {
+            "ro": "Echilibrul acido-bazic: tampoane, plămân și rinichi",
+            "fr": "Équilibre acido-basique : tampons, poumon et rein"
+          },
+          "pages": "195–198",
+          "sourcePdfPages": "218–221",
+          "text": {
+            "ro": "pH-ul sanguin normal este prezentat în manual la 7,38–7,42; la pH 7,40, [H⁺] este 40 nmol/L. Acidemia înseamnă pH scăzut, alcalemia pH crescut; acidoza/alcaloza denumesc procesele care produc schimbarea. Relația Henderson–Hasselbalch exprimă dependența pH-ului de bicarbonat și CO₂. Tampoanele chimice limitează variația imediată, plămânul ajustează PaCO₂, iar rinichiul reabsoarbe bicarbonatul filtrat și excretă încărcătura acidă zilnică. Proximalul reabsoarbe aproximativ 85–90% din bicarbonatul filtrat; excreția renală netă de acid are loc mai distal și folosește tamponul fosfat și amoniacul pentru a permite eliminarea H⁺ fără coborârea excesivă a pH-ului urinar.",
+            "fr": "Le manuel situe le pH sanguin normal à 7,38–7,42 ; à pH 7,40, [H⁺] vaut 40 nmol/L. L’acidémie correspond à un pH bas et l’alcalémie à un pH haut ; acidose/alcalose désignent les processus responsables. Henderson–Hasselbalch exprime la dépendance du pH au bicarbonate et au CO₂. Les tampons limitent la variation immédiate, le poumon ajuste PaCO₂ et le rein réabsorbe le bicarbonate filtré et excrète la charge acide quotidienne. Le tubule proximal réabsorbe environ 85–90 % du bicarbonate filtré ; l’excrétion acide nette se fait plus distalement et utilise tampons phosphate et ammoniac pour éliminer H⁺ sans abaisser excessivement le pH urinaire."
+          },
+          "express": {
+            "ro": "Tampoane → răspuns respirator → răspuns renal; proximalul reabsoarbe 85–90% din HCO₃⁻ filtrat.",
+            "fr": "Tampons → réponse respiratoire → réponse rénale ; le proximal réabsorbe 85–90 % du HCO₃⁻ filtré."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-acid-base-disorders",
+          "title": {
+            "ro": "Interpretarea gazometriei și tulburările acido-bazice",
+            "fr": "Interprétation des gaz du sang et troubles acido-basiques"
+          },
+          "pages": "198–202",
+          "sourcePdfPages": "221–225",
+          "text": {
+            "ro": "Interpretează sistematic pH-ul, PaCO₂ și HCO₃⁻: stabilește dacă predomină acidoza sau alcaloza, identifică procesul primar și verifică dacă răspunsul compensator este potrivit. Apoi calculează anion gap-ul pentru acidoza metabolică și caută cauze cu gap crescut sau normal; lactatul, cetoacizii, insuficiența renală, pierderea digestivă de bicarbonat și acidozele tubulare renale au mecanisme diferite. Alcaloza metabolică se organizează după depleția de clor/volum versus cauze mineralocorticoide; potasiul și clorul urinare pot orienta. Tulburările mixte sunt posibile, iar o valoare aparent normală a pH-ului nu exclude procese opuse concomitente. Algoritmii, nomograma și clasificarea exactă a cauzelor de pe paginile 199–202 trebuie consultate împreună cu gazometria și contextul pacientului.",
+            "fr": "Interprétez systématiquement pH, PaCO₂ et HCO₃⁻ : déterminez acidose ou alcalose prédominante, identifiez le processus primaire et vérifiez l’adéquation de la compensation. Calculez ensuite le trou anionique en cas d’acidose métabolique et recherchez les causes à trou élevé ou normal ; lactate, cétoacides, insuffisance rénale, pertes digestives de bicarbonate et acidoses tubulaires ont des mécanismes différents. Classez l’alcalose métabolique selon déplétion en chlore/volume ou causes minéralocorticoïdes ; kaliurèse et chlorurie peuvent orienter. Des troubles mixtes sont possibles et un pH apparemment normal n’exclut pas deux processus opposés. Algorithmes, nomogramme et classement exact des causes pages 199–202 doivent être lus avec les gaz du sang et le contexte."
+          },
+          "express": {
+            "ro": "pH → proces primar → compensare → anion gap → etiologie; caută întotdeauna tulburări mixte.",
+            "fr": "pH → processus primaire → compensation → trou anionique → étiologie ; recherchez toujours des troubles mixtes."
+          }
+        }
+      ],
+      "questions": [
+        {
+          "id": "kum-09-rebuild-q1",
+          "sectionId": "kum-09-rebuild-compartments",
+          "sectionIndex": 0,
+          "pages": "172",
+          "prompt": {
+            "ro": "Care ion predomină în compartimentul intracelular?",
+            "fr": "Quel ion prédomine dans le compartiment intracellulaire ?"
+          },
+          "choices": [
+            {
+              "ro": "Sodiu",
+              "fr": "Sodium"
+            },
+            {
+              "ro": "Potasiu",
+              "fr": "Potassium"
+            },
+            {
+              "ro": "Clor",
+              "fr": "Chlore"
+            }
+          ],
+          "answer": 1,
+          "explanation": {
+            "ro": "K⁺ este principalul cation intracelular; Na⁺ predomină extracelular.",
+            "fr": "K⁺ est le principal cation intracellulaire ; Na⁺ prédomine à l’extérieur."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-q2",
+          "sectionId": "kum-09-rebuild-sodium",
+          "sectionIndex": 3,
+          "pages": "185–186",
+          "prompt": {
+            "ro": "Care este plafonul general de corecție a natremiei cronice menționat în manual?",
+            "fr": "Quelle limite générale de correction de la natrémie chronique le manuel mentionne-t-il ?"
+          },
+          "choices": [
+            {
+              "ro": "Cel mult 8 mmol/L în 24 h",
+              "fr": "Au plus 8 mmol/L en 24 h"
+            },
+            {
+              "ro": "20 mmol/L în 24 h",
+              "fr": "20 mmol/L en 24 h"
+            },
+            {
+              "ro": "Nu este necesară monitorizarea",
+              "fr": "Aucune surveillance n’est nécessaire"
+            }
+          ],
+          "answer": 0,
+          "explanation": {
+            "ro": "Manualul avertizează asupra demielinizării osmotice la corecția prea rapidă.",
+            "fr": "Le manuel avertit du risque de démyélinisation osmotique en cas de correction trop rapide."
+          }
+        },
+        {
+          "id": "kum-09-rebuild-q3",
+          "sectionId": "kum-09-rebuild-potassium",
+          "sectionIndex": 4,
+          "pages": "188–190",
+          "prompt": {
+            "ro": "Ce indică o kaliurie >20 mmol/zi în evaluarea hipokaliemiei?",
+            "fr": "Que suggère une kaliurèse >20 mmol/j dans l’évaluation d’une hypokaliémie ?"
+          },
+          "choices": [
+            {
+              "ro": "Pierdere renală de potasiu",
+              "fr": "Perte rénale de potassium"
+            },
+            {
+              "ro": "Pseudohiperkaliemie",
+              "fr": "Pseudohyperkaliémie"
+            },
+            {
+              "ro": "Aport suficient de potasiu",
+              "fr": "Apport potassique suffisant"
+            }
+          ],
+          "answer": 0,
+          "explanation": {
+            "ro": "Pragul urinar din tabel orientează spre excreție renală crescută.",
+            "fr": "Le seuil urinaire du tableau oriente vers une excrétion rénale accrue."
+          }
+        }
+      ]
+    }
+  ],
+  "flashcards": [
+    {
+      "id": "norya-kum-08-kum-08-v2-clinical-skills-card",
+      "sectionId": "kum-08-v2-clinical-skills",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Abilități clinice în infecții și sepsis / Compétences cliniques en infection et sepsis",
+      "verso": "RO · Repérer le sepsis, agir sans retard, reconnaître les complications et choisir les antibiotiques avec discernement.\nFR · Reconnaître le sepsis, agir rapidement, repérer les complications et raisonner l’antibiothérapie.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 151. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-anamnesis-card",
+      "sectionId": "kum-08-v2-anamnesis",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Anamneza orientată spre infecție / Anamnèse orientée vers l’infection",
+      "verso": "RO · Durée et symptômes systémiques, foyer probable, vulnérabilités, antibiotiques/soins récents, résistances et voyages.\nFR · Durée, symptômes, foyer, vulnérabilités, expositions aux soins/antibiotiques, résistances et voyages.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 151–152. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-examination-card",
+      "sectionId": "kum-08-v2-examination",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Examen obiectiv și căutarea focarului / Examen clinique et recherche du foyer",
+      "verso": "RO · Examen complet guidé par l’anatomie : constantes, perfusion, cœur/poumons, abdomen, peau, dispositifs, articulations et SNC.\nFR · Examen systématique orienté par les foyers : constantes, perfusion, organes, peau, dispositifs et articulations.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 153. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-introduction-card",
+      "sectionId": "kum-08-v2-introduction",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Introducere / Introduction",
+      "verso": "RO · Réponse immunitaire inadaptée à l’infection → défaillance d’organe, parfois multiviscérale.\nFR · Une réponse immunitaire inadéquate à l’infection peut entraîner une défaillance multiviscérale.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-pathophysiology-card",
+      "sectionId": "kum-08-v2-pathophysiology",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Fiziopatologie / Physiopathologie",
+      "verso": "RO · PAMP → immunité innée/cytokines/NET et microthrombi ; dérégulation → fuite capillaire, hypoperfusion et atteinte d’organe.\nFR · PAMP activent inflammation et immunothrombose ; leur dérégulation provoque fuite capillaire, hypoperfusion et défaillance.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-organ-dysfunction-card",
+      "sectionId": "kum-08-v2-organ-dysfunction",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Disfuncția de organ / Défaillance d’organe",
+      "verso": "RO · Atteinte interconnectée : cardiocirculatoire, pulmonaire, intestinale, rénale et neurologique.\nFR · Les défaillances circulatoire, pulmonaire, digestive, rénale et cérébrale interagissent.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-sepsis3-card",
+      "sectionId": "kum-08-v2-sepsis3",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Definiția Sepsis-3 / Définition Sepsis-3",
+      "verso": "RO · Définition Sepsis-3 : infection + réponse dérégulée de l’hôte + défaillance d’organe ; SIRS seul ne suffit pas.\nFR · Sepsis-3 associe infection et défaillance d’organe due à une réponse dérégulée ; le SIRS ne suffit pas.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-septic-shock-card",
+      "sectionId": "kum-08-v2-septic-shock",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Șocul septic / Choc septique",
+      "verso": "RO · Vasopresseur pour PAM ≥65 mmHg + lactate >2 mmol/L malgré remplissage adéquat.\nFR · Choc septique : vasopresseur pour PAM ≥65 et lactate >2 malgré remplissage adéquat.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-recognition-card",
+      "sectionId": "kum-08-v2-recognition",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Recunoașterea sepsisului și instrumentele de risc / Reconnaître le sepsis et utiliser les outils de risque",
+      "verso": "RO · qSOFA ≥2/3 est un signal de risque, pas un test diagnostique ; NEWS2 ≥5 est le repère britannique cité.\nFR · qSOFA ≥2/3 signale un risque, sans poser le diagnostic ; NEWS2 ≥5 est le repère britannique cité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-sofa-card",
+      "sectionId": "kum-08-v2-sofa",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Scorul SOFA și grila din Cadranul 8.2 / Score SOFA et grille de l’encadré 8.2",
+      "verso": "RO · SOFA : six systèmes, scores 0–4 ; seuils PaO₂/FiO₂, plaquettes, bilirubine, PAM/vasopresseurs, Glasgow et rein.\nFR · SOFA cote six systèmes de 0 à 4 : respiration, coagulation, foie, circulation, neurologie et rein.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 155. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-risk-groups-card",
+      "sectionId": "kum-08-v2-risk-groups",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Grupele aflate la risc / Groupes à risque",
+      "verso": "RO · Risque accru : extrêmes d’âge, sepsis antérieur, immunodépression, dispositifs, grossesse et certaines dépendances.\nFR · Repérer terrain, âge, immunodépression, dispositifs et expositions qui augmentent le risque.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 154–155. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-inpatient-surveillance-card",
+      "sectionId": "kum-08-v2-inpatient-surveillance",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Supravegherea intraspitalicească / Surveillance à l’hôpital",
+      "verso": "RO · Surveillance dynamique : score d’alerte + jugement clinique, réévaluation rapide, SBAR et lactate interprété dans le contexte.\nFR · Détecter l’aggravation par la surveillance, les signes cliniques, la réévaluation et le lactate.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 155. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-origin-card",
+      "sectionId": "kum-08-v2-origin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Originea sepsisului / Origine du sepsis",
+      "verso": "RO · Repères de l’édition : communautaire ≤48 h ; nosocomial >48 h ; tenir compte des soins récents et des dispositifs.\nFR · Distinguer communauté, soins récents et infection nosocomiale ; rechercher dispositifs et résistances.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 155. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-clinical-picture-card",
+      "sectionId": "kum-08-v2-clinical-picture",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Tablou clinic / Tableau clinique",
+      "verso": "RO · Continuum local → systémique → défaillance ; associer clinique, biologie, ECG et imagerie selon le foyer.\nFR · Tableau variable, sans signe unique ; rechercher réponse systémique et défaillances avec les examens adaptés.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 156. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-travel-card",
+      "sectionId": "kum-08-v2-travel",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Sepsis la persoanele întoarse din călătorii / Sepsis au retour de voyage",
+      "verso": "RO · Destination + dates + expositions ; repères de 21 j pour fièvre hémorragique et 14 j pour MERS dans l’édition.\nFR · Documenter destination, période et expositions ; inclure hémocultures et dépistage du paludisme.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 156. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-injecting-drugs-card",
+      "sectionId": "kum-08-v2-injecting-drugs",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Sepsis la consumatorii de droguri injectabile / Sepsis chez les usagers de drogues injectables",
+      "verso": "RO · Rechercher abcès/thrombophlébite, endocardite et foyers métastatiques ; prévoir contrôle de source et traitement prolongé si complication.\nFR · Rechercher foyer d’injection et dissémination vers cœur, poumon, os ou articulations.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 156. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-neutropenia-card",
+      "sectionId": "kum-08-v2-neutropenia",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Pacienții neutropenici / Patients neutropéniques",
+      "verso": "RO · Neutropénie après chimiothérapie : risque de Pseudomonas ; le manuel cite pipéracilline-tazobactam ± aminoside.\nFR · Neutropénie fébrile : tenir compte du risque de Pseudomonas et de la source locale.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-immobilized-card",
+      "sectionId": "kum-08-v2-immobilized",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Pacienții imobilizați / Patients immobilisés",
+      "verso": "RO · Dispositifs, prévention des escarres et signes atypiques de dysautonomie après lésion médullaire.\nFR · Prévenir les infections liées aux dispositifs et repérer les présentations atypiques.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-sepsis-six-card",
+      "sectionId": "kum-08-v2-sepsis-six",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Tratamentul sepsisului și Sepsis Six / Traitement du sepsis et Sepsis Six",
+      "verso": "RO · Sepsis Six : oxygène, cultures, antibiotique, liquides, lactate, diurèse/bilan horaires.\nFR · Six actions initiales : oxygène, hémocultures, antibiotique, liquides, lactate et suivi de la diurèse.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-surviving-sepsis-card",
+      "sectionId": "kum-08-v2-surviving-sepsis",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Recomandările Surviving Sepsis Campaign / Recommandations Surviving Sepsis Campaign",
+      "verso": "RO · SSC du manuel : dépistage, cultures, antibiotique rapide/désescalade, contrôle du foyer et cristalloïdes.\nFR · Suivre le cadre de l’édition avec réévaluation quotidienne et contrôle précoce du foyer.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-fluid-resuscitation-card",
+      "sectionId": "kum-08-v2-fluid-resuscitation",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Resuscitarea volemică și lichidele / Remplissage vasculaire et fluides",
+      "verso": "RO · Repère du manuel : cristalloïdes 30 ml/kg en 3 h ; réévaluer la réponse, la surcharge et le contexte.\nFR · Le volume initial cité n’est pas universel : mesurer la réponse et réévaluer les risques.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-antibiotics-and-source-card",
+      "sectionId": "kum-08-v2-antibiotics-and-source",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Antibioterapia inițială și controlul sursei / Antibiothérapie initiale et contrôle du foyer",
+      "verso": "RO · Antibiothérapie précoce + contrôle anatomique du foyer ; les chiffres d’études ne prédisent pas un cas individuel.\nFR · Ne pas opposer antibiotiques et contrôle de source : traiter les deux dimensions.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 157–158. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-cultures-card",
+      "sectionId": "kum-08-v2-cultures",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Probe, culturi și investigații microbiologice / Prélèvements, cultures et examens microbiologiques",
+      "verso": "RO · Prélèvements avant traitement si cela ne retarde pas l’urgence ; résultats microbiologiques réévalués vers 72 h.\nFR · Choisir les prélèvements selon le foyer, sans retarder l’antibiotique urgent.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 158. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-molecular-diagnostics-card",
+      "sectionId": "kum-08-v2-molecular-diagnostics",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Identificarea moleculară a agenților / Identification moléculaire des agents",
+      "verso": "RO · PCR 16S identifie sans antibiogramme ; MALDI‑TOF identifie par spectre protéique et peut repérer certaines résistances.\nFR · Méthodes moléculaires plus rapides, mais la PCR 16S ne remplace pas la susceptibilité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 158. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-antimicrobial-stewardship-card",
+      "sectionId": "kum-08-v2-antimicrobial-stewardship",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Administrarea prudentă a tratamentului antimicrobian / Bon usage des antimicrobiens",
+      "verso": "RO · Antibiotique, dose et durée adaptés ; les cibles CQUIN citées sont historiques et britanniques.\nFR · Réévaluer l’utilité, réduire l’exposition inutile et distinguer les politiques nationales.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 159. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-empirical-choice-card",
+      "sectionId": "kum-08-v2-empirical-choice",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Înaintea antibioterapiei empirice / Avant l’antibiothérapie empirique",
+      "verso": "RO · Choix empirique = foyer + résistances locales/antécédents + organes + allergies + paramètres de prescription.\nFR · Individualiser l’empirisme selon foyer, résistances, fonctions d’organes et allergies.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 159. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-72-hour-review-card",
+      "sectionId": "kum-08-v2-72-hour-review",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Antibioterapia după 72 de ore / Réévaluation à 72 heures",
+      "verso": "RO · À 72 h : arrêter, désescalader/oral, changer, poursuivre IV ou organiser OPAT.\nFR · Décider à partir des cultures, de l’évolution, du foyer et de la complexité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 159. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-opat-card",
+      "sectionId": "kum-08-v2-opat",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Antibioterapia parenterală în ambulatoriu (OPAT) / Antibiothérapie parentérale ambulatoire (OPAT)",
+      "verso": "RO · OPAT : patient stable et sélectionné, accès au suivi, service structuré et modalité adaptée.\nFR · L’OPAT exige sélection, stabilité, observance et surveillance organisée.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 159–160. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-opat-monitoring-card",
+      "sectionId": "kum-08-v2-opat-monitoring",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Furnizarea și monitorizarea serviciului OPAT / Organisation et surveillance de l’OPAT",
+      "verso": "RO · OPAT : surveillance hebdomadaire minimale des bilans cités et vigilance sur accès veineux, toxicité et rechute.\nFR · Organiser l’équipe, les bilans, les concentrations utiles et l’accès rapide aux soins.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 160. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-allergy-card",
+      "sectionId": "kum-08-v2-allergy",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Evaluarea riscului alergic / Évaluer le risque allergique",
+      "verso": "RO · Caractériser délai, signes et gravité ; distinguer immédiat IgE d’une réaction tardive et documenter les expositions.\nFR · Évaluer précisément la réaction avant d’exclure une classe entière ; avis spécialisé si nécessaire.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 160. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-chemoprophylaxis-card",
+      "sectionId": "kum-08-v2-chemoprophylaxis",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Chemoprofilaxia antibiotică / Chimioprophylaxie antibiotique",
+      "verso": "RO · Caseta 8.7 : situații profilactice distincte; regimurile ediției nu sunt automat prescripții actuale.\nFR · Distinguer prophylaxie des contacts, asplénie, tuberculose et règles d’endocardite ; vérifier les recommandations en vigueur.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 161. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-antibiotic-principles-card",
+      "sectionId": "kum-08-v2-antibiotic-principles",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Terapiile antibiotice: principii farmacologice / Antibiotiques : principes pharmacologiques",
+      "verso": "RO · Choix et dose dépendent de PK/PD, du foyer, de la gravité, de la voie et des organes.\nFR · Relier activité, exposition, voie et fonction d’organe.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 161. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-dose-table-card",
+      "sectionId": "kum-08-v2-dose-table",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Dozele uzuale din Cadranul 8.8 / Doses usuelles de l’encadré 8.8",
+      "verso": "RO · Tableau 8.8 consulté ; transcription et vérification indépendante des doses restent nécessaires avant publication pédagogique.\nFR · Les doses de l’édition ne sont ni transcrites intégralement ni validées pour la pratique actuelle.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 162. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-beta-lactam-principle-card",
+      "sectionId": "kum-08-v2-beta-lactam-principle",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Antibiotice β-lactamice: mecanism / Antibiotiques β-lactamines : mécanisme",
+      "verso": "RO · β-lactamines : paroi bactérienne, effet bactéricide dépendant du temps ; β-lactamases = résistance.\nFR · Comprendre cible de paroi et mécanismes de β-lactamases.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 162–163. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-penicillins-card",
+      "sectionId": "kum-08-v2-penicillins",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Penicilinele / Pénicillines",
+      "verso": "RO · Distinguer spectres et exceptions au sein des pénicillines ; tenir compte β-lactamases et réactions allergiques.\nFR · Pénicillines : spectre variable, allergie et résistances ; flucloxacilline pour MSSA selon la source.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 162–163. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-cephalosporins-card",
+      "sectionId": "kum-08-v2-cephalosporins",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Cefalosporinele / Céphalosporines",
+      "verso": "RO · Couverture anti-Pseudomonas limitée à certaines molécules ; vérifier ESBL, allergie croisée et erratum non confirmé.\nFR · Les céphalosporines diffèrent selon la génération ; ne pas généraliser leur spectre.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 163. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-monobactams-card",
+      "sectionId": "kum-08-v2-monobactams",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Monobactamii / Monobactames",
+      "verso": "RO · Aztreonam : Gram négatifs aérobies seulement ; certaines métallo-β-lactamases et Pseudomonas.\nFR · Spectre étroit des monobactames : bacilles Gram négatifs aérobies.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 163. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-carbapenems-card",
+      "sectionId": "kum-08-v2-carbapenems",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Carbapenemele / Carbapénèmes",
+      "verso": "RO · Large spectre sans MRSA ; ertapenem sans Pseudomonas/Acinetobacter ; imipenem + cilastatine.\nFR · Réserver au contexte de résistance ; connaître l’exception d’ertapénem et l’association à cilastatine.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 163. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-beta-lactamase-inhibitors-card",
+      "sectionId": "kum-08-v2-beta-lactamase-inhibitors",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Asocieri β-lactamă/inhibitor de β-lactamază / Associations β-lactamine/inhibiteur de β-lactamase",
+      "verso": "RO · Inhibiteurs : restaurer/protéger l’activité de la molécule partenaire contre certaines β-lactamases.\nFR · L’association et le mécanisme de résistance déterminent l’activité ; ne pas extrapoler à toutes les enzymes.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 163–164. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-quinolones-card",
+      "sectionId": "kum-08-v2-quinolones",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Chinolonele / Quinolones",
+      "verso": "RO · Quinolones : ADN-gyrase/topoisomérase ; risques tendineux, neurologiques et QT, résistance locale à vérifier.\nFR · Spectre utile mais résistance et effets tendineux/QT limitent l’emploi.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 164. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-aminoglycosides-card",
+      "sectionId": "kum-08-v2-aminoglycosides",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Aminoglicozidele / Aminosides",
+      "verso": "RO · Aminosides : Gram négatifs, concentration surveillée, néphro-/ototoxicité et prudence en myasthénie.\nFR · Surveiller les concentrations et les toxicités rénale, auditive et neuromusculaire.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 164. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-glycopeptides-card",
+      "sectionId": "kum-08-v2-glycopeptides",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Glicopeptidele / Glycopeptides",
+      "verso": "RO · Vancomycine : Gram positifs/MRSA, suivi rénal et pharmacologique ; perfuser prudemment.\nFR · Glycopeptides : cible paroi Gram positif et nécessité de surveillance.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 164. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-lipopeptides-card",
+      "sectionId": "kum-08-v2-lipopeptides",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Lipopeptidele / Lipopeptides",
+      "verso": "RO · Daptomycine : infections graves à Gram positif ; dalbavancine : longue demi-vie.\nFR · Connaître les usages décrits des lipopeptides et leur place dans le traitement ciblé.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 164. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-oxazolidinones-card",
+      "sectionId": "kum-08-v2-oxazolidinones",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Oxazolidinonele / Oxazolidinones",
+      "verso": "RO · Oxazolidinones : Gram positifs résistants, excellente voie orale du linezolid, interactions et NFS hebdomadaire.\nFR · Surveiller cytopénies, neuropathies et interactions sérotoninergiques/adrénergiques.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 164–165. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-tetracyclines-card",
+      "sectionId": "kum-08-v2-tetracyclines",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Tetraciclinele și tigeciclina / Tétracyclines et tigécycline",
+      "verso": "RO · Tigécycline : exceptions Pseudomonas/Proteus ; prudence en infection grave, grossesse, enfance et fonction rénale.\nFR · Tétracyclines : inhibiteurs protéiques ; interactions avec fer/antiacides et précautions d’âge/grossesse.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 165. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-macrolides-card",
+      "sectionId": "kum-08-v2-macrolides",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Macrolidele / Macrolides",
+      "verso": "RO · Macrolides : atypiques respiratoires et plusieurs agents ; interactions médicamenteuses et QT.\nFR · Vérifier interactions et risque de QT, notamment avec d’autres médicaments concernés.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 165. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-polymyxins-card",
+      "sectionId": "kum-08-v2-polymyxins",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Polimixinele și colistimetatul / Polymyxines et colistiméthate",
+      "verso": "RO · Polymyxines : recours contre certains Gram négatifs résistants ; toxicité rénale/neurologique majeure.\nFR · Dernier recours, spectre et toxicités imposent surveillance et susceptibilité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 165–166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-fusidate-card",
+      "sectionId": "kum-08-v2-fusidate",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Fusidatul de sodiu / Fusidate de sodium",
+      "verso": "RO · Fusidate : association anti-staphylococcique pour éviter une résistance rapide ; éviter statines.\nFR · Ne pas employer seul dans les infections staphylococciques selon la source.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-sulfonamides-trimethoprim-card",
+      "sectionId": "kum-08-v2-sulfonamides-trimethoprim",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Sulfamidele și trimetoprimul / Sulfamides et triméthoprime",
+      "verso": "RO · Cotrimoxazole : réactions cutanées/hématologiques et hémolyse G6PD ; triméthoprime : hyperkaliémie/interactions.\nFR · Repérer toxicités foliques, G6PD, coagulation et potassium.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-nitroimidazoles-card",
+      "sectionId": "kum-08-v2-nitroimidazoles",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Nitroimidazolii / Nitroimidazolés",
+      "verso": "RO · Métronidazole : anaérobies/protozoaires ; prévenir interaction alcool-warfarine et neuropathie prolongée.\nFR · Connaître spectre anaérobie et interactions du métronidazole.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-clindamycin-card",
+      "sectionId": "kum-08-v2-clindamycin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Clindamicina / Clindamycine",
+      "verso": "RO · Clindamycine : inhibition de certaines toxines, mais risque C. difficile.\nFR · Associer activité anti-toxinique et vigilance sur C. difficile.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-nitrofurantoin-card",
+      "sectionId": "kum-08-v2-nitrofurantoin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Nitrofurantoina / Nitrofurantoïne",
+      "verso": "RO · Nitrofurantoïne : infection urinaire basse simple, pas pyélonéphrite ni Proteus ; prudence rénale/G6PD.\nFR · Relier l’usage à une infection urinaire basse et vérifier fonction rénale et G6PD.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 166. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-mupirocin-card",
+      "sectionId": "kum-08-v2-mupirocin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Mupirocinul / Mupirocine",
+      "verso": "RO · Mupirocine topique : décolonisation/peau ; résistance MupA possible.\nFR · Usage local ciblé et prudent de la mupirocine.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-fosfomycin-card",
+      "sectionId": "kum-08-v2-fosfomycin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Fosfomicina / Fosfomycine",
+      "verso": "RO · Fosfomycine : cible paroi, utile contre certaines E. coli ESBL ; tenir compte de FosA et du test.\nFR · Interpréter susceptibilité et enzyme FosA avant de conclure à l’activité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-rifaximin-card",
+      "sectionId": "kum-08-v2-rifaximin",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Rifaximina / Rifaximine",
+      "verso": "RO · Rifaximine peu absorbée : usages digestifs cités, distincts du traitement systémique du sepsis.\nFR · Connaître son absorption digestive faible et ses indications citées.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-mrsa-card",
+      "sectionId": "kum-08-v2-mrsa",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Infecțiile cu MRSA / Infections à MRSA",
+      "verso": "RO · MRSA : PBP2a, contrôle de source, vancomycine ou linezolid selon contexte, susceptibilité et surveillance.\nFR · Relier mécanisme PBP2a, dispositif, diffusion et toxicités des options décrites.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-vre-card",
+      "sectionId": "kum-08-v2-vre",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Enterococii rezistenți la vancomicină / Entérocoques résistants à la vancomycine",
+      "verso": "RO · VRE : modification D-Ala-D-Lac ; options citées linezolid, daptomycine ou tigécycline selon site.\nFR · Comprendre la cible modifiée et le caractère souvent nosocomial des VRE.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-carbapenem-resistant-pseudomonas-card",
+      "sectionId": "kum-08-v2-carbapenem-resistant-pseudomonas",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Pseudomonas rezistent la carbapeneme / Pseudomonas résistant aux carbapénèmes",
+      "verso": "RO · Distinguer efflux/porines ; traitement guidé par susceptibilité et toxicité.\nFR · Résistance de Pseudomonas et traitements exigent antibiogramme et surveillance spécialisée.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-esbl-card",
+      "sectionId": "kum-08-v2-esbl",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Enterobacterii producătoare de ESBL / Entérobactéries productrices d’ESBL",
+      "verso": "RO · ESBL : β-lactamines inactivées, résistances associées fréquentes ; traitement ciblé selon foyer et susceptibilité.\nFR · Identifier le mécanisme ESBL et choisir l’option guidée par foyer/sensibilité.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-08-kum-08-v2-cre-card",
+      "sectionId": "kum-08-v2-cre",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Rezidențiat · Sepsis et traitement des infections bactériennes",
+      "recto": "Enterobacterii rezistente la carbapeneme (CRE) / Entérobactéries résistantes aux carbapénèmes (CRE)",
+      "verso": "RO · CRE : identifier carbapénémase, foyer et antibiogramme ; la source souligne les tests non standardisés et l’hétéro-résistance.\nFR · Mécanisme CRE et susceptibilité guident seuls une stratégie spécialisée ; prudence face aux schémas anciens.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p. 167–168. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-compartments-card",
+      "sectionId": "kum-09-rebuild-compartments",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Apa totală, compartimente și osmolalitate / Eau totale, compartiments et osmolalité",
+      "verso": "RO · 42 L la 70 kg; intracelular 28 L, interstițial 9,4 L, plasmă 4,6 L; Na extracelular, K intracelular.\nFR · 42 L pour 70 kg ; intracellulaire 28 L, interstitiel 9,4 L, plasma 4,6 L ; Na extracellulaire, K intracellulaire.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 172–173. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-volume-control-card",
+      "sectionId": "kum-09-rebuild-volume-control",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Volumul extracelular și controlul renal al sodiului / Volume extracellulaire et contrôle rénal du sodium",
+      "verso": "RO · Cantitatea totală de Na controlează volumul extracelular; VASE controlează răspunsul renal și neurohormonal.\nFR · Le sodium total règle le volume extracellulaire ; le VACE règle les réponses rénales et neurohormonales.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 173–176. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-edema-diuretics-card",
+      "sectionId": "kum-09-rebuild-edema-diuretics",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Edemele, depleția volemică și diureticele / Œdèmes, déplétion volémique et diurétiques",
+      "verso": "RO · Edem ≠ volum circulant eficient; clasa diureticului corespunde segmentului tubular și efectelor sale.\nFR · Œdème ≠ volume circulant efficace ; chaque classe diurétique cible un segment et a ses effets propres.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 176–183. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-sodium-card",
+      "sectionId": "kum-09-rebuild-sodium",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Tulburările sodiului: hiponatremia și hipernatremia / Troubles du sodium : hyponatrémie et hypernatrémie",
+      "verso": "RO · Hyponatremie: osmolalitate + volemie + simptomatologie; evită supracorecția. Hipernatremie: deficit de apă, corecție atentă.\nFR · Hyponatrémie : osmolalité + volémie + symptômes ; éviter la surcorrection. Hypernatrémie : déficit en eau, correction prudente.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 183–187. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-potassium-card",
+      "sectionId": "kum-09-rebuild-potassium",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Tulburările potasiului și urgența hiperkaliemiei / Troubles du potassium et urgence hyperkaliémique",
+      "verso": "RO · Kaliurie și ECG orientează cauza și riscul; în hiperkaliemia severă, protejează cordul și elimină K⁺.\nFR · Kaliurèse et ECG orientent cause et risque ; dans l’hyperkaliémie sévère, protéger le cœur et éliminer K⁺.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 187–190. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-acid-base-card",
+      "sectionId": "kum-09-rebuild-acid-base",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Echilibrul acido-bazic: tampoane, plămân și rinichi / Équilibre acido-basique : tampons, poumon et rein",
+      "verso": "RO · Tampoane → răspuns respirator → răspuns renal; proximalul reabsoarbe 85–90% din HCO₃⁻ filtrat.\nFR · Tampons → réponse respiratoire → réponse rénale ; le proximal réabsorbe 85–90 % du HCO₃⁻ filtré.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 195–198. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "norya-kum-09-kum-09-rebuild-acid-base-disorders-card",
+      "sectionId": "kum-09-rebuild-acid-base-disorders",
+      "objectiveId": "kum-09",
+      "itemNumber": 9,
+      "subject": "Rezidențiat · Équilibre hydro-électrolytique et acido-basique",
+      "recto": "Interpretarea gazometriei și tulburările acido-bazice / Interprétation des gaz du sang et troubles acido-basiques",
+      "verso": "RO · pH → proces primar → compensare → anion gap → etiologie; caută întotdeauna tulburări mixte.\nFR · pH → processus primaire → compensation → trou anionique → étiologie ; recherchez toujours des troubles mixtes.",
+      "sourceVersionId": "kumar-ro-2021-kum-09",
+      "explanation": "Kumar RO 2021, p. 198–202. Module original à relire; Consulter les errata associés à la fiche."
+    },
+    {
+      "id": "glossary-disfunctie-organ",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Vocabulaire médical RO–FR",
+      "recto": "disfuncție de organ",
+      "verso": "défaillance d’organe — Alterarea funcției unui organ, relevantă pentru gravitatea sepsisului. / Altération de la fonction d’un organe, déterminante pour la gravité du sepsis.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p.154 · À vérifier"
+    },
+    {
+      "id": "glossary-vasoplegie",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Vocabulaire médical RO–FR",
+      "recto": "vasoplegie",
+      "verso": "vasoplégie — Scăderea tonusului vascular, cu reducerea rezistenței periferice. / Diminution du tonus vasculaire et des résistances périphériques.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p.154 · À vérifier"
+    },
+    {
+      "id": "glossary-frison",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Vocabulaire médical RO–FR",
+      "recto": "frison solemn",
+      "verso": "grand frisson — Frison intens; termen corectat în errata pentru anamneza infecțioasă. / Frisson intense ; terme corrigé dans l’erratum pour l’interrogatoire infectieux.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p.152 · À vérifier"
+    },
+    {
+      "id": "glossary-diureza",
+      "objectiveId": "kum-08",
+      "itemNumber": 8,
+      "subject": "Vocabulaire médical RO–FR",
+      "recto": "diureză",
+      "verso": "diurèse — Volumul de urină produs într-un interval de timp. / Volume d’urine produit pendant un intervalle de temps.",
+      "sourceVersionId": "kumar-ro-2021-kum-08",
+      "explanation": "Kumar RO 2021, p.152–154 · À vérifier"
+    }
+  ]
+}

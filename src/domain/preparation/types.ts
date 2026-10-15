@@ -14,6 +14,7 @@ export type PreparationProfile = {
   examDate: { provisional: Day; official?: { date: Day; source: string } };
   specialties: string[];
   weeklyMinutes: [number, number, number, number, number, number, number];
+  availabilityConfigured?: boolean;
   restDays: Weekday[];
   startsOn: Day;
   firstPassTarget: Day;

@@ -7,15 +7,23 @@ import type {
   PreparationProfile,
 } from "./types";
 import { addDays, assertDay, daysBetween, weekday, isDay } from "./dates";
-import { deadline, examDay } from "./profile";
+import {
+  AUTOMATIC_DAILY_CAPACITY_MINUTES,
+  deadline,
+  examDay,
+} from "./profile";
 import { emptyProgress, reviewInterval } from "./progress";
+
+export { AUTOMATIC_DAILY_CAPACITY_MINUTES } from "./profile";
 
 export function dailyCapacity(profile: PreparationProfile, day: Day): number {
   const dow = weekday(day);
   return profile.restDays.includes(dow) ||
     profile.constraints.unavailableDates.includes(day)
     ? 0
-    : profile.weeklyMinutes[dow];
+    : profile.availabilityConfigured
+      ? profile.weeklyMinutes[dow]
+      : AUTOMATIC_DAILY_CAPACITY_MINUTES;
 }
 export function validateProgram(program: Objective[]) {
   if (new Set(program.map((o) => o.id)).size !== program.length)

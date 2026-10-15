@@ -5,6 +5,7 @@ import {
   Txt,
   Card,
   Button,
+  Progress,
   Icon,
   Section,
   RowLink,
@@ -20,13 +21,20 @@ import {
   FinalConsolidation,
 } from "../components/PreparationSummary";
 import { usePreparation } from "../state/PreparationProvider";
+import { completionPercent } from "../domain/preparation/progress";
+import { useLearning } from "../state/LearningProvider";
+import { groupDailyEvents, groupDailyTasks } from "../domain/preparation/dailyTasks";
 export default function Home() {
   const { profile, state, today, plan, summary } = usePreparation();
+  const { learning } = useLearning();
   const onboarded = state.onboarded;
-  const tasks = plan.tasks.filter((t) => t.on === today);
+  const tasks = groupDailyTasks(plan.tasks.filter((t) => t.on === today));
+  const todaysEvents = groupDailyEvents(summary.todaysEvents);
   const next = tasks[0];
   const activePass = plan.passes.find(p=>p.completed < p.total) ?? plan.passes.at(-1)!;
+  const activePassPercent = completionPercent(activePass.completed, activePass.total);
   const minutes = tasks.reduce((n, t) => n + t.minutes, 0);
+  const dueErrors = (learning.errorCards ?? []).filter(card => card.nextReviewOn <= today);
   return (
     <Screen
       title={
@@ -40,7 +48,7 @@ export default function Home() {
         </Txt>
         <View style={s.row}>
           <Icon name="flame-outline" color="#BC8652" size={18} />
-          <Txt size={12}>{summary.todayMinutes} min effectuées</Txt>
+          <Txt size={12}>{summary.todayMinutes} min estimées enregistrées</Txt>
         </View>
       </View>
       <Columns
@@ -75,9 +83,9 @@ export default function Home() {
               </Txt>
               <Txt color="#D8E9DF" size={14}>
                 {onboarded
-                  ? "Aujourd’hui, " +
+                  ? "Pour terminer tes tours à temps, voici ce qu’il faudrait travailler aujourd’hui : " +
                     minutes +
-                    " minutes planifiées pour avancer à votre rythme."
+                    " min recommandées."
                   : "Votre prochain pas : créer votre profil pour obtenir votre calendrier."}
               </Txt>
               <View style={[s.between, { marginTop: 6, flexWrap: "wrap" }]}>
@@ -88,15 +96,10 @@ export default function Home() {
                         ? "/onboarding"
                         : next
                           ? {
-                              pathname: "/study",
-                              params: {
-                                objectiveId: next.objectiveId,
-                                kind: next.kind,
-                                pass: String(next.pass ?? 1),
-                                minutes: String(next.minutes),
-                              },
+                              pathname: "/chapter",
+                              params: { id: next.objectiveId },
                             }
-                          : "/calendar",
+                          : "/schedule",
                     )
                   }
                   style={[s.button, { backgroundColor: c.lime }]}
@@ -112,14 +115,14 @@ export default function Home() {
                 </Pressable>
                 <Txt size={12} color="#D8E9DF">
                   {summary.todaysEvents.filter((e) => e.completed).length}{" "}
-                  validation(s) aujourd’hui
+                      partie(s) terminée(s) aujourd’hui
                 </Txt>
               </View>
             </View>
             <Section
               title="Votre programme du jour"
               action="Voir le planning"
-              onPress={() => router.push("/calendar")}
+              onPress={() => router.push("/schedule")}
             />
             <Card style={{ paddingVertical: 5 }}>
               {onboarded ? (
@@ -137,77 +140,27 @@ export default function Home() {
                   parcours.
                 </Txt>
               )}
-              {summary.todaysEvents.map((e) => (
+              {todaysEvents.map(({event:e,count}) => (
                 <RowLink
-                  key={e.id}
+                  key={`${e.objectiveId}:${e.pass}:${e.kind}`}
                   title={
                     objectives.find((o) => o.id === e.objectiveId)?.title ??
                     e.objectiveId
                   }
-                  subtitle={
-                    e.minutes +
-                    " min effectuées · " +
-                    (e.completed ? "Validée" : "Séance partielle")
-                  }
+                  subtitle={`${count > 1 ? `${count} parties terminées` : "Partie terminée"} · tour ${e.pass ?? 1} · progression sauvegardée`}
                   icon="checkmark-circle-outline"
                   href={{
-                    pathname: "/study",
-                    params: { objectiveId: e.objectiveId },
+                    pathname: "/chapter",
+                    params: { id: e.objectiveId },
                   }}
                 />
               ))}
             </Card>
-            <RowLink title="QCM du jour · Sepsis" subtitle="4 questions originales RO–FR · entraînement libre" href={{pathname:'/chapter',params:{id:'kum-08',tab:'qcm'}}} />
+            <RowLink title="Entraînement Rezidențiat" subtitle="Questions originales Norya · annales vérifiées indisponibles" href="/quiz" />
             <RowLink title="Mes flashcards du jour" subtitle="Rappels espacés du deck personnel" href="/flashcards" />
-            <Section title="Apprendre autrement" />
-            <View style={{ flexDirection: "row", gap: 14 }}>
-              <Pressable
-                style={{ flex: 1 }}
-                onPress={() => router.push("/podcasts")}
-              >
-                <Card
-                  style={{
-                    backgroundColor: c.peach,
-                    borderColor: c.peach,
-                    flex: 1,
-                  }}
-                >
-                  <Icon name="headset-outline" size={30} />
-                  <Txt bold size={17}>
-                    Une pause qui fait avancer
-                  </Txt>
-                  <Txt size={12} color={c.muted}>
-                    Aperçu audio de démonstration.
-                  </Txt>
-                  <Txt bold size={13}>
-                    Écouter un podcast →
-                  </Txt>
-                </Card>
-              </Pressable>
-              <Pressable
-                style={{ flex: 1 }}
-                onPress={() => router.push("/errors")}
-              >
-                <Card
-                  style={{
-                    backgroundColor: c.lavender,
-                    borderColor: c.lavender,
-                    flex: 1,
-                  }}
-                >
-                  <Icon name="layers-outline" size={30} />
-                  <Txt bold size={17}>
-                    L’erreur fait partie du chemin
-                  </Txt>
-                  <Txt size={12} color={c.muted}>
-                    Aperçu du futur carnet d’erreurs.
-                  </Txt>
-                  <Txt bold size={13}>
-                    Ouvrir mon carnet →
-                  </Txt>
-                </Card>
-              </Pressable>
-            </View>
+            <Section title="Réviser" />
+            <RowLink title="Mes erreurs" subtitle={`${dueErrors.length} à revoir · historique local`} icon="layers-outline" href="/errors" />
+            <RowLink title="Flashcards" subtitle="Rappels prévus dans le deck personnel" icon="albums-outline" href="/flashcards" />
           </>
         }
         side={
@@ -217,28 +170,12 @@ export default function Home() {
                 <Txt bold>Tour {activePass.number}</Txt>
                 <Icon name="flag-outline" color={c.primary} />
               </View>
-              <View style={{ alignItems: "center", padding: 12 }}>
-                <View
-                  style={{
-                    width: 146,
-                    height: 146,
-                    borderRadius: 80,
-                    borderWidth: 11,
-                    borderColor: c.mint,
-                    borderTopColor: c.primary,
-                    borderRightColor: c.primary,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Txt size={35} bold>
-                    {Math.round(activePass.completed / Math.max(1, activePass.total) * 100)}
-                    <Txt size={19}> %</Txt>
-                  </Txt>
-                  <Txt size={11} color={c.muted}>
-                    du chemin parcouru
-                  </Txt>
+              <View style={{ gap: 10, paddingVertical: 12 }}>
+                <View style={s.between}>
+                  <Txt size={35} bold>{activePassPercent}<Txt size={19}> %</Txt></Txt>
+                  <Txt size={11} color={c.muted}>du tour parcouru</Txt>
                 </View>
+                <Progress value={activePassPercent} color={c.primary} />
               </View>
               <Txt size={13} color={c.muted} style={{ textAlign: "center" }}>
                 {activePass.completed} chapitres sur {activePass.total}
@@ -275,7 +212,7 @@ export default function Home() {
                 La régularité compte plus que la durée. Gardez un petit moment
                 pour un rappel actif de vos objectifs déjà parcourus.
               </Txt>
-              <Pressable onPress={() => router.push("/coach")}>
+              <Pressable onPress={() => router.push("/mentor")}>
                 <Txt color={c.primary} bold size={13}>
                   Échanger avec mon coach →
                 </Txt>

@@ -31,8 +31,11 @@ import {
 } from "../domain/preparation/dates";
 import { dailyCapacity } from "../domain/preparation/planner";
 import { objectives } from "../data/program";
+import { useLearning } from "../state/LearningProvider";
+import { groupDailyEvents, groupDailyTasks } from "../domain/preparation/dailyTasks";
 export default function Calendar() {
   const { profile, plan, today, summary, state } = usePreparation();
+  const { learning } = useLearning();
   const [selected, setSelected] = useState(today);
   const [week, setWeek] = useState(false);
   const [adapt, setAdapt] = useState(false);
@@ -47,7 +50,7 @@ export default function Calendar() {
   const slots = Array.from({ length }, (_, i) => addDays(start, i));
   const tasksByDay = useMemo(() => {
     const m = new Map<string, typeof plan.tasks>();
-    for (const t of plan.tasks) {
+    for (const t of groupDailyTasks(plan.tasks)) {
       const list = m.get(t.on) ?? [];
       list.push(t);
       m.set(t.on, list);
@@ -55,7 +58,8 @@ export default function Calendar() {
     return m;
   }, [plan]);
   const tasks = tasksByDay.get(selected) ?? [];
-  const events = state.events.filter((e) => e.on === selected);
+  const events = groupDailyEvents(state.events.filter((e) => e.on === selected));
+  const dueErrorCards = (learning.errorCards ?? []).filter(card => card.nextReviewOn <= selected);
   const shift = (n: number) =>
     setSelected(week ? addDays(selected, n * 7) : moveMonth(selected, n));
   return (
@@ -81,6 +85,17 @@ export default function Calendar() {
           onPress={() => router.push("/onboarding")}
         />
       )}
+      {!!dueErrorCards.length && <Card>
+        <Txt bold>Erreurs dues au {formatDay(selected)}</Txt>
+        {dueErrorCards.map(card => <RowLink key={card.id} title={card.notion} subtitle={`Échéance ${formatDay(card.nextReviewOn)} · contenu en attente de vérification`} icon="alert-circle-outline" href="/errors" />)}
+      </Card>}
+      <Card>
+        <Txt bold>Pour terminer tes tours à temps</Txt>
+        <Txt>Voici ce qu’il faudrait travailler aujourd’hui : {tasks.reduce((sum, task) => sum + task.minutes, 0)} min recommandées sur {new Set(tasks.map(task => task.objectiveId)).size} chapitre(s). Le calcul se met à jour après chaque partie terminée, y compris depuis la bibliothèque.</Txt>
+        {plan.requiredMinutesPerAvailableDay !== null && <Txt size={12} color={plan.feasible ? c.muted : c.primary}>
+          Charge moyenne nécessaire : environ {(plan.requiredMinutesPerAvailableDay / 60).toFixed(1)} h par jour actif pour finir avant J−30.
+        </Txt>}
+      </Card>
       <Columns
         main={
           <>
@@ -193,27 +208,22 @@ export default function Calendar() {
             <Section title={formatDay(selected, { weekday: "long" })} />
             <Card>
               <Txt size={13} color={c.muted}>
-                Disponibilité : {dailyCapacity(profile, selected)} min · Prévu
-                restant : {tasks.reduce((n, t) => n + t.minutes, 0)} min · {new Set(tasks.filter(t=>t.kind === "pass").map(t=>`${t.pass}:${t.objectiveId}`)).size} chapitre(s)/tour(s)
+                Charge recommandée : {tasks.reduce((n, t) => n + t.minutes, 0)} min · {new Set(tasks.map(t=>t.objectiveId)).size} chapitre(s). Les parties déjà terminées sont exclues.
               </Txt>
               {state.onboarded &&
                 tasks.map((t) => <TaskRow key={t.id} task={t} />)}
-              {events.map((e) => (
+              {events.map(({event:e,count}) => (
                 <RowLink
-                  key={e.id}
+                  key={`${e.objectiveId}:${e.pass}:${e.kind}`}
                   title={
                     objectives.find((o) => o.id === e.objectiveId)?.title ??
                     e.objectiveId
                   }
-                  subtitle={
-                    e.minutes +
-                    " min · " +
-                    (e.completed ? "Validée" : "Partiellement terminée")
-                  }
+                  subtitle={`${count > 1 ? `${count} parties terminées` : e.completed ? "Partie terminée" : "Partie lue"} · tour ${e.pass ?? 1} · progression sauvegardée`}
                   icon="checkmark-circle-outline"
                   href={{
-                    pathname: "/study",
-                    params: { objectiveId: e.objectiveId },
+                    pathname: "/chapter",
+                    params: { id: e.objectiveId },
                   }}
                 />
               ))}
