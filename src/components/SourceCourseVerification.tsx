@@ -1,1664 +1,976 @@
-import { reviewBlocks, reviewKey, reviewTargets, filterReviewTargets, selectReviewTarget, isVerified, type ReviewFilter, type ReviewTarget } from '../domain/sourceCourse/reviewNavigation';
-import { SourcePresentationText } from './SourcePresentationText';
-import { reconcileReviewValidation, saveBlockReview, updateBlockValidation, saveValidation } from '../domain/sourceCourse/verification';
 /**
- * Composant de vérification de fidélité pour les cours source.
- * Permet de vérifier côte à côte le texte extrait et le visuel PDF,
- * de marquer les blocs comme vérifiés, et de naviguer entre les anomalies.
+ * Vérification manuelle d'un cours source : texte reconstitué à gauche, PDF original à droite
+ * (affichage Split permanent). Les décisions (statuts, corrections, fusions) viennent des modules
+ * de domaine, partagés avec « Cours reconstitué » et la finalisation.
  */
-
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { Button, Card, Chip, Txt } from './ui';
+import { SourcePresentationText } from './SourcePresentationText';
+import { CourseTable } from './CourseBlocks';
+import { TableEditor } from './TableEditor';
 import { colors as c } from '../design/theme';
-import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 import type { SourcePacket, SourcePart } from '../domain/sourceCourse/packet';
 import { openOriginalPage } from '../services/storage/privateCourse';
+import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
 import {
-  ChapterValidation,
-  BlockValidationStatus,
-  loadChapterValidation,
-  getPagesWithAnomalies,
-  AnomalyReport,
-  AnomalyStatus,
-  createAnomalyReport,
-  loadChapterAnomalies,
-  exportAnomaliesToJSON,
-  exportAnomaliesToMarkdown,
-  generateFullAnomalyReport,
-} from '../services/storage/sourceValidation';
+  loadValidation, reconcileReviewValidation, reviewBlock, saveValidation,
+  type BlockValidationStatus, type ChapterValidation,
+} from '../domain/sourceCourse/verification';
+import {
+  createAnomalyReport, loadChapterAnomalies, type AnomalyReport,
+} from '../domain/sourceCourse/anomalies';
+import {
+  buildMergeDraft, isMergeableRole, mergeAtAnchor, mergeWarnings, recordMerge, undoMerge, withEditedText,
+  recordSplit, splitAtAnchor, splitPreview, suggestedSplitPosition, undoSplit, withJunction, withMovedItem,
+  type MergeDraft, type MergeItem, type MergeJunction,
+} from '../domain/sourceCourse/merges';
+import {
+  hasActiveCorrection, hasCorrectionRecord, logicalSources, reviewLogicalBlock, saveDisplayedCorrection, undoDisplayedCorrection,
+  savedBlock, workingPresentation,
+} from '../domain/sourceCourse/blockEdits';
+import {
+  BLOCK_KINDS, decideBlockTable, kindLabel, saveBlockTable, setBlocksKind, type BlockKind, type BlockTable,
+} from '../domain/sourceCourse/classification';
+import { boundaryHyphenation } from '../domain/sourceCourse/hyphenation';
+import { boundaryParagraphNormalization, normalizeParagraphLines } from '../domain/sourceCourse/paragraphNormalization';
+import { applyParagraphNormalization, planParagraphNormalization, type NormalizationPlan } from '../domain/sourceCourse/normalizationBatch';
+import { applyBraceNormalization, planBraceNormalization, type BracePlan } from '../domain/sourceCourse/braceNormalization';
+import {
+  REVIEW_FILTERS, countReviewTargets, filterReviewTargets, isVerified, reviewKey, reviewTargets, selectReviewTarget,
+  type ReviewFilter,
+} from '../domain/sourceCourse/reviewNavigation';
+import { buildStructureExport, importStructureExport } from '../domain/sourceCourse/structureExport';
+import { createManualBlock, logicalBlocks, undoManualBlockCreation } from '../domain/sourceCourse/manualBlocks';
+import { activeAssociations, associationsForDeletedBlocks, repairDeletedBlockAssociations, createAssociation, deleteAssociation, updateAssociation, validateAssociations,
+  type ManualAssociation } from '../domain/sourceCourse/associations';
 
-// Rôles des blocs - même définition que dans PrivateSourceCourse
 const roles: Record<string, string> = {
-  heading: 'Titre',
-  paragraph: 'Paragraphe',
-  list: 'Liste',
-  table: 'Tableau',
-  figure: 'Illustration',
-  box: 'Encadré',
-  contents: 'Sommaire original',
-  'chapter-title': 'Titre du chapitre',
-  'section-title': 'Titre de section',
-  'page-header': 'En-tête original',
-  'uncertain-text': 'Passage incertain'
+  heading: 'Titre', paragraph: 'Paragraphe', list: 'Liste', table: 'Tableau', figure: 'Illustration',
+  box: 'Encadré', contents: 'Sommaire original', 'chapter-title': 'Titre du chapitre',
+  'section-title': 'Titre de section', 'page-header': 'En-tête original', 'uncertain-text': 'Passage incertain',
 };
+const statusLabels: Record<BlockValidationStatus, string> = {
+  pending: 'À vérifier', 'in-review': 'En cours', verified: 'Vérifié ✓', 'issue-found': 'Anomalie !', corrected: 'Vérifié ✓',
+};
+const junctions: { id: MergeJunction; label: string }[] = [
+  { id: 'space', label: 'Espace' }, { id: 'linebreak', label: 'Saut de ligne' },
+  { id: 'none', label: 'Aucune séparation' }, { id: 'hyphen', label: 'Retirer le tiret' },
+];
+const DEFAULT_ISSUE = 'Anomalie signalée sans commentaire.';
 
-// Composant OriginalVisual - même que dans PrivateSourceCourse
-function OriginalVisual({ image, ratio, wide, label }: { image: string; ratio: number; wide: boolean; label: string }) {
+function OriginalVisual({ image, ratio, label }: { image: string; ratio: number; label: string }) {
   const [container, setContainer] = useState(280);
   const [zoom, setZoom] = useState(false);
-  const size = zoom ? Math.max(container * 1.5, 1000) : wide ? Math.max(container, 720) : container;
+  const size = zoom ? Math.max(container * 1.8, 1000) : container;
   return (
-    <View style={{ gap: 8, maxWidth: '100%' }} onLayout={e => setContainer(e.nativeEvent.layout.width)}>
+    <View style={{ gap: 6, maxWidth: '100%' }} onLayout={e => setContainer(e.nativeEvent.layout.width)}>
       <ScrollView horizontal showsHorizontalScrollIndicator testID="source-visual-scroll">
-        <Image
-          source={{ uri: image }}
-          accessibilityLabel={label}
-          resizeMode="contain"
-          style={{ width: size, height: size * ratio }}
-        />
+        <Image source={{ uri: image }} accessibilityLabel={label} resizeMode="contain"
+          style={{ width: size, height: size * (Number.isFinite(ratio) && ratio > 0 ? ratio : 0.5) }} />
       </ScrollView>
-      <Pressable accessibilityRole="button" onPress={() => setZoom(!zoom)} style={{ paddingVertical: 8 }}>
-        <Txt size={12} color={c.primary}>
-          {zoom ? 'Réduire le visuel' : 'Agrandir le visuel'}{wide ? ' · défilement horizontal' : ''}
-        </Txt>
+      <Pressable accessibilityRole="button" onPress={() => setZoom(!zoom)} style={{ paddingVertical: 6 }}>
+        <Txt size={12} color={c.primary}>{zoom ? 'Réduire le PDF' : 'Zoom sur le PDF'}</Txt>
       </Pressable>
     </View>
   );
 }
 
-// Couleurs des statuts
-const statusColors: Record<BlockValidationStatus, string> = {
-  pending: c.muted,
-  'in-review': c.peach, // Orange clair
-  verified: c.primary, // Vert
-  'issue-found': '#dc3545', // Rouge
-  corrected: c.primary, // Vert
-};
+function downloadFile(name: string, content: string, type: string) {
+  if (Platform.OS !== 'web' || typeof document === 'undefined') return false;
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = document.createElement('a');
+  link.href = url; link.download = name;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  return true;
+}
 
-const statusLabels: Record<BlockValidationStatus, string> = {
-  pending: 'À vérifier',
-  'in-review': 'En cours',
-  verified: 'Vérifié ✓',
-  'issue-found': 'Anomalie !',
-  corrected: 'Vérifié ✓',
-};
-
-const statusIcons: Record<BlockValidationStatus, string> = {
-  pending: '○',
-  'in-review': '◐',
-  verified: '✓',
-  'issue-found': '!',
-  corrected: '✓',
-};
-
-/** Props du composant */
 interface SourceCourseVerificationProps {
   packet: SourcePacket;
   controlReport?: any;
+  initialTarget?: { printedPage?: number; blockId?: string; nonce: number };
   onClose: () => void;
 }
 
-/**
- * Composant de vérification de fidélité.
- */
-export function SourceCourseVerification({ packet, controlReport, onClose }: SourceCourseVerificationProps) {
-  const [validation, setValidation] = useState<ChapterValidation | null>(null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('pending');
-  const [pageNotice, setPageNotice] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<'split' | 'text' | 'visual'>('split');
-  const [filter, setFilter] = useState<'anomalies' | 'user-anomalies' | null>(null);
-  const [showUserAnomalies, setShowUserAnomalies] = useState(true);
-  const [showStats, setShowStats] = useState(false);
-  const [showPageSelector, setShowPageSelector] = useState(false);
-  const [anomalies, setAnomalies] = useState<AnomalyReport[]>([]);
-const allTargets = reviewTargets(packet, validation, anomalies);
-   
-   // Filtrer les cibles pour exclure les blocs marqués comme fusionnés dans un autre bloc
-   const filteredTargets = allTargets.filter(target => {
-     const blockValidation = validation?.pages.find(p => p.printedPage === target.printedPage)
-       ?.blocks.find(b => b.id === target.blockId);
-     return !(blockValidation?.notes?.startsWith('MERGED_INTO_PREVIOUS:') || blockValidation?.notes?.startsWith('MERGED_INTO:'));
-   });
-   
-   const visibleTargets = filterReviewTargets(filteredTargets, reviewFilter);
-   const target = selectReviewTarget(filteredTargets, visibleTargets, selectedKey);
-   const targetRef = useRef(target);
-   targetRef.current = target;
-   const currentPageIndex = target?.pageIndex ?? 0;
-   const currentBlockIndex = target?.blockIndex ?? -1;
-
-   const [draft, setDraftState] = useState<{ key: string; anomalyId?: string; description: string; session: number } | null>(null);
-   const draftRef = useRef<typeof draft>(null);
-   const draftSession = useRef(0);
-   // État pour l'aperçu de fusion
-   const [mergePreview, setMergePreview] = useState<{
-     block1: SourcePart | null;
-     block2: SourcePart | null;
-     block1Key: string | null;
-     block2Key: string | null;
-     previewText: string;
-     manualText: string;
-     junction: 'space' | 'linebreak' | 'none' | 'hyphen';
-     order: '1-2' | '2-1';
-   } | null>(null);
-   const [selectedForMerge, setSelectedForMerge] = useState<Set<string>>(new Set());
-   const [mergeSaving, setMergeSaving] = useState(false);
-   const [mergeError, setMergeError] = useState<string | null>(null);
-   const [mergeSuccess, setMergeSuccess] = useState<string | null>(null);
-  function setDraft(value: typeof draft) {
-    draftRef.current = value;
-    setDraftState(value);
-  }
-  const showCommentInput = draft !== null;
-  const editingBlockKey = draft?.key;
-  const commentInput = draft?.description ?? '';
-  const currentAnomaly = anomalies.find(a => a.id === draft?.anomalyId && reviewKey(a.chapterId, a.printedPage, a.blockId) === draft.key);
-  const latestValidation = useRef<ChapterValidation | null>(null);
-  const mutationRef = useRef(false);
+export function SourceCourseVerification({ packet, onClose, initialTarget }: SourceCourseVerificationProps) {
   const [loaded, setLoaded] = useState(false);
-  const [anomalyFilter, setAnomalyFilter] = useState<AnomalyStatus>('open');
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const scrollRef = useRef<ScrollView>(null);
-  
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const isWide = screenWidth >= 768;
-  
-  // Identifie une VRAIE illustration médicale (schéma chimique) qui doit rester en image
-  // Une illustration a role='figure' ET un texte très court (symboles chimiques)
-  const isTrueIllustration = (part: any) => part.role === 'figure' && part.text && part.text.trim().length < 200;
-  
-  // Load once before allowing writes; never race a temporary empty validation
-  // against persisted data. Cancellation prevents an old load updating a new packet.
+  const [validation, setValidation] = useState<ChapterValidation | null>(null);
+  const [filter, setFilter] = useState<ReviewFilter>('all');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [jumpPage, setJumpPage] = useState<number | null>(null);
+  const [panel, setPanel] = useState<'none' | 'correct' | 'normalize' | 'split' | 'comment' | 'table' | 'add-manual' | 'associate'>('none');
+  const [editText, setEditText] = useState('');
+  const [splitPosition, setSplitPosition] = useState('');
+  const [comment, setComment] = useState('');
+  const [editingAnomaly, setEditingAnomaly] = useState<string | null>(null);
+  const [selection, setSelection] = useState<MergeItem[]>([]);
+  const [draft, setDraft] = useState<MergeDraft | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [showExport, setShowExport] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [batchPlan, setBatchPlan] = useState<NormalizationPlan | null>(null);
+  const [bracePlan, setBracePlan] = useState<BracePlan | null>(null);
+  const [manualText, setManualText] = useState('');
+  const [anchorText, setAnchorText] = useState('');
+  const [anchorOccurrence, setAnchorOccurrence] = useState('0');
+  const [associationTarget, setAssociationTarget] = useState<string | null>(null);
+  const [associationSearch, setAssociationSearch] = useState('');
+  const [editingAssociation, setEditingAssociation] = useState<ManualAssociation | null>(null);
+  const latest = useRef<ChapterValidation | null>(null);
+  const locked = useRef(false);
+  const { width } = useWindowDimensions();
+  const wide = width >= 768;
+
   useEffect(() => {
     let active = true;
     setLoaded(false);
-    Promise.all([loadChapterValidation(), loadChapterAnomalies(packet.chapterId)])
-      .then(([saved, reports]) => {
-        if (!active) return;
-        const v = reconcileReviewValidation(saved, packet);
-        latestValidation.current = v;
-        setValidation(v);
-        setAnomalies(v.anomalies ?? reports);
-        setLoaded(true);
-      }).catch(() => {
-        if (active) setSaveError('Impossible de charger les validations et anomalies. Réessayez en rouvrant la vérification.');
-      });
+    Promise.all([loadValidation(packet.chapterId), loadChapterAnomalies(packet.chapterId)]).then(([saved, reports]) => {
+      if (!active) return;
+      const next = reconcileReviewValidation(saved, packet);
+      if (!next.anomalies) next.anomalies = saved?.anomalies ?? reports;
+      latest.current = next;
+      setValidation(next);
+      setLoaded(true);
+    }).catch(() => { if (active) setError('Impossible de charger les validations. Aucune modification enregistrée.'); });
     return () => { active = false; };
   }, [packet]);
 
-  // Navigation discards only the unsaved editor, never persisted reports.
   useEffect(() => {
-    if (target) setSelectedKey(target.key);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-    setDraft(null);
-    setSaveError(null);
-    setSaveSuccess(null);
-  }, [target?.key, packet]);
+    if (!initialTarget?.printedPage || !initialTarget.blockId) return;
+    setFilter('all');
+    setSelectedKey(reviewKey(packet.chapterId, initialTarget.printedPage, initialTarget.blockId));
+  }, [packet, initialTarget]);
 
-  function selectTarget(next: ReviewTarget | undefined | null) {
-    if (!next) return;
-    setSelectedKey(next.key);
-    setPageNotice(null);
-    setShowPageSelector(false);
-    scrollRef.current?.scrollTo({ y: 0, animated: true });
-  }
-  function nextBlock() { selectTarget(visibleTargets[visibleTargets.findIndex(t => t.key === target?.key) + 1]); }
-  function prevBlock() { selectTarget(visibleTargets[visibleTargets.findIndex(t => t.key === target?.key) - 1]); }
-  function changeReviewFilter(next: ReviewFilter) {
-    setReviewFilter(next);
-    setFilter(null);
-    setDraft(null);
-    setPageNotice(null);
-  }
+  const anomalies = validation?.anomalies ?? [];
+  const targets = useMemo(() => reviewTargets(packet, validation, anomalies), [packet, validation]);
+  const counts = useMemo(() => countReviewTargets(targets), [targets]);
+  const visible = filterReviewTargets(targets, filter);
+  const current = selectReviewTarget(targets, visible, selectedKey);
+  const position = current ? visible.findIndex(t => t.key === current.key) : -1;
+  const selectedPage = jumpPage ?? current?.printedPage ?? visible[0]?.printedPage;
+  const visiblePages = packet.pages.map(page => page.printedPage);
+  const pageBlocks = visible.filter(target => target.printedPage === selectedPage);
+  const page = current ? packet.pages[current.pageIndex] : undefined;
+  const logical = useMemo(() => logicalBlocks(packet, validation), [packet, validation]);
+  const currentLogical = current ? logical.find(block => block.printedPage === current.printedPage && block.blockId === current.blockId) : undefined;
+  const part: SourcePart | undefined = currentLogical?.part;
+  const ref = current ? { printedPage: current.printedPage, blockId: current.blockId } : null;
+  const merge = ref ? mergeAtAnchor(validation?.merges, ref.printedPage, ref.blockId) : undefined;
+  const split = ref ? splitAtAnchor(validation?.splits, ref.printedPage, ref.blockId, merge?.id) : undefined;
+  const sources = ref ? logicalSources(validation, ref) : [];
+  const presentation = page && part ? workingPresentation(page.printedPage, part, validation) : null;
+  const kind: BlockKind | undefined = page && part ? savedBlock(validation, page.printedPage, part.id)?.kind : undefined;
+  const table: BlockTable | undefined = page && part ? savedBlock(validation, page.printedPage, part.id)?.table : undefined;
+  const imageOnly = !!part && (sourcePresentation(page!.printedPage, part).imageOnly || kind === 'table');
+  const mergeable = !!part && !currentLogical?.manual && !imageOnly && isMergeableRole(part.role);
+  const shownText = presentation?.text ?? '';
+  const associations = activeAssociations(validation);
+  const deletedBlockLinks = associationsForDeletedBlocks(validation);
+  const normalization = part ? normalizeParagraphLines(shownText, part.role) : null;
+  const canNormalize = !!normalization && normalization.text !== shownText && !hasCorrectionRecord(validation, sources);
 
-  // Met à jour le statut d'un bloc
-  async function handleBlockStatusChange(
-    pageIndex: number,
-    blockId: string,
-    newStatus: BlockValidationStatus
-  ) {
-    const session = draftRef.current?.session;
-    if (await commitReview(pageIndex, blockId, newStatus)) {
-      if (draftRef.current?.session === session) closeAnomalyForm();
-    }
-  }
+  // L'édition en cours est liée au bloc : elle se ferme quand l'utilisateur change de bloc.
+  useEffect(() => { setPanel('none'); setEditingAnomaly(null); setError(null); setNotice(null); }, [current?.key]);
 
-  async function commitReview(pageIndex: number, blockId: string, status: BlockValidationStatus, anomaly?: AnomalyReport, mode: 'create' | 'edit' = 'create') {
-    const current = latestValidation.current;
-    if (!current || !loaded || mutationRef.current) return false;
-    mutationRef.current = true;
-    setSaving(true);
-    setSaveError(null);
+  async function commit(next: ChapterValidation, message?: string) {
+    if (locked.current) return false;
+    locked.current = true; setBusy(true); setError(null);
     try {
-      const updated = await saveBlockReview(current, anomalies,
-        packet.pages[pageIndex].printedPage, blockId, status, anomaly, mode);
-      latestValidation.current = updated;
-      setValidation(updated);
-      setAnomalies(updated.anomalies!);
-      const page = packet.pages[pageIndex].printedPage;
-      const updatedTargets = reviewTargets(packet, updated);
-      if (status === 'verified' && updatedTargets.filter(t => t.printedPage === page).every(t => isVerified(t.status))) {
-        setPageNotice(page);
-      } else if (!isVerified(status)) {
-        setPageNotice(previous => previous === page ? null : previous);
-      }
-      const previousBlock = current.pages.find(p => p.printedPage === page)?.blocks.find(b => b.id === blockId);
-      if (status === 'issue-found' && previousBlock && isVerified(previousBlock.status) &&
-          targetRef.current?.key === reviewKey(packet.chapterId, page, blockId)) {
-        setReviewFilter('pending');
-      }
+      const checked = validateAssociations(next, logicalBlocks(packet, next), candidate => {
+        const block = logicalBlocks(packet, next).find(item => item.printedPage === candidate.printedPage && item.blockId === candidate.blockId);
+        return block ? workingPresentation(block.printedPage, block.part, next)?.text ?? '' : '';
+      });
+      await saveValidation(checked);
+      latest.current = checked; setValidation(checked);
+      if (message) setNotice(message);
       return true;
-    } catch {
-      setSaveError("Erreur lors de l'enregistrement. Veuillez réessayer.");
+    } catch (reason) {
+      setError(`Enregistrement local impossible : ${String(reason)}`);
       return false;
-    } finally {
-      mutationRef.current = false;
-      setSaving(false);
+    } finally { locked.current = false; setBusy(false); }
+  }
+  const base = () => latest.current ?? validation!;
+
+  function navigateTo(target: typeof current) {
+    if (!target) return;
+    if (panel !== 'none') {
+      setError('Terminez, enregistrez ou annulez l’édition en cours avant de changer de bloc : aucune saisie n’est abandonnée silencieusement.');
+      return;
     }
+    setJumpPage(null);
+    setSelectedKey(target.key);
   }
-  
-  function goToPage(pageIndex: number) {
-    selectTarget(visibleTargets.find(t => t.pageIndex === pageIndex));
+  function go(delta: number) {
+    const target = visible[position + delta];
+    navigateTo(target);
+  }
+  function pickFilter(next: ReviewFilter) { setFilter(next); }
+
+  async function setStatus(status: BlockValidationStatus) {
+    if (!ref || locked.current) return;
+    setSelectedKey(current!.key);
+    try {
+      const next = reviewLogicalBlock(base(), base().anomalies ?? [], sources, status);
+      await commit(next, status === 'verified' ? 'Bloc vérifié. Anomalies actives résolues.' : undefined);
+    } catch (reason) { setError(String(reason)); }
   }
 
-  function blockKey(pageIndex: number, blockId: string) {
-    return reviewKey(packet.chapterId, packet.pages[pageIndex].printedPage, blockId);
+  async function changeKind(next: BlockKind | null) {
+    if (!ref || locked.current) return;
+    const value = kind === next ? null : next;
+    try {
+      const saved = await commit(setBlocksKind(base(), sources, value), value
+        ? `Type « ${kindLabel(value)} » enregistré${sources.length > 1 ? ` pour les ${sources.length} blocs de la fusion` : ''}. Le texte et le statut ne sont pas modifiés.`
+        : 'Type retiré : le bloc redevient un texte normal.');
+      if (saved && value === 'table') setPanel('table');
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function saveTable(next: BlockTable) {
+    if (!ref) return;
+    try {
+      if (await commit(saveBlockTable(base(), ref, next), 'Tableau enregistré localement en brouillon. L’image originale reste affichée dans le cours tant qu’il n’est pas validé.')) setPanel('none');
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function decideTable(decision: 'validate' | 'keep-original' | 'draft') {
+    if (!ref) return;
+    try {
+      const message = decision === 'validate' ? 'Tableau validé : il remplace l’image dans le cours.'
+        : decision === 'keep-original' ? 'Image originale conservée dans le cours.' : 'Tableau remis en brouillon.';
+      await commit(decideBlockTable(base(), ref, decision), message);
+    } catch (reason) { setError(String(reason)); }
   }
 
-  // A new report starts blank. Editing an existing report is an explicit choice.
-  function openAnomalyForm(blockId: string, anomaly?: AnomalyReport) {
-    const key = blockKey(currentPageIndex, blockId);
-    if (!anomaly && draftRef.current?.key === key) return;
-    setDraft({ key, anomalyId: anomaly?.id, description: anomaly?.description ?? '', session: ++draftSession.current });
-    setSaveError(null);
-    setSaveSuccess(null);
+  function openCorrection() {
+    if (!ref || !part) return;
+    if (imageOnly) { openComment(); return; }
+    setEditText(shownText); setPanel('correct'); setNotice(null); setError(null);
   }
-
-  function closeAnomalyForm() { setDraft(null); }
-
-  async function saveAnomalyDraft(pageIndex: number, blockId: string) {
-    const editor = draftRef.current;
-    if (!editor || editor.key !== blockKey(pageIndex, blockId) || !editor.description.trim()) return;
-    const page = packet.pages[pageIndex];
-    const block = reviewBlocks(page).find(p => p.id === blockId);
-    if (!block) return;
-    const existing = anomalies.find(a => a.id === editor.anomalyId && reviewKey(a.chapterId, a.printedPage, a.blockId) === editor.key);
-    if (editor.anomalyId && !existing) return;
-    const anomaly = existing ? { ...existing, description: editor.description, status: 'open' as const }
-      : createAnomalyReport(packet.chapterId, 'Kumar', page.printedPage, page.pdfPage,
-        blockId, block.role, block.text, editor.description);
-    if (await commitReview(pageIndex, blockId, 'issue-found', anomaly, existing ? 'edit' : 'create')) {
-      // A completed save must not close a different block's newly opened editor.
-      if (draftRef.current?.session === editor.session) {
-        closeAnomalyForm();
-        setSaveSuccess('Anomalie enregistrée avec succès !');
+  function proposeNormalization() {
+    if (!canNormalize || !normalization) return;
+    setEditText(normalization.text);
+    setPanel('normalize');
+    setNotice(null);
+    setError(null);
+  }
+  async function saveCorrection() {
+    if (!ref) return;
+    try {
+      const next = saveDisplayedCorrection(base(), ref, shownText, editText);
+      if (next === base()) { setPanel('none'); setNotice('Aucun changement à enregistrer.'); return; }
+      if (await commit(next, 'Correction enregistrée localement (Safari/appareil). Le bloc n’est pas vérifié.')) setPanel('none');
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function cancelCorrection() {
+    if (!ref) return;
+    try {
+      await commit(undoDisplayedCorrection(base(), ref), 'Correction annulée : le texte précédent est rétabli. L’historique est conservé.');
+      setPanel('none');
+    } catch (reason) { setError(String(reason)); }
+  }
+  function openBatchNormalization() {
+    if (!validation) return;
+    setBatchPlan(planParagraphNormalization(packet, validation));
+    setError(null);
+    setNotice(null);
+  }
+  async function acceptBatchNormalization() {
+    if (!batchPlan?.proposals.length) return;
+    try {
+      const next = applyParagraphNormalization(base(), batchPlan.proposals);
+      const recheck = batchPlan.proposals.filter(proposal => proposal.wasVerified).length;
+      if (await commit(next, `${batchPlan.proposals.length} normalisation(s) enregistrée(s)${recheck ? ` ; ${recheck} bloc(s) déjà vérifié(s) sont maintenant à revoir.` : ''}`)) {
+        setBatchPlan(null);
       }
-    }
+    } catch (reason) { setError(String(reason)); }
+  }
+  function openBraceNormalization() {
+    if (!validation) return;
+    setBracePlan(planBraceNormalization(packet, validation));
+    setError(null);
+    setNotice(null);
+  }
+  async function acceptBraceNormalization() {
+    if (!bracePlan?.proposals.length) return;
+    try {
+      const next = applyBraceNormalization(base(), bracePlan.proposals);
+      const recheck = bracePlan.proposals.filter(proposal => proposal.wasVerified).length;
+      if (await commit(next, `${bracePlan.proposals.length} correction(s) de parenthèses enregistrée(s)${recheck ? ` ; ${recheck} bloc(s) déjà vérifié(s) sont maintenant à revoir.` : ''}`)) setBracePlan(null);
+    } catch (reason) { setError(String(reason)); }
   }
 
-  function renderAnomalyForm(pageIndex: number, blockId: string) {
-    if (!draft || editingBlockKey !== blockKey(pageIndex, blockId)) return null;
-    const existing = anomalies.filter(a => a.chapterId === packet.chapterId &&
-      a.printedPage === packet.pages[pageIndex].printedPage && a.blockId === blockId && a.status !== 'resolved');
-    return <View style={{ marginTop: 12, gap: 8, width: '100%' }}>
-      <Txt size={13} bold>{currentAnomaly ? "Modifier l'anomalie" : 'Nouvelle anomalie'}</Txt>
-      {existing.map((a, i) => <Button key={a.id} title={`Modifier l’anomalie ${i + 1}`}
-        secondary disabled={saving} onPress={() => openAnomalyForm(blockId, a)} />)}
-      {currentAnomaly && <Button title="Nouvelle anomalie" secondary disabled={saving}
-        onPress={() => { closeAnomalyForm(); openAnomalyForm(blockId); }} />}
-      <TextInput multiline numberOfLines={4} accessibilityLabel="Description de l’anomalie"
-        placeholder="Décrivez l’anomalie…" value={commentInput} editable={!saving}
-        onChangeText={description => {
-          if (draftRef.current && !mutationRef.current) setDraft({ ...draftRef.current, description });
-        }}
-        style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12,
-          fontSize: 15, color: c.ink, backgroundColor: c.paper, minHeight: 100, width: '100%' }} />
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title={currentAnomaly ? 'Mettre à jour' : 'Enregistrer'} secondary
-          disabled={!loaded || saving || !commentInput.trim()} onPress={() => saveAnomalyDraft(pageIndex, blockId)} />
-        <Button title="Annuler" secondary onPress={closeAnomalyForm} />
-      </View>
-    </View>;
+  const blockAnomalies = (): AnomalyReport[] => anomalies.filter(a => sources.some(s => s.printedPage === a.printedPage && s.blockId === a.blockId));
+  function openComment(existing?: AnomalyReport) {
+    setComment(existing?.description ?? ''); setEditingAnomaly(existing?.id ?? null); setPanel('comment');
+  }
+  async function saveComment() {
+    if (!ref || !part || !page) return;
+    const text = comment.trim() || (imageOnly ? DEFAULT_ISSUE : '');
+    if (!text) { setError('Écrivez un commentaire ou utilisez « Anomalie ! » pour corriger directement le texte.'); return; }
+    try {
+      const existing = editingAnomaly ? anomalies.find(a => a.id === editingAnomaly) : undefined;
+      const report = existing ? { ...existing, description: text, status: 'open' as const }
+        : createAnomalyReport(packet.chapterId, 'Kumar', page.printedPage, page.pdfPage, part.id, part.role, shownText, text);
+      const next = reviewBlock(base(), base().anomalies ?? [], ref.printedPage, ref.blockId, 'issue-found', report, existing ? 'edit' : 'create');
+      if (await commit(next, 'Commentaire enregistré localement.')) setPanel('none');
+    } catch (reason) { setError(String(reason)); }
   }
 
-  // Génère un rapport complet des anomalies
-  function generateAnomalyReport() {
-    return generateFullAnomalyReport(anomalies);
-  }
-  
-  // Compte les anomalies par statut
-  function getAnomalyCounts() {
+  function currentItem(): MergeItem | null {
+    if (!ref || !part || !page || !presentation) return null;
+    const index = (page.parts ?? []).filter(p => p.role !== 'page-header').findIndex(p => p.id === part.id);
     return {
-      total: anomalies.length,
-      open: anomalies.filter(a => a.status === 'open').length,
-      correctedPendingReview: anomalies.filter(a => a.status === 'corrected-pending-review').length,
-      resolved: anomalies.filter(a => a.status === 'resolved').length,
+      sources: merge ? merge.sources : [ref], sourceTexts: merge ? merge.sourceTexts : [shownText], text: shownText,
+      role: part.role, mergeId: merge?.id, position: current!.pageIndex * 10000 + index,
     };
   }
-  
-  // Exporte les anomalies vers un fichier
-  async function exportAnomalies() {
-    const report = generateAnomalyReport();
-    
-    if (Platform.OS === 'web') {
-      // Sur web, télécharger le fichier
-      const jsonBlob = new Blob([report.json], { type: 'application/json' });
-      const jsonUrl = URL.createObjectURL(jsonBlob);
-      const jsonLink = document.createElement('a');
-      jsonLink.href = jsonUrl;
-      jsonLink.download = `norya-anomalies-${report.chapterId}-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(jsonLink);
-      jsonLink.click();
-      document.body.removeChild(jsonLink);
-      URL.revokeObjectURL(jsonUrl);
-      
-      const mdBlob = new Blob([report.markdown], { type: 'text/markdown' });
-      const mdUrl = URL.createObjectURL(mdBlob);
-      const mdLink = document.createElement('a');
-      mdLink.href = mdUrl;
-      mdLink.download = `norya-anomalies-${report.chapterId}-${new Date().toISOString().split('T')[0]}.md`;
-      document.body.appendChild(mdLink);
-      mdLink.click();
-      document.body.removeChild(mdLink);
-      URL.revokeObjectURL(mdUrl);
-      
-      setSaveSuccess('Export terminé ! 2 fichiers téléchargés (JSON + Markdown)');
-      setTimeout(() => setSaveSuccess(null), 5000);
-    } else {
-      // Sur mobile, retourner le rapport pour traitement natif
-      setShowExportModal(true);
-    }
+  function startOrAddMerge() {
+    const item = currentItem();
+    if (!item || !ref) return;
+    if (!mergeable) { setError('Seuls les blocs de texte (paragraphe, liste, titre, encadré) peuvent être fusionnés ; une figure, un tableau ou un sommaire ne le peut pas.'); return; }
+    setError(null);
+    if (selection.some(s => s.sources[0].printedPage === ref.printedPage && s.sources[0].blockId === ref.blockId)) return;
+    setSelection([...selection, item]);
+    setNotice(selection.length ? 'Bloc ajouté à la fusion.' : 'Premier bloc choisi. Naviguez vers un autre bloc (filtre « Tous » pour les voir tous) puis « Ajouter à la fusion ».');
   }
-  
-  // Filtrage des pages avec anomalies
-  function getAnomalyPages() {
-    if (!validation || !controlReport) return [];
-    return getPagesWithAnomalies(validation, controlReport);
+  function removeFromSelection() {
+    if (!ref) return;
+    setSelection(selection.filter(s => !(s.sources[0].printedPage === ref.printedPage && s.sources[0].blockId === ref.blockId)));
   }
-  
-   // Obtenir les blocs de la page actuelle
-   // On filtre les blocs décoratifs qui n'ont pas besoin de vérification textuelle
-   function getCurrentBlocks() {
-     if (!packet.pages[currentPageIndex]) return [];
-     // Exclure les page-header qui sont des en-têtes de page sans contenu utile
-     return reviewBlocks(packet.pages[currentPageIndex]);
-   }
-  
-  // Obtenir le statut d'un bloc
-  function getCurrentBlockStatus(blockId: string): BlockValidationStatus {
-    return allTargets.find(t => t.pageIndex === currentPageIndex && t.blockId === blockId)?.status ?? 'pending';
+  function previewMerge() {
+    try { setDraft(buildMergeDraft(packet.chapterId, selection)); setError(null); } catch (reason) { setError(String(reason)); }
   }
-  
-  // Récupère le texte à afficher pour un bloc (en tenant compte des fusions)
-   function getBlockDisplayText(block: any): string {
-     const validation = latestValidation.current;
-     if (!validation) return block.text;
-     
-     const pageIndex = validation.pages.findIndex(p => p.printedPage === block.page || p.printedPage === packet.pages[currentPageIndex]?.printedPage);
-     if (pageIndex < 0) return block.text;
-     
-     const blockValidation = validation.pages[pageIndex].blocks.find(b => b.id === block.id);
-     if (!blockValidation) return block.text;
-     
-     // Vérifier si ce bloc a été fusionné (notes commencent par FUSION DES BLOCS)
-     if (blockValidation.notes && (blockValidation.notes.startsWith('FUSION DES BLOCS') || blockValidation.notes.startsWith('MERGED_INTO'))) {
-       if (blockValidation.notes.startsWith('FUSION DES BLOCS')) {
-         const colonIndex = blockValidation.notes.indexOf(':');
-         if (colonIndex > 0) {
-           const textAfterColon = blockValidation.notes.substring(colonIndex + 1).trim();
-           if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
-             return textAfterColon.substring(1, textAfterColon.length - 1);
-           }
-           return textAfterColon;
-         }
-       }
-       // If merged into another, try to find the merged text in the target
-       if (blockValidation.notes.startsWith('MERGED_INTO')) {
-         const targetId = blockValidation.notes.split(':')[1];
-         // look for target's merged text
-         for (const page of validation.pages) {
-           const target = page.blocks.find(b => b.id === targetId);
-           if (target && target.notes && target.notes.startsWith('FUSION DES BLOCS')) {
-             const colonIndex = target.notes.indexOf(':');
-             if (colonIndex > 0) {
-               const textAfterColon = target.notes.substring(colonIndex + 1).trim();
-               if (textAfterColon.startsWith('"') && textAfterColon.endsWith('"')) {
-                 return textAfterColon.substring(1, textAfterColon.length - 1);
-               }
-               return textAfterColon;
-             }
-           }
-         }
-         return block.text;
-       }
-     }
-     
-     return block.text;
-   }
-  function getStats() {
-    if (!validation) return null;
-    const verifiedBlocks = allTargets.filter(t => isVerified(t.status)).length;
-    const pages = packet.pages.filter(p => allTargets.some(t => t.printedPage === p.printedPage));
-    const verifiedPages = pages.filter(p => allTargets.filter(t => t.printedPage === p.printedPage).every(t => isVerified(t.status))).length;
-    return { verifiedBlocks, totalBlocks: allTargets.length, verifiedPages, totalPages: pages.length,
-      progress: allTargets.length ? Math.round(100 * verifiedBlocks / allTargets.length) : 0,
-      complete: allTargets.length > 0 && verifiedBlocks === allTargets.length };
+  async function confirmMerge() {
+    if (!draft) return;
+    try {
+      const next = recordMerge(base(), draft);
+      const anchor = draft.sources[0];
+      if (await commit(next, 'Fusion enregistrée localement. Les textes originaux sont conservés ; aucun bloc n’a été vérifié.')) {
+        setSelection([]); setDraft(null); setFilter('all');
+        setSelectedKey(reviewKey(packet.chapterId, anchor.printedPage, anchor.blockId));
+      }
+    } catch (reason) { setError(String(reason)); }
   }
-  
-   // Vérifie si le bloc actuel peut être fusionné avec le suivant
-   function canMergeWithNext(): boolean {
-     if (!loaded || !packet.pages[currentPageIndex]) return false;
-     
-     const blocks = getCurrentBlocks();
-     const currentBlock = blocks[currentBlockIndex];
-     
-     // Vérifier qu'il y a un bloc suivant
-     if (currentBlockIndex + 1 >= blocks.length) return false;
-     
-     const nextBlock = blocks[currentBlockIndex + 1];
-     
-     // Ne pas fusionner les éléments structurés
-     const structuredRoles = ['heading', 'table', 'figure', 'list', 'box', 'contents', 'chapter-title', 'section-title', 'page-header'];
-     if (structuredRoles.includes(currentBlock.role) || structuredRoles.includes(nextBlock.role)) {
-       return false;
-     }
-     
-     // Autoriser la fusion entre paragraphes (peut être affiné selon les besoins)
-     return currentBlock.role === 'paragraph' && nextBlock.role === 'paragraph';
-   }
-   
-   // Ouvre le aperçu de fusion
-   function openMergePreview() {
-     if (!loaded || !packet.pages[currentPageIndex]) return;
-     
-     const blocks = getCurrentBlocks();
-     const currentBlock = blocks[currentBlockIndex];
-     const nextBlock = blocks[currentBlockIndex + 1];
-     
-     if (!currentBlock || !nextBlock) return;
-     
-     // Texte des deux blocs
-     const currentText = currentBlock.text.trim();
-     const nextText = nextBlock.text.trim();
-     
-     // Aperçu avec espace
-     const previewWithSpace = currentText + ' ' + nextText;
-     // Aperçu sans espace (pour les mots coupés)
-     const previewWithoutSpace = currentText + nextText;
-     
-     setMergePreview({
-       currentBlock,
-       nextBlock,
-       previewText: previewWithSpace, // Valeur par défaut
-       manualText: previewWithSpace,  // Commence avec l'aperçu avec espace
-       useSpace: true                 // Commence avec l'option espace
-     });
-   }
-   
-   // Ferme l'aperçu de fusion
-   function closeMergePreview() {
-     setMergePreview(null);
-     setMergeError(null);
-     setMergeSuccess(null);
-   }
-   
-   // Gère le changement d'option (jonction)
-   function handleMergeOptionChange(junction: 'space' | 'linebreak' | 'none' | 'hyphen') {
-     setMergePreview(prev => {
-       if (!prev) return prev;
-       const { block1, block2, order } = prev;
-       if (!block1 || !block2) return prev;
-       const text1 = order === '1-2' ? block1.text.trim() : block2.text.trim();
-       const text2 = order === '1-2' ? block2.text.trim() : block1.text.trim();
-       let baseText = text1;
-       if (junction === 'space') baseText = text1 + ' ' + text2;
-       else if (junction === 'linebreak') baseText = text1 + '\n' + text2;
-       else if (junction === 'none') baseText = text1 + text2;
-       else if (junction === 'hyphen') {
-         // Remove trailing hyphen from text1 if present and merge
-         const cleaned1 = text1.replace(/[-‐-―−﹣－]\s*$/, '');
-         baseText = cleaned1 + '-' + text2.replace(/^\s*/, '');
-       }
-       return {
-         ...prev,
-         previewText: baseText,
-         manualText: baseText,
-         junction,
-         order: prev.order
-       };
-     });
-   }
-   
-   // Gère le changement du texte manuel
-   function handleManualTextChange(text: string) {
-     setMergePreview(prev => {
-       if (!prev) return prev;
-       return {
-         ...prev,
-         manualText: text
-       };
-     });
-   }
-   
-   // Confirme la fusion
-   async function confirmMerge() {
-     if (!mergePreview || !loaded) return;
-     
-     setMergeSaving(true);
-     setMergeError(null);
-     setMergeSuccess(null);
-     
-     try {
-       const { block1, block2, order } = mergePreview;
-       if (!block1 || !block2) throw new Error('Blocs introuvables');
-       const validation = latestValidation.current;
-       if (!validation) throw new Error('Validation non disponible');
-       
-       const mergedBlockId = order === '1-2' ? block1.id : block2.id;
-       const otherBlockId = order === '1-2' ? block2.id : block1.id;
-       const mergedPage = packet.pages.find(p => p.parts?.some(part => part.id === mergedBlockId));
-       const otherPage = packet.pages.find(p => p.parts?.some(part => part.id === otherBlockId));
-       if (!mergedPage || !otherPage) throw new Error('Pages introuvables');
-       
-       const mergedPageIdx = validation.pages.findIndex(p => p.printedPage === mergedPage.printedPage);
-       const otherPageIdx = validation.pages.findIndex(p => p.printedPage === otherPage.printedPage);
-       if (mergedPageIdx < 0 || otherPageIdx < 0) throw new Error('Page introuvable dans la validation');
-       
-       const mergedBlockIdx = validation.pages[mergedPageIdx].blocks.findIndex(b => b.id === mergedBlockId);
-       const otherBlockIdx = validation.pages[otherPageIdx].blocks.findIndex(b => b.id === otherBlockId);
-       if (mergedBlockIdx < 0 || otherBlockIdx < 0) throw new Error('Bloc introuvable dans la validation');
-       
-       const mergeDescription = `FUSION DES BLOCS ${block1.id} ET ${block2.id} (ordre:${order}, jonction:${mergePreview.junction}): "${mergePreview.manualText}"`;
-       const mergedIntoTarget = `MERGED_INTO:${mergedBlockId}`;
-       
-       let updatedValidation = updateBlockValidation(
-         validation,
-         mergedPageIdx,
-         mergedBlockId,
-         {
-           notes: mergeDescription,
-           status: validation.pages[mergedPageIdx].blocks[mergedBlockIdx].status
-         }
-       );
-       
-       updatedValidation = updateBlockValidation(
-         updatedValidation,
-         otherPageIdx,
-         otherBlockId,
-         {
-           notes: mergedIntoTarget,
-           status: updatedValidation.pages[otherPageIdx].blocks[otherBlockIdx].status
-         }
-       );
-       
-       // Sauvegarder la validation
-       await saveValidation(updatedValidation);
-       latestValidation.current = updatedValidation;
-       setValidation(updatedValidation);
-       
-       setMergeSuccess('Fusion enregistrée avec succès !');
-       
-       // Fermer l'aperçu après un court délai
-       setTimeout(() => {
-         closeMergePreview();
-       }, 1500);
-     } catch (error) {
-       console.error('Erreur lors de la fusion:', error);
-       setMergeError('Erreur lors de l'enregistrement de la fusion. Veuillez réessayer.');
-     } finally {
-       setMergeSaving(false);
-     }
-   }
+  async function cancelMerge() {
+    if (!merge || !current) return;
+    setSelectedKey(current.key);
+    try { await commit(undoMerge(base(), merge.id), 'Fusion annulée : les blocs précédents sont rétablis avec leurs corrections et anomalies.'); }
+    catch (reason) { setError(String(reason)); }
+  }
+  function openSplit() {
+    if (!mergeable || !shownText) return;
+    setSplitPosition(String(suggestedSplitPosition(shownText)));
+    setPanel('split');
+    setError(null);
+    setNotice(null);
+  }
+  async function confirmSplit() {
+    if (!ref) return;
+    try {
+      const next = recordSplit(base(), ref, shownText, Number(splitPosition));
+      if (await commit(next, 'Séparation enregistrée localement. Les sources, corrections, classifications, anomalies et validations sont conservées.')) {
+        setPanel('none');
+      }
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function cancelSplit() {
+    if (!split) return;
+    try { await commit(undoSplit(base(), split.id), 'Séparation annulée : le bloc logique précédent est rétabli.'); }
+    catch (reason) { setError(String(reason)); }
+  }
 
-   // Annule une fusion
-   async function unmergeBlock(blockId: string, printedPage: number) {
-     const validation = latestValidation.current;
-     if (!validation) return;
-     const pageIdx = validation.pages.findIndex(p => p.printedPage === printedPage);
-     if (pageIdx < 0) return;
-     const block = validation.pages[pageIdx].blocks.find(b => b.id === blockId);
-     if (!block) return;
-     // If this block is the target of merge (has FUSION DES BLOCS), we need to find and restore merged blocks
-     if (block.notes && block.notes.startsWith('FUSION DES BLOCS')) {
-       // Extract merged block IDs
-       const match = block.notes.match(/FUSION DES BLOCS ([A-Za-z0-9-]+) ET ([A-Za-z0-9-]+)/);
-       if (match) {
-         const id1 = match[1], id2 = match[2];
-         // Restore both blocks - remove merge notes
-         let updated = updateBlockValidation(validation, pageIdx, blockId, { notes: '', status: block.status });
-         // Find and restore the other block
-         for (let pi = 0; pi < updated.pages.length; pi++) {
-           const bi = updated.pages[pi].blocks.findIndex(b => b.id === id1 || b.id === id2);
-           if (bi >= 0 && updated.pages[pi].blocks[bi].id !== blockId) {
-             updated = updateBlockValidation(updated, pi, updated.pages[pi].blocks[bi].id, { notes: '', status: updated.pages[pi].blocks[bi].status });
-           }
-         }
-         await saveValidation(updated);
-         latestValidation.current = updated;
-         setValidation(updated);
-       }
-     } else if (block.notes && block.notes.startsWith('MERGED_INTO')) {
-       // This block was merged into target - restore it
-       const targetId = block.notes.split(':')[1];
-       let updated = updateBlockValidation(validation, pageIdx, blockId, { notes: '', status: block.status });
-       // Also clean up target if it only had this merge?
-       for (let pi = 0; pi < updated.pages.length; pi++) {
-         const bi = updated.pages[pi].blocks.findIndex(b => b.id === targetId);
-         if (bi >= 0) {
-           const tblock = updated.pages[pi].blocks[bi];
-           if (tblock.notes && tblock.notes.startsWith('FUSION DES BLOCS')) {
-             const match = tblock.notes.match(/FUSION DES BLOCS ([A-Za-z0-9-]+) ET ([A-Za-z0-9-]+)/);
-             if (match && (match[1] === blockId || match[2] === blockId)) {
-               updated = updateBlockValidation(updated, pi, targetId, { notes: '', status: tblock.status });
-             }
-           }
-         }
-       }
-       await saveValidation(updated);
-       latestValidation.current = updated;
-       setValidation(updated);
-     }
-   }
+  function openManualBlock() {
+    if (!ref || !part) return;
+    setManualText('');
+    setPanel('add-manual');
+    setError(null);
+    setNotice(null);
+  }
+  function openAssociation(existing?: ManualAssociation) {
+    if (!ref) return;
+    setEditingAssociation(existing ?? null);
+    setAnchorText(existing?.anchor.text ?? '');
+    setAnchorOccurrence(String(existing?.anchor.occurrence ?? 0));
+    setAssociationTarget(existing ? JSON.stringify([existing.target.printedPage, existing.target.blockId]) : null);
+    setAssociationSearch('');
+    setPanel('associate');
+    setError(null); setNotice(null);
+  }
+  async function saveAssociation(addAnother = false) {
+    if (!ref || !associationTarget) { setError('Choisissez une destination logique.'); return; }
+    try {
+      const [printedPage, blockId] = JSON.parse(associationTarget) as [number, string];
+      const target = { printedPage, blockId };
+      const next = editingAssociation
+        ? updateAssociation(base(), editingAssociation.id, ref, shownText, anchorText, Number(anchorOccurrence), target, logical)
+        : createAssociation(base(), ref, shownText, anchorText, Number(anchorOccurrence), target, logical);
+      if (await commit(next, 'Association enregistrée. Elle reste une décision manuelle et ne valide aucun contenu médical.')) {
+        if (addAnother) openAssociation();
+        else setPanel('none');
+      }
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function removeAssociation(id: string) {
+    try { await commit(deleteAssociation(base(), id), 'Association supprimée ; son historique est conservé.'); }
+    catch (reason) { setError(String(reason)); }
+  }
+  async function confirmManualBlock() {
+    if (!ref) return;
+    try {
+      const next = createManualBlock(base(), packet, ref, manualText);
+      if (await commit(next, 'Bloc manuel ajouté après le bloc sélectionné. Il reste à vérifier et le paquet source est inchangé.')) {
+        const added = next.manualBlocks?.[next.manualBlocks.length - 1];
+        setPanel('none');
+        // A new block is pending: Verified / My anomalies would hide it immediately.
+        setFilter('all');
+        setJumpPage(null);
+        if (added) setSelectedKey(reviewKey(packet.chapterId, added.sourceRef.printedPage, added.id));
+      }
+    } catch (reason) { setError(String(reason)); }
+  }
+  async function undoManualBlock() {
+    if (!currentLogical?.manual) return;
+    try {
+      const after = currentLogical.manual.after;
+      if (await commit(undoManualBlockCreation(base(), currentLogical.manual.id),
+        'Création du bloc manuel annulée. Son historique reste dans l’export.')) {
+        setSelectedKey(reviewKey(packet.chapterId, after.printedPage, after.blockId));
+      }
+    } catch (reason) { setError(String(reason)); }
+  }
 
-       
-     } catch (error) {
-       console.error('Erreur lors de la fusion:', error);
-       setMergeError('Erreur lors de l\'enregistrement de la fusion. Veuillez réessayer.');
-     } finally {
-       setMergeSaving(false);
-     }
-   }
-   
-   // Rendu du contenu en fonction du mode d'affichage
-   function renderContent() {
-    const page = packet.pages[currentPageIndex];
-    const blocks = getCurrentBlocks();
-    const currentBlock = blocks[currentBlockIndex];
-    
-    if (!page || !currentBlock) {
-      return (
-        <View style={{ padding: 20 }}>
-          <Txt size={16} color={c.muted}>{!loaded ? 'Chargement…' : reviewFilter === 'pending'
-              ? 'Tous les blocs sont vérifiés. Retrouvez-les dans « Vérifiés » ou « Tous ».'
-              : reviewFilter === 'verified' ? 'Aucun bloc vérifié pour le moment.' : 'Aucun bloc dans ce cours.'}</Txt>
-        </View>
-      );
-    }
-    
-    const blockStatus = getCurrentBlockStatus(currentBlock.id);
-    const presentation = sourcePresentation(page.printedPage, currentBlock);
-    const isIllustration = isTrueIllustration(currentBlock) || presentation.imageOnly;
-    const showAsText = !isIllustration; // Dans vérification, on affiche le texte sauf pour les vraies illustrations
-    
-    // Mode split : texte + visuel
-    if (viewMode === 'split') {
-      return (
-        <View style={{ flexDirection: isWide ? 'row' : 'column', gap: 16, flex: 1 }}>
-          {/* Texte ou illustration */}
-          <View style={{ flex: 1, minWidth: isWide ? 300 : '100%' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <Chip
-                label={statusLabels[blockStatus]}
-                selected={false}
-                onPress={() => {}}
-              />
-              <Txt size={12} color={c.muted}>
-                Bloc {currentBlock.id} · {currentBlock.role}
-              </Txt>
-            </View>
-            
-             {showAsText ? (
-               // Affiche le texte pour les blocs non-illustration
-               <>
-                 <ScrollView nestedScrollEnabled style={{ maxHeight: isWide ? 500 : 300 }}>
-                   {presentation.contents ? (
-                     <View style={{flexDirection:'row',flexWrap:'wrap',gap:14}}>
-                       {presentation.contents.map((column, ci) => (
-                         <View key={ci} style={{flex:1,minWidth:240,gap:6}}>
-                           {column.map((entry, i) => (
-                             <View key={i} style={{flexDirection:'row',gap:8,justifyContent:'space-between'}}>
-                               <Text selectable style={{fontSize:16,color:c.ink,flex:1}}>{entry.label}</Text>
-                               <Text selectable style={{fontSize:16,color:c.ink,minWidth:32,textAlign:'right'}}>{entry.page}</Text>
-                             </View>
-                           ))}
-                         </View>
-                       ))}
-                     </View>
-                   ) : (
-                     <SourcePresentationText presentation={presentation} size={16} />
-                   )}
-                 </ScrollView>
-                 
-                 {/* Boutons de statut et de fusion */}
-                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: showCommentInput ? 0 : 12 }}>
-                   {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => {
-                     const isAnomalie = status === 'issue-found';
-                     return (
-                       <Button
-                         key={status}
-                         disabled={!loaded || saving}
-                         title={statusLabels[status]}
-                         secondary={blockStatus !== status}
-                         onPress={() => {
-                           if (isAnomalie) {
-                             // Pour "Anomalie", toujours ouvrir le formulaire
-                             openAnomalyForm(currentBlock.id);
-                           } else {
-                             // Pour les autres statuts, juste changer le statut
-                             // et fermer le formulaire si ouvert
-                             return handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
-                           }
-                         }}
-                       />
-                     );
-                   })}
-                   {/* Bouton de fusion */}
-                   <Button
-                     key="merge"
-                     disabled={!loaded || saving || !canMergeWithNext()}
-                     title="Fusionner avec le bloc suivant"
-                     secondary
-                     onPress={() => openMergePreview()}
-                   />
-                 </View>
-               </>
-             ) : (
-              // Affiche l'illustration
-              <View style={{ alignItems: 'center', gap: 8 }}>
-                <OriginalVisual image={currentBlock.image} ratio={(currentBlock.bbox[3]-currentBlock.bbox[1])/(currentBlock.bbox[2]-currentBlock.bbox[0])}
-                  wide={false} label={`${roles[currentBlock.role] || 'Illustration'} original`} />
-                <Txt size={12} color={c.muted}>Illustration médicale - à vérifier visuellement</Txt>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: showCommentInput ? 0 : 12, justifyContent: 'center' }}>
-                  {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => {
-                    const isAnomalie = status === 'issue-found';
-                    return (
-                      <Button
-                        key={status}
-                        disabled={!loaded || saving}
-                        title={statusLabels[status]}
-                        secondary={blockStatus !== status}
-                        onPress={() => {
-                          if (isAnomalie) {
-                            openAnomalyForm(currentBlock.id);
-                          } else {
-                            return handleBlockStatusChange(currentPageIndex, currentBlock.id, status);
-                          }
-                        }}
-                      />
-                    );
-                  })}
-                </View>
-                
+  const inSelection = !!ref && selection.some(s => s.sources[0].printedPage === ref.printedPage && s.sources[0].blockId === ref.blockId);
 
-              </View>
-            )}
+  function proposeBoundaryHyphenation() {
+    if (!ref || !part || !currentItem()) return;
+    const nextTarget = targets[targets.findIndex(target => target.key === current.key) + 1];
+    const nextPage = nextTarget && packet.pages[nextTarget.pageIndex];
+    const nextPart = nextPage?.parts?.find(candidate => candidate.id === nextTarget.blockId);
+    if (!nextTarget || !nextPage || !nextPart) return;
+    const nextPresentation = workingPresentation(nextPage.printedPage, nextPart, validation);
+    const candidate = boundaryHyphenation(shownText, nextPresentation?.text ?? '');
+    if (!candidate || candidate.status !== 'repaired') return;
+    const nextRef = { printedPage: nextPage.printedPage, blockId: nextPart.id };
+    const nextMerge = mergeAtAnchor(validation?.merges, nextRef.printedPage, nextRef.blockId);
+    const nextItem: MergeItem = {
+      sources: nextMerge ? nextMerge.sources : [nextRef],
+      sourceTexts: nextMerge ? nextMerge.sourceTexts : [nextPresentation?.text ?? ''],
+      text: nextPresentation?.text ?? '', role: nextPart.role, mergeId: nextMerge?.id,
+      position: nextTarget.pageIndex * 10000 + nextTarget.blockIndex,
+    };
+    try {
+      const draft = buildMergeDraft(packet.chapterId, [currentItem()!, nextItem], 'hyphen');
+      setSelection([currentItem()!, nextItem]);
+      setDraft(draft);
+      setNotice('Jonction par césure proposée : vérifiez l’aperçu et confirmez la fusion pour l’enregistrer.');
+    } catch (reason) { setError(String(reason)); }
+  }
+
+  function proposeBoundaryParagraph() {
+    if (!ref || !part || !currentItem()) return;
+    const nextTarget = targets[targets.findIndex(target => target.key === current.key) + 1];
+    const nextPage = nextTarget && packet.pages[nextTarget.pageIndex];
+    const nextPart = nextPage?.parts?.find(candidate => candidate.id === nextTarget.blockId);
+    if (!nextTarget || !nextPage || !nextPart) return;
+    const nextPresentation = workingPresentation(nextPage.printedPage, nextPart, validation);
+    const candidate = boundaryParagraphNormalization(shownText, nextPresentation?.text ?? '', part.role, nextPart.role);
+    if (candidate?.status !== 'repaired') return;
+    const nextRef = { printedPage: nextPage.printedPage, blockId: nextPart.id };
+    const nextMerge = mergeAtAnchor(validation?.merges, nextRef.printedPage, nextRef.blockId);
+    const nextItem: MergeItem = {
+      sources: nextMerge ? nextMerge.sources : [nextRef],
+      sourceTexts: nextMerge ? nextMerge.sourceTexts : [nextPresentation?.text ?? ''],
+      text: nextPresentation?.text ?? '', role: nextPart.role, mergeId: nextMerge?.id,
+      position: nextTarget.pageIndex * 10000 + nextTarget.blockIndex,
+    };
+    try {
+      const draft = buildMergeDraft(packet.chapterId, [currentItem()!, nextItem], 'space');
+      setSelection([currentItem()!, nextItem]);
+      setDraft(draft);
+      setNotice('Jonction de paragraphe proposée : contrôlez l’aperçu et confirmez la fusion pour l’enregistrer.');
+    } catch (reason) { setError(String(reason)); }
+  }
+
+  function renderMergeDraft() {
+    if (!draft) return null;
+    const warnings = mergeWarnings(draft);
+    return (
+      <Card>
+        <Txt bold>Aperçu de la fusion ({draft.items.length} blocs)</Txt>
+        {draft.items.map((item, i) => (
+          <View key={item.sources.map(s => `${s.printedPage}:${s.blockId}`).join('+')} style={{ gap: 4, paddingVertical: 4 }}>
+            <Txt size={12} color={c.muted}>
+              {i + 1}. p. {item.sources[0].printedPage} · {item.sources.map(s => s.blockId).join(' + ')}{item.mergeId ? ' (déjà fusionné)' : ''}
+            </Txt>
+            <Text selectable style={{ color: c.ink }}>{item.text}</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Button title="Monter" secondary disabled={i === 0} onPress={() => setDraft(withMovedItem(draft, i, -1))} />
+              <Button title="Descendre" secondary disabled={i === draft.items.length - 1} onPress={() => setDraft(withMovedItem(draft, i, 1))} />
+            </View>
           </View>
-          
-          {/* Visuel original du PDF */}
-          <View style={{ flex: 1, minWidth: isWide ? 300 : '100%' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <Txt size={13} bold>Visuel original (PDF)</Txt>
-              <Pressable onPress={() => setViewMode('visual')}>
-                <Txt size={12} color={c.primary}>Plein écran</Txt>
-              </Pressable>
-            </View>
-            <View style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, overflow: 'hidden' }}>
-              <Image
-                source={{ uri: currentBlock.image }}
-                resizeMode="contain"
-                style={{ 
-                  width: '100%', 
-                  height: 400,
-                  backgroundColor: c.bg
-                }}
-              />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 8 }}>
-              <Button
-                title="Ouvrir le PDF"
-                secondary
-                onPress={() => openOriginalPage(page).catch(() => {})}
-              />
-            </View>
-          </View>
+        ))}
+        <Txt size={13} bold>Jonction</Txt>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {junctions.map(j => <Chip key={j.id} label={j.label} selected={draft.junction === j.id} onPress={() => setDraft(withJunction(draft, j.id))} />)}
         </View>
-      );
-    }
-    
-    // Mode visual : plein écran
-    if (viewMode === 'visual') {
+        <Txt size={12} color={c.muted}>Changer l’ordre ou la jonction régénère le texte ; aucun terme médical n’est modifié sans votre action.</Txt>
+        <Txt size={13} bold>Texte fusionné (modifiable)</Txt>
+        <TextInput multiline value={draft.joinedText} onChangeText={t => setDraft(withEditedText(draft, t))}
+          accessibilityLabel="Aperçu modifiable de la fusion"
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, minHeight: 120, color: c.ink, backgroundColor: c.paper }} />
+        {warnings.map(w => <Txt key={w} size={12} color="#b45309">⚠ {w}</Txt>)}
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          <Button title="Confirmer la fusion" disabled={busy || !draft.joinedText.trim()} onPress={confirmMerge} />
+          <Button title="Annuler" secondary onPress={() => setDraft(null)} />
+        </View>
+      </Card>
+    );
+  }
+
+  function renderMergeControls() {
+    if (!ref || !mergeable) return null;
+    return (
+      <View style={{ gap: 8, marginTop: 12 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {!inSelection && <Button title={selection.length ? 'Ajouter à la fusion' : 'Fusionner avec un autre bloc'} secondary onPress={startOrAddMerge} />}
+          {!split && <Button title="Séparer le bloc" secondary onPress={openSplit} />}
+          {split && <Button title="Annuler la séparation" secondary disabled={busy} onPress={cancelSplit} />}
+          {inSelection && <Button title="Retirer de la sélection" secondary onPress={removeFromSelection} />}
+          {selection.length >= 2 && <Button title="Prévisualiser la fusion" onPress={previewMerge} />}
+          {selection.length > 0 && <Button title="Vider la sélection de fusion" secondary onPress={() => { setSelection([]); setDraft(null); }} />}
+          {merge && <Button title="Annuler la fusion" secondary disabled={busy} onPress={cancelMerge} />}
+        </View>
+        {selection.length > 0 && <Txt size={12} color={c.muted}>Sélection : {selection.length} bloc(s) — {selection.map(s => `p. ${s.sources[0].printedPage} ${s.sources[0].blockId}`).join(' · ')}</Txt>}
+        {merge && <Txt size={12} color={c.muted}>Bloc fusionné ({merge.sources.length} blocs d’origine : {merge.sources.map(s => `p. ${s.printedPage} ${s.blockId}`).join(', ')}). Il peut encore être fusionné avec un autre bloc.</Txt>}
+      </View>
+    );
+  }
+
+  function renderPanel() {
+    if (panel === 'correct' || panel === 'normalize') {
       return (
-        <View style={{ alignItems: 'center', gap: 16 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-            <Button title="← Retour" secondary onPress={() => setViewMode('split')} />
-            <Chip label={statusLabels[blockStatus]} selected={false} onPress={() => {}} />
+        <View style={{ gap: 8, marginTop: 12 }}>
+          <Txt size={13} bold>{panel === 'normalize' ? 'Proposition de normalisation des paragraphes' : 'Correction du texte affiché'}</Txt>
+          <TextInput multiline value={editText} onChangeText={setEditText} accessibilityLabel="Éditeur de correction"
+            style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, minHeight: 140, fontSize: 15, color: c.ink, backgroundColor: c.paper }} />
+          {panel === 'normalize' && <Txt size={12} color={c.muted}>
+            Vérifiez cette proposition avant de l’enregistrer. Elle devient une correction locale avec historique et peut être annulée.
+          </Txt>}
+          <Txt size={12} color={c.muted}>Texte original de la source (inchangé) :</Txt>
+          {sources.map(s => {
+            const raw = packet.pages.find(p => p.printedPage === s.printedPage)?.parts?.find(p => p.id === s.blockId)?.text ?? '';
+            return <Text key={`${s.printedPage}:${s.blockId}`} selectable style={{ color: c.muted, fontSize: 13 }}>{raw}</Text>;
+          })}
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <Button title={panel === 'normalize' ? 'Accepter la normalisation' : 'Enregistrer la correction'} disabled={busy || !editText.trim()} onPress={saveCorrection} />
+            <Button title="Annuler" secondary onPress={() => setPanel('none')} />
           </View>
-          <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-            <Image
-              source={{ uri: currentBlock.image }}
-              resizeMode="contain"
-              style={{ 
-                width: Math.min(screenWidth - 40, 800), 
-                height: undefined,
-                aspectRatio: (currentBlock.bbox[2] - currentBlock.bbox[0]) / (currentBlock.bbox[3] - currentBlock.bbox[1]),
-                backgroundColor: c.bg
-              }}
-            />
-          </ScrollView>
-          <Button
-            title="Ouvrir le PDF original"
-            secondary
-            onPress={() => openOriginalPage(page).catch(() => {})}
-          />
         </View>
       );
     }
-    
-    // Mode text : texte seul
-    if (viewMode === 'text') {
+    if (panel === 'split') {
+      let preview: { firstText: string; secondText: string } | null = null;
+      let previewError = '';
+      try { preview = splitPreview(shownText, Number(splitPosition)); } catch (reason) { previewError = String(reason); }
       return (
-        <View style={{ padding: 8 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Button title="← Retour" secondary onPress={() => setViewMode('split')} />
-            <Chip label={statusLabels[blockStatus]} selected={false} onPress={() => {}} />
+        <View style={{ gap: 8, marginTop: 12 }}>
+          <Txt size={13} bold>Séparer le bloc</Txt>
+          <Txt size={12} color={c.muted}>Indiquez la position de coupure dans le texte affiché. Les deux nouveaux passages restent rattachés aux mêmes sources et historiques.</Txt>
+          <TextInput value={splitPosition} onChangeText={setSplitPosition} keyboardType="numeric" accessibilityLabel="Position de séparation"
+            style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10, color: c.ink, backgroundColor: c.paper }} />
+          {preview ? <View style={{ gap: 6 }}>
+            <Txt size={12} color={c.muted}>Aperçu des nouveaux blocs</Txt>
+            <Text selectable style={{ color: c.ink, padding: 10, borderWidth: 1, borderColor: c.line, borderRadius: 8 }}>{preview.firstText}</Text>
+            <Text selectable style={{ color: c.ink, padding: 10, borderWidth: 1, borderColor: c.line, borderRadius: 8 }}>{preview.secondText}</Text>
+          </View> : <Txt size={12} color="#dc3545">{previewError}</Txt>}
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <Button title="Enregistrer la séparation" disabled={busy || !preview} onPress={confirmSplit} />
+            <Button title="Annuler" secondary onPress={() => setPanel('none')} />
           </View>
-          {showAsText ? (
-            <>
-              <ScrollView nestedScrollEnabled>
-                {presentation.contents ? (
-                    <View style={{flexDirection:'row',flexWrap:'wrap',gap:14}}>
-                      {presentation.contents.map((column, ci) => (
-                        <View key={ci} style={{flex:1,minWidth:240,gap:6}}>
-                          {column.map((entry, i) => (
-                            <View key={i} style={{flexDirection:'row',gap:8,justifyContent:'space-between'}}>
-                              <Text selectable style={{fontSize:18,color:c.ink,flex:1}}>{entry.label}</Text>
-                              <Text selectable style={{fontSize:18,color:c.ink,minWidth:32,textAlign:'right'}}>{entry.page}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <SourcePresentationText presentation={presentation} size={18} />
-                  )}
-              </ScrollView>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => (
-                  <Button
-                    key={status}
-                    disabled={!loaded || saving}
-                    title={statusLabels[status]}
-                    secondary={blockStatus !== status}
-                    onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
-                  />
-                ))}
-              </View>
-            </>
-          ) : (
-            <View style={{ alignItems: 'center', gap: 8 }}>
-              <OriginalVisual image={currentBlock.image} ratio={(currentBlock.bbox[3]-currentBlock.bbox[1])/(currentBlock.bbox[2]-currentBlock.bbox[0])}
-                wide={false} label={`${roles[currentBlock.role] || 'Illustration'} original`} />
-              <Txt size={12} color={c.muted}>Illustration médicale</Txt>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                {(['pending', 'in-review', 'verified', 'issue-found'] as BlockValidationStatus[]).map(status => (
-                  <Button
-                    key={status}
-                    disabled={!loaded || saving}
-                    title={statusLabels[status]}
-                    secondary={blockStatus !== status}
-                    onPress={() => status === 'issue-found' ? openAnomalyForm(currentBlock.id) : handleBlockStatusChange(currentPageIndex, currentBlock.id, status)}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
         </View>
       );
     }
-    
+    if (panel === 'add-manual') {
+      return (
+        <View style={{ gap: 8, marginTop: 12 }}>
+          <Txt size={13} bold>Ajouter un bloc après</Txt>
+          <Txt size={12} color={c.muted}>Aperçu avant enregistrement : ce texte sera un nouveau bloc indépendant, ancré après « {part?.id} » et rattaché à sa page PDF. Le paquet source reste inchangé.</Txt>
+          <TextInput multiline value={manualText} onChangeText={setManualText} accessibilityLabel="Texte du nouveau bloc manuel"
+            style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, minHeight: 120, color: c.ink, backgroundColor: c.paper }} />
+          {!!manualText.trim() && <View style={{ gap: 4 }}>
+            <Txt size={12} color={c.primary}>Aperçu du nouveau bloc</Txt>
+            <Text selectable style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10 }}>{manualText}</Text>
+          </View>}
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <Button title="Confirmer l’ajout du bloc" disabled={busy || !manualText.trim()} onPress={confirmManualBlock} />
+            <Button title="Annuler" secondary onPress={() => setPanel('none')} />
+          </View>
+        </View>
+      );
+    }
+    if (panel === 'associate' && ref) {
+      const choices = logical.filter(item => !(item.printedPage === ref.printedPage && item.blockId === ref.blockId))
+        .filter(item => `${item.printedPage} ${item.blockId} ${item.part.text}`.toLocaleLowerCase().includes(associationSearch.toLocaleLowerCase()));
+      const selected = associationTarget ? logical.find(item => JSON.stringify([item.printedPage, item.blockId]) === associationTarget) : undefined;
+      return <View style={{ gap: 8, marginTop: 12 }}>
+        <Txt size={13} bold>{editingAssociation ? 'Modifier l’association' : 'Associer un élément'}</Txt>
+        <Txt size={12} bold>Source · p. {ref.printedPage} · {ref.blockId}</Txt>
+        <Txt size={12} color={c.muted}>Vous pouvez associer plusieurs passages de ce texte. Références enregistrées : {associations.filter(value => value.source.printedPage === ref.printedPage && value.source.blockId === ref.blockId).length}.</Txt>
+        <Txt size={12} color={c.muted}>Sélectionnez le passage à associer ci-dessous, ou saisissez son texte exact. L’occurrence est comptée à partir de 0.</Txt>
+        <TextInput multiline readOnly value={shownText} accessibilityLabel="Sélectionner le passage source"
+          onSelectionChange={({ nativeEvent: { selection: range } }) => {
+            if (range.end <= range.start) return;
+            const text = shownText.slice(range.start, range.end);
+            let occurrence = 0;
+            let at = shownText.indexOf(text);
+            while (at >= 0 && at < range.start) { occurrence += 1; at = shownText.indexOf(text, at + text.length); }
+            if (at !== range.start) return;
+            setAnchorText(text);
+            setAnchorOccurrence(String(occurrence));
+          }}
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, height: 160, fontSize: 16, color: c.ink, backgroundColor: c.paper }} />
+        <TextInput value={anchorText} onChangeText={setAnchorText} accessibilityLabel="Texte exact de l’ancre" placeholder="Texte exact de l’ancre"
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10, color: c.ink, backgroundColor: c.paper }} />
+        <TextInput value={anchorOccurrence} onChangeText={setAnchorOccurrence} keyboardType="numeric" accessibilityLabel="Occurrence de l’ancre"
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10, color: c.ink, backgroundColor: c.paper }} />
+        <TextInput value={associationSearch} onChangeText={setAssociationSearch} accessibilityLabel="Rechercher une destination logique" placeholder="Rechercher bloc, texte ou page"
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10, color: c.ink, backgroundColor: c.paper }} />
+        <ScrollView nestedScrollEnabled style={{ maxHeight: 180, borderWidth: 1, borderColor: c.line, borderRadius: 8 }}>
+          {choices.map(item => {
+            const key = JSON.stringify([item.printedPage, item.blockId]);
+            return <Pressable key={key} accessibilityRole="button" onPress={() => setAssociationTarget(key)}
+              accessibilityState={{ selected: associationTarget === key }}
+              style={{ minHeight: 48, padding: 9, backgroundColor: associationTarget === key ? c.mint : undefined }}>
+              <Txt size={12} bold>p. {item.printedPage} · {item.blockId}{item.manual ? ' · bloc manuel' : ''}</Txt>
+              <Txt size={12} numberOfLines={2}>{item.part.text}</Txt>
+            </Pressable>;
+          })}
+        </ScrollView>
+        {selected && <View style={{ padding: 10, borderRadius: 8, backgroundColor: c.mint }}>
+          <Txt size={12} bold>Aperçu destination · p. {selected.printedPage} · {selected.blockId}</Txt><Txt size={12}>{selected.part.text}</Txt>
+          {(selected.part.role === 'figure' || selected.part.role === 'table' || selected.part.kind === 'visual') && <Image
+            source={{ uri: selected.part.image }} accessibilityLabel="Aperçu de l’élément associé"
+            resizeMode="contain" style={{ width: '100%', height: 200 }} />}
+        </View>}
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          <Button title="Enregistrer l’association" disabled={busy || !anchorText.trim() || !associationTarget} onPress={() => saveAssociation()} />
+          <Button title="Enregistrer et ajouter une référence" secondary disabled={busy || !anchorText.trim() || !associationTarget} onPress={() => saveAssociation(true)} />
+          <Button title="Annuler" secondary onPress={() => setPanel('none')} />
+        </View>
+      </View>;
+    }
+    if (panel === 'table' && ref) {
+      return <TableEditor key={current?.key} initial={table} sourcePart={part!} busy={busy} onSave={saveTable} onCancel={() => setPanel('none')} />;
+    }
+    if (panel === 'comment') {
+      return (
+        <View style={{ gap: 8, marginTop: 12 }}>
+          <Txt size={13} bold>{imageOnly ? 'Commentaire facultatif (figure ou tableau)' : 'Commentaire sur le passage'}</Txt>
+          <TextInput multiline value={comment} onChangeText={setComment} accessibilityLabel="Commentaire d’anomalie"
+            style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, minHeight: 90, color: c.ink, backgroundColor: c.paper }} />
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Button title={editingAnomaly ? 'Mettre à jour le commentaire' : 'Enregistrer le commentaire'} disabled={busy} onPress={saveComment} />
+            <Button title="Annuler" secondary onPress={() => setPanel('none')} />
+          </View>
+        </View>
+      );
+    }
     return null;
   }
-  
-  // Rendu de la navigation
-  function renderNavigation() {
-    const page = packet.pages[currentPageIndex];
-    const blocks = getCurrentBlocks();
-    const currentBlock = blocks[currentBlockIndex];
-    const stats = getStats();
-    
-    return (
-      <View style={{ gap: 12 }}>
-        {/* Barre d'outils principale */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-          <Button
-            title="Page précédente"
-            secondary
-            disabled={!visibleTargets.some(t => t.pageIndex < currentPageIndex)}
-            onPress={() => {
-              const previous = visibleTargets.filter(t => t.pageIndex < currentPageIndex).at(-1);
-              if (previous) goToPage(previous.pageIndex);
-            }}
-          />
-          <Button
-            title={reviewFilter === 'pending' ? 'Bloc précédent à vérifier' : 'Bloc précédent'}
-            secondary
-            disabled={!target || visibleTargets[0]?.key === target.key}
-            onPress={prevBlock}
-          />
-          <Button
-            title={target ? `Page ${page?.printedPage || '?'} · Bloc ${currentBlockIndex + 1}/${blocks.length || 0}` : 'Choisir une page'}
-            secondary
-            onPress={() => setShowPageSelector(!showPageSelector)}
-          />
-          <Button
-            title={reviewFilter === 'pending' ? 'Bloc suivant à vérifier' : 'Bloc suivant'}
-            secondary
-            disabled={!target || visibleTargets.at(-1)?.key === target.key}
-            onPress={nextBlock}
-          />
-          <Button
-            title="Page suivante"
-            secondary
-            disabled={!visibleTargets.some(t => t.pageIndex > currentPageIndex)}
-            onPress={() => selectTarget(visibleTargets.find(t => t.pageIndex > currentPageIndex))}
-          />
-        </View>
-        
-        {/* Mode d'affichage */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
-          <Chip
-            label="Split"
-            selected={viewMode === 'split'}
-            onPress={() => setViewMode('split')}
-          />
-          <Chip
-            label="Texte"
-            selected={viewMode === 'text'}
-            onPress={() => setViewMode('text')}
-          />
-          <Chip
-            label="Visuel"
-            selected={viewMode === 'visual'}
-            onPress={() => setViewMode('visual')}
-          />
-        </View>
-        
-        {/* Filtrage */}
-        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {(['pending', 'verified', 'all'] as ReviewFilter[]).map(mode => (
-            <Chip key={mode} label={mode === 'pending' ? 'À traiter' : mode === 'verified' ? 'Vérifiés' : 'Tous'}
-              selected={reviewFilter === mode} onPress={() => changeReviewFilter(mode)} />
-          ))}
-          {anomalies.length > 0 && (
-            <Chip
-              label={`Mes anomalies (${anomalies.length})`}
-              selected={filter === 'user-anomalies'}
-              onPress={() => {
-                setFilter('user-anomalies');
-                setShowUserAnomalies(true);
-              }}
-            />
-          )}
-          <Chip
-            label="Anomalies auto"
-            selected={filter === 'anomalies'}
-            onPress={() => setFilter('anomalies')}
-          />
 
-        </View>
-        
-        {/* Statistiques */}
-        {stats && (
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-around',
-            backgroundColor: c.mint,
-            padding: 12,
-            borderRadius: 8
-          }}>
-            <View style={{ alignItems: 'center' }}>
-              <Txt size={18} bold>{stats.progress}%</Txt>
-              <Txt size={12}>Vérifié</Txt>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Txt size={18} bold>{stats.verifiedPages}/{stats.totalPages}</Txt>
-              <Txt size={12}>Pages</Txt>
-            </View>
-            <View style={{ alignItems: 'center' }}>
-              <Txt size={18} bold>{stats.verifiedBlocks}/{stats.totalBlocks}</Txt>
-              <Txt size={12}>Blocs</Txt>
-            </View>
-          </View>
-        )}
-        
-        {/* Sélecteur de page */}
-        {showPageSelector && (
-          <View style={{ 
-            position: 'absolute', 
-            top: '50%', 
-            left: 20, 
-            right: 20, 
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: c.line,
-            zIndex: 1000,
-            maxHeight: 400
-          }}>
-            <Txt bold size={16} style={{ marginBottom: 12 }}>Aller à la page</Txt>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {packet.pages.map((p, i) => {
-                const pageTargets = allTargets.filter(t => t.printedPage === p.printedPage);
-                const pageStatus = pageTargets.length && pageTargets.every(t => isVerified(t.status)) ? 'verified' : 'in-progress';
-                const available = visibleTargets.some(t => t.printedPage === p.printedPage);
-                const bgColor = pageStatus === 'verified' ? c.primary : 
-                               pageStatus === 'in-progress' ? c.peach : c.muted;
-                return (
-                  <Pressable
-                    key={p.printedPage}
-                    disabled={!available}
-                    accessibilityLabel={`Page ${p.printedPage}${pageStatus === 'verified' ? ' entièrement vérifiée' : ''}`}
-                    onPress={() => goToPage(i)}
-                    style={{ 
-                      padding: 10, 
-                      backgroundColor: bgColor,
-                      borderRadius: 8
-                    }}
-                  >
-                    <Txt size={14} color={pageStatus === 'verified' ? 'white' : c.ink}>
-                      {p.printedPage}
-                    </Txt>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <Button title="Fermer" secondary onPress={() => setShowPageSelector(false)} />
-          </View>
-        )}
-      </View>
-    );
-  }
-  
-  // Navigue vers une anomalie spécifique
-  function goToAnomaly(anomaly: AnomalyReport) {
-    const next = allTargets.find(t => t.key === reviewKey(anomaly.chapterId, anomaly.printedPage, anomaly.blockId));
-    if (next) {
-      setReviewFilter(isVerified(next.status) ? 'verified' : 'pending');
-      selectTarget(next);
+  function renderBlock() {
+    if (!loaded) return <Txt color={c.muted}>Chargement des validations…</Txt>;
+    if (!current || !page || !part || !presentation) {
+      return <Txt color={c.muted}>{filter === 'pending' ? 'Aucun bloc à vérifier.' : 'Aucun bloc ne correspond à ce filtre.'}</Txt>;
     }
-  }
-
-  // Modal d'export pour mobile
-  function renderExportModal() {
-    if (!showExportModal || anomalies.length === 0) return null;
-    
-    const report = generateAnomalyReport();
-    
+    const status = current.status;
+    const mineAnomalies = blockAnomalies();
     return (
-      <View style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 2000,
-      }}>
-        <View style={{
-          backgroundColor: 'white',
-          padding: 24,
-          borderRadius: 12,
-          maxWidth: 500,
-          width: '90%',
-          maxHeight: '80%',
-          gap: 16,
-        }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Txt size={18} bold>Exporter les anomalies</Txt>
-            <Pressable onPress={() => setShowExportModal(false)}>
-              <Txt size={24}>×</Txt>
-            </Pressable>
-          </View>
-          
-          <View style={{ backgroundColor: '#E8F4FD', padding: 12, borderRadius: 8 }}>
-            <Txt bold>Chapitre : {report.chapterId}</Txt>
-            <Txt>Manuel : {report.manual}</Txt>
-            <Txt>Total : {anomalies.length} anomalies</Txt>
-          </View>
-          
-          <View style={{ gap: 8 }}>
-            <Txt size={14} bold>Fichiers à exporter :</Txt>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Chip label="📄 JSON" selected={false} onPress={() => {}} />
-              <Chip label="📄 Markdown" selected={false} onPress={() => {}} />
-            </View>
-          </View>
-          
-          <View style={{ gap: 8 }}>
-            <Txt size={12} color={c.muted}>
-              Ces fichiers contiennent toutes vos anomalies avec leurs descriptions.
-              Ils peuvent être importés par une IA pour correction.
-            </Txt>
-            <Txt size={12} color={c.muted}>
-              Aucune donnée ne sera envoyée automatiquement.
-            </Txt>
-          </View>
-          
-          <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
-            <Button
-              title="Annuler"
-              secondary
-              onPress={() => setShowExportModal(false)}
-            />
-            <Button
-              title="Exporter"
-              onPress={() => {
-                // Sur mobile, on retourne le rapport au parent pour traitement
-                exportAnomalies();
-                setShowExportModal(false);
-              }}
-            />
-          </View>
+      <View style={{ flex: 1, minWidth: wide ? 300 : '100%', gap: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Txt size={12} color={c.muted}>Statut : {statusLabels[status]}</Txt>
+          <Txt size={12} color={c.muted}>Bloc {part.id} · {roles[part.role] ?? part.role} · p. {page.printedPage}</Txt>
         </View>
+        {kind === 'table' && table && !table.keepOriginal && <CourseTable table={table} />}
+        {kind === 'table' && <Txt size={12} color={c.muted}>
+          {!table ? 'Tableau : image originale conservée (à droite). Aucune reconstruction numérique.'
+            : table.validated ? 'Tableau numérique validé : il remplace l’image dans le cours.'
+              : table.keepOriginal ? 'Reconstruction non utilisée : l’image originale est conservée dans le cours.'
+                : 'Brouillon de tableau : non validé, l’image originale reste affichée dans le cours.'}
+        </Txt>}
+        {kind && kind !== 'table' && <Txt size={12} color={c.primary}>Type : {kindLabel(kind)}{kind === 'toc' ? ' · masqué dans le cours, conservé dans les pages originales' : kind === 'bibliography' ? ' · conservé dans les données privées et l’export, masqué dans le cours de révision' : kind === 'h1' || kind === 'authors' ? ' · affiché dans l’en-tête' : ''}</Txt>}
+        {presentation.hyphenation?.some(change => change.status === 'repaired') && <Txt size={12} color={c.primary}>
+          Césure PDF reconstituée dans la présentation ; le texte brut et le PDF restent inchangés.
+        </Txt>}
+        {presentation.hyphenation?.some(change => change.status === 'ambiguous') && <Txt size={12} color="#b45309">
+          Césure ambiguë conservée : vérifiez-la avec le PDF avant de corriger.
+        </Txt>}
+        {normalization?.decisions.some(change => change.status === 'ambiguous') && <Txt size={12} color="#b45309">
+          Retour de ligne ambigu conservé : vérifiez la séparation de paragraphe avec le PDF.
+        </Txt>}
+        {kind === 'table' ? null : imageOnly
+          ? <Txt size={12} color={c.muted}>Figure ou tableau complexe : conservé en image originale (à droite). Jamais remplacé par du texte.</Txt>
+          : <ScrollView nestedScrollEnabled style={{ maxHeight: wide ? 460 : 300 }}>
+              <SourcePresentationText presentation={presentation} size={16} heading={part.role === 'heading'} />
+            </ScrollView>}
+        {panel === 'none' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+          <Button title="À vérifier" secondary={status !== 'pending'} disabled={busy} onPress={() => setStatus('pending')} />
+          <Button title="En cours" secondary={status !== 'in-review'} disabled={busy} onPress={() => setStatus('in-review')} />
+          <Button title="Vérifié ✓" secondary={!isVerified(status)} disabled={busy} onPress={() => setStatus('verified')} />
+          <Button title="Anomalie !" secondary={status !== 'issue-found'} disabled={busy} onPress={openCorrection} />
+        </View>}
+        {panel === 'none' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <Button title="Ajouter un bloc après" secondary disabled={busy} onPress={openManualBlock} />
+          <Button title="Associer un élément" secondary disabled={busy || imageOnly} onPress={() => openAssociation()} />
+          {currentLogical?.manual && <Button title="Annuler la création du bloc" secondary disabled={busy} onPress={undoManualBlock} />}
+          {canNormalize && <Button title="Proposer la normalisation des paragraphes" secondary onPress={proposeNormalization} />}
+          {hasActiveCorrection(validation, ref!) && <Button title="Annuler la correction" secondary disabled={busy} onPress={cancelCorrection} />}
+        </View>}
+        {panel === 'none' && <View style={{ gap: 6 }}>
+          <Txt size={11} color={c.muted}>Classification du bloc</Txt>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            <Chip label="Texte normal" selected={!kind} onPress={() => changeKind(null)} />
+            {BLOCK_KINDS.map(k => <Chip key={k.id} label={k.label} selected={kind === k.id} onPress={() => changeKind(k.id)} />)}
+          </View>
+          {kind === 'table' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Button title={table ? 'Modifier le tableau numérique' : 'Reconstruire le tableau'} secondary onPress={() => setPanel('table')} />
+            {table && !table.validated && <Button title="Valider le tableau" disabled={busy} onPress={() => decideTable('validate')} />}
+            {table && !table.keepOriginal && <Button title="Conserver l’image originale" secondary disabled={busy} onPress={() => decideTable('keep-original')} />}
+            {table && (table.validated || table.keepOriginal) && <Button title="Remettre en brouillon" secondary disabled={busy} onPress={() => decideTable('draft')} />}
+          </View>}
+        </View>}
+        {renderPanel()}
+        {panel === 'none' && renderMergeControls()}
+        {panel === 'none' && (() => {
+          const nextTarget = targets[targets.findIndex(target => target.key === current.key) + 1];
+          const nextPart = nextTarget && packet.pages[nextTarget.pageIndex]?.parts?.find(candidate => candidate.id === nextTarget.blockId);
+          const nextPresentation = nextTarget && nextPart ? workingPresentation(packet.pages[nextTarget.pageIndex].printedPage, nextPart, validation) : null;
+          const candidate = nextPresentation ? boundaryHyphenation(shownText, nextPresentation.text) : null;
+          return candidate?.status === 'repaired' && mergeable
+            ? <Button title="Proposer la jonction par césure" secondary onPress={proposeBoundaryHyphenation} />
+            : null;
+        })()}
+        {panel === 'none' && (() => {
+          const nextTarget = targets[targets.findIndex(target => target.key === current.key) + 1];
+          const nextPart = nextTarget && packet.pages[nextTarget.pageIndex]?.parts?.find(candidate => candidate.id === nextTarget.blockId);
+          const nextPage = nextTarget ? packet.pages[nextTarget.pageIndex] : undefined;
+          if (!nextPart || !nextPage) return null;
+          const nextPresentation = workingPresentation(nextPage.printedPage, nextPart, validation);
+          const candidate = nextPresentation ? boundaryParagraphNormalization(shownText, nextPresentation.text, part.role, nextPart.role) : null;
+          return candidate?.status === 'repaired' && mergeable
+            ? <Button title="Proposer la jonction de paragraphe" secondary onPress={proposeBoundaryParagraph} />
+            : null;
+        })()}
+        {renderMergeDraft()}
+        {panel === 'none' && associations.filter(value => value.source.printedPage === ref!.printedPage && value.source.blockId === ref!.blockId).map(value =>
+          <View key={value.id} style={{ padding: 8, borderRadius: 8, backgroundColor: value.state === 'active' ? c.mint : '#FFF3CD', gap: 4 }}>
+            <Txt size={12} bold>Association · « {value.anchor.text} » → p. {value.target.printedPage} · {value.target.blockId}</Txt>
+            <Txt size={11} color={c.muted}>{value.state === 'active' ? 'Active' : 'À réassocier : aucune redirection automatique.'}</Txt>
+            <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Modifier" secondary onPress={() => openAssociation(value)} /><Button title="Supprimer" secondary onPress={() => void removeAssociation(value.id)} /></View>
+          </View>)}
+        {mineAnomalies.map((a, i) => (
+          <View key={a.id} style={{ padding: 10, borderRadius: 8, backgroundColor: c.mint, gap: 4 }}>
+            <Txt size={12} bold>Anomalie {i + 1} · {a.status === 'resolved' ? 'résolue' : a.status === 'open' ? 'ouverte' : 'à revérifier'} · {a.blockId}</Txt>
+            <Txt size={13}>{a.description}</Txt>
+            {a.status !== 'resolved' && <Button title={`Modifier l’anomalie ${i + 1}`} secondary onPress={() => openComment(a)} />}
+          </View>
+        ))}
       </View>
     );
   }
 
-  // Rendu de la liste des anomalies utilisateur (avec commentaires)
-  function renderUserAnomalyList() {
-    if (anomalies.length === 0) {
-      return (
-        <View style={{ padding: 20 }}>
-          <Txt size={14} color={c.muted}>Aucune anomalie signalée</Txt>
-        </View>
-      );
-    }
-    
-    // Grouper les anomalies par page
-    const anomaliesByPage: Record<number, AnomalyReport[]> = {};
-    for (const anomaly of anomalies.filter(a => a.status === anomalyFilter)) {
-      if (!anomaliesByPage[anomaly.printedPage]) {
-        anomaliesByPage[anomaly.printedPage] = [];
-      }
-      anomaliesByPage[anomaly.printedPage].push(anomaly);
-    }
-    
-    // Trier les pages par numéro
-    const sortedPages = Object.keys(anomaliesByPage).map(Number).sort((a, b) => a - b);
-    
+  function renderPdf() {
+    if (!current || !page || !part) return null;
+    const refs = currentLogical?.manual ? [{ printedPage: currentLogical.manual.sourceRef.printedPage, blockId: currentLogical.manual.sourceRef.blockId }] : sources;
+    const originals = refs.map(s => {
+      const p = packet.pages.find(x => x.printedPage === s.printedPage);
+      return { s, page: p, part: p?.parts?.find(x => x.id === s.blockId) };
+    }).filter(o => o.page && o.part);
+    return (
+      <View style={{ flex: 1, minWidth: wide ? 300 : '100%', gap: 8 }}>
+        <Txt size={13} bold>PDF original</Txt>
+        {originals.map(o => (
+          <View key={`${o.s.printedPage}:${o.s.blockId}`} style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 6, gap: 4 }}>
+            <OriginalVisual image={o.part!.image}
+              ratio={(o.part!.bbox[3] - o.part!.bbox[1]) / Math.max(1, o.part!.bbox[2] - o.part!.bbox[0])}
+              label={`Original p. ${o.s.printedPage} ${o.s.blockId}`} />
+            <Button title={`Ouvrir le PDF p. ${o.s.printedPage}`} secondary onPress={() => openOriginalPage(o.page!).catch(() => {})} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
+  function download() {
+    if (!validation) return;
+    const day = new Date().toISOString().slice(0, 10);
+    const data = buildStructureExport(packet, validation, anomalies);
+    const name = `norya-chapitre-complet-${packet.chapterId}-${day}.json`;
+    const ok = downloadFile(name, JSON.stringify(data, null, 2), 'application/json');
+    setExportNotice(ok
+      ? `${name} téléchargé par le navigateur. Il n’est PAS encore enregistré dans Codespaces : transmettez-le ou placez-le sous references-privees/exports/. Votre travail reste enregistré automatiquement dans Norya.`
+      : 'Téléchargement indisponible sur cet appareil. Votre travail reste enregistré localement dans Norya ; rien n’a été écrit dans Codespaces.');
+  }
+  async function importExport() {
+    try {
+      const next = importStructureExport(importText, packet, base());
+      if (await commit(next)) { setExportNotice('Export importé et enregistré localement. Fusions et corrections reconstituées sans doublon.'); setImportText(''); }
+    } catch (reason) { setExportNotice(`Import refusé : ${String(reason)}`); }
+  }
+
+  function renderExport() {
+    if (!showExport) return null;
     return (
       <Card>
-        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-          {(['open', 'corrected-pending-review', 'resolved'] as AnomalyStatus[]).map(status => (
-            <Chip key={status} label={`${status === 'open' ? 'Ouvertes' : status === 'resolved' ? 'Résolues' : 'À revérifier'} (${anomalies.filter(a => a.status === status).length})`}
-              selected={anomalyFilter === status} onPress={() => setAnomalyFilter(status)} />
-          ))}
+        <Txt bold>Exporter / importer</Txt>
+        <Txt size={12} color={c.muted}>« Enregistré localement » = stockage de ce navigateur (Safari). « Exporté dans Codespaces » = fichier réel sous references-privees/ ; il n’est jamais publié sur GitHub.</Txt>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <Button title="Exporter le chapitre complet" onPress={download} />
         </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Txt bold size={16}>Anomalies signalées ({anomalies.length})</Txt>
-          <Button
-            title="Exporter"
-            secondary
-            onPress={() => exportAnomalies()}
-          />
-        </View>
-        
-        <View style={{ gap: 12 }}>
-          {sortedPages.map(pageNum => {
-            const pageAnomalies = anomaliesByPage[pageNum];
-            const openCount = pageAnomalies.filter(a => a.status === 'open').length;
-            const pendingCount = pageAnomalies.filter(a => a.status === 'corrected-pending-review').length;
-            const resolvedCount = pageAnomalies.filter(a => a.status === 'resolved').length;
-            
-            return (
-              <View key={pageNum} style={{ 
-                backgroundColor: c.mint,
-                borderRadius: 8,
-                padding: 12,
-                gap: 8
-              }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Txt bold>Page {pageNum}</Txt>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Chip
-                      label={`🔴 ${openCount}`}
-                      selected={false}
-                      onPress={() => {}}
-                    />
-                    <Chip
-                      label={`🟡 ${pendingCount}`}
-                      selected={false}
-                      onPress={() => {}}
-                    />
-                    <Chip
-                      label={`🟢 ${resolvedCount}`}
-                      selected={false}
-                      onPress={() => {}}
-                    />
-                  </View>
-                </View>
-                
-                <View style={{ gap: 8 }}>
-                  {pageAnomalies.map(anomaly => (
-                    <View key={anomaly.id} style={{ 
-                      padding: 10,
-                      backgroundColor: 'white',
-                      borderRadius: 6,
-                      borderWidth: 1,
-                      borderColor: c.line
-                    }}>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                        <Txt size={12} bold>Bloc : {anomaly.blockId}</Txt>
-                        <View style={{ flexDirection: 'row', gap: 8 }}>
-                          <Chip
-                            label={anomaly.blockRole}
-                            selected={false}
-                            onPress={() => {}}
-                          />
-                          <Pressable onPress={() => goToAnomaly(anomaly)}>
-                            <Txt size={12} color={c.primary}>Aller →</Txt>
-                          </Pressable>
-                        </View>
-                      </View>
-                      
-                      <Txt size={11} color={c.muted} numberOfLines={1}>
-                        {anomaly.blockTextPreview}
-                      </Txt>
-                      
-                      <View style={{ 
-                        marginTop: 6,
-                        padding: 8,
-                        backgroundColor: '#FFF4DD',
-                        borderRadius: 4
-                      }}>
-                        <Txt size={13} bold>Description :</Txt>
-                        <Txt size={12}>{anomaly.description}</Txt>
-                        {(anomaly.descriptionHistory ?? []).map((previous, i) => (
-                          <Txt key={i} size={11} color={c.muted}>Commentaire précédent : {previous.description}</Txt>
-                        ))}
-                      </View>
-                      
-                      <View style={{ 
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginTop: 6,
-                        paddingTop: 6,
-                        borderTopWidth: 1,
-                        borderTopColor: c.line
-                      }}>
-                        <Txt size={10} color={c.muted}>
-                          {anomaly.createdAt.split('T')[0]}
-                        </Txt>
-                        <Chip
-                          label={anomaly.status === 'open' ? '🔴 Ouverte' :
-                                anomaly.status === 'corrected-pending-review' ? '🟡 À revérifier' : '🟢 Résolue'}
-                          selected={false}
-                          onPress={() => {}}
-                        />
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            );
-          })}
-        </View>
+        <TextInput multiline value={importText} onChangeText={setImportText} placeholder="Collez ici un export JSON (ancien ou nouveau) à réimporter"
+          accessibilityLabel="Import d’un export"
+          style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10, minHeight: 70, color: c.ink, backgroundColor: c.paper }} />
+        <Button title="Importer l’export collé" secondary disabled={!importText.trim() || busy} onPress={importExport} />
+        {exportNotice && <Txt size={12} color={c.ink}>{exportNotice}</Txt>}
+        <Button title="Fermer" secondary onPress={() => setShowExport(false)} />
       </Card>
     );
   }
 
-  // Rendu de la liste des anomalies prioritaires automatiques (ancienne version)
-  function renderAnomalyList() {
-    if (!validation || !controlReport || filter !== 'anomalies') return null;
-    
-    const anomalyPages = getAnomalyPages();
-    
-    if (anomalyPages.length === 0) {
-      return (
-        <View style={{ padding: 20 }}>
-          <Txt size={14} color={c.muted}>Aucune anomalie détectée</Txt>
-        </View>
-      );
-    }
-    
+  function renderBatchNormalization() {
+    if (!batchPlan) return null;
     return (
       <Card>
-        <Txt bold size={16}>Pages avec anomalies prioritaires</Txt>
-        <Txt size={13} color={c.muted} style={{ marginBottom: 12 }}>
-          {anomalyPages.length} pages · Priorité : haute et moyenne
+        <Txt bold>Nettoyage global des retours à la ligne</Txt>
+        <Txt size={12} color={c.muted}>
+          Seules les propositions sûres sont listées. Les corrections manuelles et fusions modifiées sont exclues.
+          Un bloc déjà vérifié conserve sa trace de validation, mais repasse en révision après modification.
         </Txt>
-        <View style={{ gap: 8 }}>
-          {anomalyPages.map(({ page, blocks }) => (
-            <View key={page} style={{ 
-              padding: 12, 
-              backgroundColor: c.mint, 
-              borderRadius: 8,
-              gap: 8
-            }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Txt bold>Page {page}</Txt>
-                <Button
-                  title="Aller à cette page"
-                  secondary
-                  onPress={() => {
-                    const pageIndex = packet.pages.findIndex(p => p.printedPage === page);
-                    if (pageIndex !== -1) goToPage(pageIndex);
-                  }}
-                />
-              </View>
-              <Txt size={12}>
-                {blocks.length} blocs avec anomalies :
-                {blocks.filter(b => b.priority === 'high').length} haute priorité, 
-                {blocks.filter(b => b.priority === 'medium').length} moyenne priorité
-              </Txt>
-            </View>
-          ))}
+        {!batchPlan.proposals.length && <Txt>Aucune normalisation sûre à enregistrer.</Txt>}
+        {batchPlan.proposals.map(proposal => (
+          <View key={proposal.id} style={{ gap: 4, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: c.line }}>
+            <Txt size={12} bold>p. {proposal.refs.map(ref => ref.printedPage).join(', ')} · {proposal.refs.map(ref => ref.blockId).join(' + ')}{proposal.wasVerified ? ' · à revoir' : ''}</Txt>
+            <Txt size={12} color={c.muted}>Avant</Txt>
+            <Text selectable style={{ color: c.ink, fontSize: 13 }}>{proposal.before}</Text>
+            <Txt size={12} color={c.primary}>Après</Txt>
+            <Text selectable style={{ color: c.ink, fontSize: 13 }}>{proposal.after}</Text>
+          </View>
+        ))}
+        {!!batchPlan.ambiguities.length && <View style={{ gap: 4 }}>
+          <Txt size={12} color="#b45309">{batchPlan.ambiguities.length} séparation(s) ambiguë(s) conservée(s) : ouvrez-les individuellement pour comparaison PDF.</Txt>
+          {batchPlan.ambiguities.map((ambiguity, index) => <Button key={`${ambiguity.ref.printedPage}:${ambiguity.ref.blockId}:${index}`}
+            title={`Ouvrir p. ${ambiguity.ref.printedPage} · ${ambiguity.ref.blockId}`} secondary onPress={() => {
+              setFilter('all');
+              setSelectedKey(reviewKey(packet.chapterId, ambiguity.ref.printedPage, ambiguity.ref.blockId));
+              setBatchPlan(null);
+            }} />)}
+        </View>}
+        <Txt size={12} color={c.muted}>{batchPlan.skipped} bloc(s) exclu(s) (visuel, tableau, correction ou fusion déjà modifiée).</Txt>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <Button title={`Appliquer ${batchPlan.proposals.length} normalisation(s)`} disabled={busy || !batchPlan.proposals.length} onPress={acceptBatchNormalization} />
+          <Button title="Fermer l’aperçu" secondary onPress={() => setBatchPlan(null)} />
         </View>
       </Card>
     );
   }
-  
-  if (!packet) {
+
+  function renderBraceNormalization() {
+    if (!bracePlan) return null;
     return (
       <Card>
-        <Txt size={16} color={c.muted}>Chargement...</Txt>
+        <Txt bold>Correction proposée des parenthèses</Txt>
+        <Txt size={12} color={c.muted}>Les accolades sont remplacées uniquement dans les passages de prose suspects. Vérifiez chaque proposition contre le PDF : les corrections manuelles sont exclues et un bloc déjà vérifié devra être confirmé à nouveau.</Txt>
+        {!bracePlan.proposals.length && <Txt>Aucune accolade suspecte à proposer.</Txt>}
+        {bracePlan.proposals.map(proposal => (
+          <View key={proposal.id} style={{ gap: 4, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: c.line }}>
+            <Txt size={12} bold>p. {proposal.refs.map(ref => ref.printedPage).join(', ')} · {proposal.refs.map(ref => ref.blockId).join(' + ')}{proposal.kind === 'table' ? ' · cellules du tableau' : ''}{proposal.wasVerified ? ' · à revoir' : ''}</Txt>
+            <Txt size={12} color={c.muted}>Avant</Txt><Text selectable style={{ color: c.ink, fontSize: 13 }}>{proposal.before}</Text>
+            <Txt size={12} color={c.primary}>Après</Txt><Text selectable style={{ color: c.ink, fontSize: 13 }}>{proposal.after}</Text>
+          </View>
+        ))}
+        <Txt size={12} color={c.muted}>{bracePlan.skipped} bloc(s) exclu(s) (visuel, tableau source sans reconstruction ou correction/fusion manuelle).</Txt>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <Button title={`Appliquer ${bracePlan.proposals.length} correction(s)`} disabled={busy || !bracePlan.proposals.length} onPress={acceptBraceNormalization} />
+          <Button title="Fermer l’aperçu" secondary onPress={() => setBracePlan(null)} />
+        </View>
       </Card>
     );
   }
-  
-  return (
-    <Card>
-      <View style={{ gap: 16 }}>
-        {/* Modal d'export pour mobile */}
-        {renderExportModal()}
-        
-        {/* En-tête */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-          <View style={{ flex: 1, minWidth: 220 }}>
-            <Txt size={12} color={c.primary} bold>KUMAR · CHAPITRE 8</Txt>
-            <Txt size={24} bold>Vérification de fidélité</Txt>
-            <Txt size={13} color={c.muted}>
-              Contrôle manuel du contenu médical
-            </Txt>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {anomalies.length > 0 && (
-              <Button
-                title={`Exporter (${anomalies.length})`}
-                secondary
-                onPress={() => {
-                  if (Platform.OS === 'web') {
-                    exportAnomalies();
-                  } else {
-                    setShowExportModal(true);
-                  }
-                }}
-              />
-            )}
-            <Button title="× Fermer" secondary onPress={onClose} />
-          </View>
-        </View>
-        
-        {saveError && <Txt color="#dc3545">{saveError}</Txt>}
-        {/* Statistiques globales */}
-        <View style={{ backgroundColor: '#FFF4DD', padding: 14, borderRadius: 12, gap: 8 }}>
-          <Txt bold size={14}>📊 Progression</Txt>
-          {getStats() ? (
-            <Txt size={13}>
-              {getStats()!.verifiedPages}/{getStats()!.totalPages} pages vérifiées · 
-              {getStats()!.verifiedBlocks} blocs vérifiés / {getStats()!.totalBlocks} ·
-              {getStats()!.progress}% complet
-            </Txt>
-          ) : (
-            <Txt size={13}>Chargement des statistiques...</Txt>
-          )}
-          <Txt size={12} color={c.muted}>
-            {getStats()?.complete ? '✅ Chapitre entièrement vérifié' : '⏳ Vérification en cours'}
-          </Txt>
-        </View>
-        
-        {loaded && <Txt bold>{allTargets.filter(t => !isVerified(t.status)).length} blocs restant à contrôler</Txt>}
-        {pageNotice !== null && <Txt color={c.primary}>Page entièrement vérifiée · p. {pageNotice}</Txt>}
-        {/* Statistiques des anomalies */}
-        {anomalies.length > 0 && (
-          <View style={{ backgroundColor: '#FFE8E8', padding: 14, borderRadius: 12, gap: 8 }}>
-            <Txt bold size={14}>⚠️ Anomalies signalées ({anomalies.length})</Txt>
-            <Txt size={13}>
-              🔴 {getAnomalyCounts().open} ouvertes · 
-              🟡 {getAnomalyCounts().correctedPendingReview} à revérifier · 
-              🟢 {getAnomalyCounts().resolved} résolues
-            </Txt>
-            <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-              {anomalies.length > 0 && (
-                <Pressable onPress={() => {
-                  setFilter('user-anomalies');
-                  setShowUserAnomalies(true);
-                }}>
-                  <Txt size={12} color={c.primary}>Voir la liste →</Txt>
-                </Pressable>
-              )}
-              <Pressable onPress={() => exportAnomalies()}>
-                <Txt size={12} color={c.primary}>Exporter →</Txt>
-              </Pressable>
-            </View>
-          </View>
-        )}
-        
-        {/* Liste des anomalies utilisateur */}
-        {filter === 'user-anomalies' && showUserAnomalies && renderUserAnomalyList()}
-        
-        {/* Liste des anomalies automatiques prioritaires */}
-        {filter === 'anomalies' && renderAnomalyList()}
-        
-        {/* Contenu principal */}
-        <ScrollView ref={scrollRef} nestedScrollEnabled style={{ maxHeight: isWide ? 700 : 500 }}>
-          {renderContent()}
-          {getCurrentBlocks()[currentBlockIndex] && renderAnomalyForm(currentPageIndex, getCurrentBlocks()[currentBlockIndex].id)}
-          {saveSuccess && <Txt size={12} color={c.primary}>{saveSuccess}</Txt>}
-          {target && anomalies.filter(a => reviewKey(a.chapterId, a.printedPage, a.blockId) === target.key).map(a => (
-            <View key={a.id} style={{ padding: 12, borderTopWidth: 1, borderColor: c.line, gap: 4 }}>
-              <Txt bold>Historique · {a.status === 'resolved' ? 'Résolue' : a.status === 'open' ? 'Ouverte' : 'À revérifier'}</Txt>
-              <Txt size={12}>{a.createdAt} · Mise à jour : {a.updatedAt}</Txt>
-              <Txt>{a.description}</Txt>
-              {(a.descriptionHistory ?? []).map((previous, i) => <Txt key={i} size={12}>Commentaire précédent ({previous.updatedAt}) : {previous.description}</Txt>)}
-            </View>
-          ))}
-         </ScrollView>
-         
-         {/* Navigation */}
-         {renderNavigation()}
-         
-         {/* Instructions */}
-         <View style={{ backgroundColor: '#E8F4FD', padding: 14, borderRadius: 8, gap: 8 }}>
-           <Txt bold size={13}>ℹ️ Instructions</Txt>
-           <Txt size={12}>
-             <Txt bold>Cours reconstitué : </Txt>
-             Texte extrait du PDF avec mise en forme.
-           </Txt>
-           <Txt size={12}>
-             <Txt bold>Visuel original : </Txt>
-             Image de la page PDF pour comparaison.
-           </Txt>
-           <Txt size={12}>
-             <Txt bold>Marquage : </Txt>
-             Utilisez les boutons de statut pour valider chaque bloc.
-           </Txt>
-           <Txt size={12}>
-             <Txt bold>Fusion de blocs : </Txt>
-             Utilisez le bouton "Fusionner avec le bloc suivant" pour combiner deux blocs textuels séparés incorrectement lors de l'extraction du PDF.
-           </Txt>
-         </View>
-       </View>
-       
-       {/* Modal d'aperçu de fusion */}
-       {mergePreview && (
-         <View style={{
-           position: 'absolute',
-           top: 0,
-           left: 0,
-           right: 0,
-           bottom: 0,
-           backgroundColor: 'rgba(0,0,0,0.5)',
-           justifyContent: 'center',
-           alignItems: 'center',
-           zIndex: 2000,
-         }}>
-           <View style={{
-             backgroundColor: 'white',
-             padding: 24,
-             borderRadius: 12,
-             maxWidth: 500,
-             width: '90%',
-             maxHeight: '80%',
-             gap: 16,
-           }}>
-             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-               <Txt size={18} bold>Aperçu de fusion</Txt>
-               <Pressable onPress={() => closeMergePreview()}>
-                 <Txt size={24}>×</Txt>
-               </Pressable>
-             </View>
-             
-             {/* Texte des deux blocs */}
-             <View style={{ gap: 8 }}>
-               <Txt size={14} bold>Bloc actuel ({mergePreview.currentBlock?.id}):</Txt>
-               <Txt size={13} color={c.ink}>{mergePreview.currentBlock?.text}</Txt>
-               <Txt size={14} bold>Bloc suivant ({mergePreview.nextBlock?.id}):</Txt>
-               <Txt size={13} color={c.ink}>{mergePreview.nextBlock?.text}</Txt>
-             </View>
-             
-             {/* Aperçu du texte fusionné */}
-             <View style={{ gap: 8 }}>
-               <Txt size={14} bold>Aperçu du texte fusionné:</Txt>
-               <View style={{ 
-                 backgroundColor: '#FFF4DD', 
-                 padding: 12, 
-                 borderRadius: 8,
-                 borderWidth: 1,
-                 borderColor: c.line
-               }}>
-                 <Txt size={13} color={c.ink}>{mergePreview.previewText}</Txt>
-               </View>
-             </View>
-             
-             {/* Options de fusion */}
-             <View style={{ gap: 8 }}>
-               <Txt size={14} bold>Options de jonction:</Txt>
-               <View style={{ flexDirection: 'row', gap: 16 }}>
-                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                   <Pressable
-                     onPress={() => handleMergeOptionChange(true)}
-                     style={{ 
-                       padding: 8, 
-                       borderWidth: mergePreview.useSpace ? 2 : 1,
-                       borderColor: mergePreview.useSpace ? c.primary : c.line,
-                       borderRadius: 4
-                     }}
-                   >
-                     <Txt size={13}>Avec espace</Txt>
-                   </Pressable>
-                 </View>
-                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                   <Pressable
-                     onPress={() => handleMergeOptionChange(false)}
-                     style={{ 
-                       padding: 8, 
-                       borderWidth: !mergePreview.useSpace ? 2 : 1,
-                       borderColor: !mergePreview.useSpace ? c.primary : c.line,
-                       borderRadius: 4
-                     }}
-                   >
-                     <Txt size={13}>Sans espace</Txt>
-                   </Pressable>
-                 </View>
-               </View>
-             </View>
-             
-             {/* Correction manuelle */}
-             <View style={{ gap: 8 }}>
-               <Txt size={14} bold>Correction manuelle (si nécessaire):</Txt>
-               <TextInput
-                 multiline
-                 numberOfLines={3}
-                 accessibilityLabel="Texte fusionné corrigé"
-                 placeholder="Corrigez le texte fusionné ici si nécessaire..."
-                 value={mergePreview.manualText}
-                 editable={!mergeSaving}
-                 onChangeText={handleManualTextChange}
-                 style={{ 
-                   borderWidth: 1, 
-                   borderColor: c.line, 
-                   borderRadius: 8, 
-                   padding: 12,
-                   fontSize: 15, 
-                   color: c.ink, 
-                   backgroundColor: c.paper,
-                   minHeight: 80,
-                   width: '100%'
-                 }}
-               />
-               <Txt size={12} color={c.muted}>
-                 Ne supprimez jamais un véritable trait d'union d'un terme médical.
-               </Txt>
-             </View>
-             
-             {/* Boutons d'action */}
-             <View style={{ gap: 8, flexDirection: 'row-reverse' }}>
-               <Button
-                 title="Annuler"
-                 secondary
-                 onPress={closeMergePreview}
-               />
-               <Button
-                 title={mergeSaving ? 'Enregistrement...' : 'Confirmer la fusion'}
-                 disabled={mergeSaving || !mergePreview.manualText.trim()}
-                 onPress={confirmMerge}
-               />
-             </View>
-             
-             {mergeError && <Txt color="#dc3545">{mergeError}</Txt>}
-             {mergeSuccess && <Txt size={12} color={c.primary}>{mergeSuccess}</Txt>}
-           </View>
-         </View>
-       )}
-       
-       {/* Modal d'export pour mobile */}
-       {renderExportModal()}
-     </Card>
-   );
- }
 
-/**
- * Hook pour utiliser la vérification dans PrivateSourceCourse.
- * Ce composant peut être intégré comme un mode supplémentaire.
- */
-export function useVerificationMode(
-  packet: SourcePacket | null,
-  controlReport: any | null
-): {
-  showVerification: boolean;
-  setShowVerification: (show: boolean) => void;
-  verificationProps: SourceCourseVerificationProps | null;
-} {
-  const [showVerification, setShowVerification] = useState(false);
-  
-  const verificationProps = packet && controlReport ? {
-    packet,
-    controlReport,
-    onClose: () => setShowVerification(false),
-  } : null;
-  
-  return {
-    showVerification,
-    setShowVerification,
-    verificationProps,
+  const targetLabel = (target: typeof current) => {
+    if (!target) return '';
+    const item = logical.find(block => block.printedPage === target.printedPage && block.blockId === target.blockId);
+    const saved = savedBlock(validation, target.printedPage, target.blockId);
+    const text = item?.part.text.replace(/\s+/gu, ' ').trim() ?? '';
+    return `Bloc ${target.blockIndex + 1}${saved?.kind ? ` · ${kindLabel(saved.kind)}` : ''}${text ? ` — ${text.slice(0, 44)}${text.length > 44 ? '…' : ''}` : ''}`;
   };
+  return (
+    <View style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <Txt bold>Vérification manuelle</Txt>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Button title="Nettoyer les retours à la ligne" secondary disabled={!loaded || busy} onPress={openBatchNormalization} />
+          <Button title="Vérifier les parenthèses" secondary disabled={!loaded || busy} onPress={openBraceNormalization} />
+          <Button title="Exporter / importer" secondary onPress={() => setShowExport(!showExport)} />
+          <Button title="Fermer" secondary onPress={onClose} />
+        </View>
+      </View>
+      <View style={{ gap: 8, padding: 8, borderRadius: 10, borderWidth: 1, borderColor: c.line, backgroundColor: c.paper }}>
+        {deletedBlockLinks.length > 0 && <View style={{ gap: 6 }}>
+          <Txt size={12}>{deletedBlockLinks.length} association(s) concernent un bloc déjà supprimé. Leur retrait conserve l’historique et vos validations.</Txt>
+          <Button title="Retirer les associations des blocs supprimés" disabled={busy || !loaded}
+            onPress={() => void commit(repairDeletedBlockAssociations(base()), 'Associations des blocs supprimés retirées et enregistrées. Vous pouvez relancer la finalisation.')} />
+        </View>}
+        <Txt size={12} bold>Aller à la page</Txt>
+        <ScrollView horizontal showsHorizontalScrollIndicator>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {visiblePages.map(printedPage => <Chip key={printedPage} label={`p. ${printedPage}`} selected={selectedPage === printedPage}
+              onPress={() => {
+                setJumpPage(printedPage);
+                const target = visible.find(candidate => candidate.printedPage === printedPage);
+                if (target) navigateTo(target);
+              }} />)}
+          </View>
+        </ScrollView>
+        <Txt size={12} bold>Aller au bloc</Txt>
+        <ScrollView horizontal showsHorizontalScrollIndicator>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {pageBlocks.map(target => <Chip key={target.key} label={targetLabel(target)} selected={current?.key === target.key}
+              onPress={() => navigateTo(target)} />)}
+          </View>
+        </ScrollView>
+        {!pageBlocks.length && <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+          <Txt size={12} color={c.muted}>Aucun bloc de cette page dans le filtre actif.</Txt>
+          <Button title="Passer à Tous" secondary onPress={() => { setFilter('all'); setJumpPage(null); }} />
+        </View>}
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {REVIEW_FILTERS.map(f => <Chip key={f.id} label={`${f.label} (${counts[f.id]})`} selected={filter === f.id} onPress={() => pickFilter(f.id)} />)}
+      </View>
+      <Txt size={12} color={c.muted}>{visible.length} bloc(s) pour ce filtre{current ? ` · bloc ${position + 1}/${visible.length}` : ''}</Txt>
+      {renderExport()}
+      {renderBatchNormalization()}
+      {renderBraceNormalization()}
+      {error && <Txt size={12} color="#dc3545">{error}</Txt>}
+      {notice && <Txt size={12} color={c.primary}>{notice}</Txt>}
+      <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16 }}>
+        {renderBlock()}
+        {renderPdf()}
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+        <Button title="Bloc précédent" secondary disabled={position <= 0} onPress={() => go(-1)} />
+        <Button title="Bloc suivant" secondary disabled={position < 0 || position >= visible.length - 1} onPress={() => go(1)} />
+      </View>
+    </View>
+  );
+}
+
+/** Hook conservé pour compatibilité avec les intégrations existantes. */
+export function useVerificationMode(packet: SourcePacket | null, controlReport: any | null) {
+  const [showVerification, setShowVerification] = useState(false);
+  const verificationProps = packet && controlReport ? { packet, controlReport, onClose: () => setShowVerification(false) } : null;
+  return { showVerification, setShowVerification, verificationProps };
 }

@@ -1,15 +1,25 @@
+import { presentationKey, type FinalCourseVersion } from '../domain/sourceCourse/finalization';
+import type { CoursePresentation } from '../domain/sourceCourse/displayCorrections';
 import { SourcePresentationText } from './SourcePresentationText';
-import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { Button, Card, Chip, Txt } from './ui';
 import { colors as c } from '../design/theme';
-import type { SourcePacket, SourcePart } from '../domain/sourceCourse/packet';
+import type { SourcePacket, SourcePage, SourcePart } from '../domain/sourceCourse/packet';
+import type { BlockTable } from '../domain/sourceCourse/classification';
 import { importPrivateCourse, loadPrivateCourse, openOriginalPage } from '../services/storage/privateCourse';
 import { SourceCourseVerification } from './SourceCourseVerification';
-import { loadChapterValidation } from '../services/storage/sourceValidation';
+import { loadValidation, type ChapterValidation } from '../domain/sourceCourse/verification';
+import { workingPresentation } from '../domain/sourceCourse/blockEdits';
 import { sourcePresentation } from '../domain/sourceCourse/displayCorrections';
+import { mergeAtAnchor } from '../domain/sourceCourse/merges';
+import { buildCourseStructure, type CourseItem, type CourseOutlineItem, type CourseStructure } from '../domain/sourceCourse/courseStructure';
+import { CourseHeading, CourseTable } from './CourseBlocks';
+import { activeAssociations, type ManualAssociation } from '../domain/sourceCourse/associations';
+import { CourseReadingProvider, CourseReadingToolbar } from './CourseReadingTools';
+import { CourseReadingText } from './CourseReadingText';
 
-type Mode = 'Cours reconstitué' | 'À vérifier' | 'Pages originales' | 'Vérification manuelle';
+type Mode = 'Cours reconstitué' | 'Pages originales' | 'Vérification manuelle';
 const roles: Record<string,string> = { heading:'Titre', paragraph:'Paragraphe', list:'Liste', table:'Tableau',
   figure:'Illustration', box:'Encadré', contents:'Sommaire original', 'chapter-title':'Titre du chapitre',
   'section-title':'Titre de section', 'page-header':'En-tête original', 'uncertain-text':'Passage incertain' };
@@ -36,113 +46,182 @@ function OriginalVisual({ image, ratio, wide, label }: { image:string; ratio:num
     </Pressable>
   </View>;
 }
-function Part({ part, printed, pdf, original, showAsText }: {part:SourcePart;printed:number;pdf:number;original:()=>void;showAsText?:boolean}) {
+function Part({ part, printed, pdf, original, showAsText, frozen, validation, associations = [], onAssociation }: {
+  frozen?: CoursePresentation; validation?: ChapterValidation | null; part: SourcePart; printed: number; pdf: number;
+  original: () => void; showAsText?: boolean; associations?: ManualAssociation[]; onAssociation?: (value: ManualAssociation) => void;
+}) {
   const [compare, setCompare] = useState(false);
-  // Dans le cours Norya (showAsText=true), on affiche TOUT comme texte SAUF les vraies illustrations
-  // Une VRAIE illustration est un bloc avec role='figure' ET texte court (schémas chimiques avec symboles)
-  // Les blocs 'figure' ou 'table' avec du texte long sont en réalité des tableaux/listes à afficher en texte
-  const presentation = sourcePresentation(printed, part);
-  if (showAsText && presentation.hide) return null;
-  const isTrueIllustration = part.role === 'figure' && part.text && part.text.trim().length < 200;
-  const showImage = showAsText ? (isTrueIllustration || presentation.imageOnly) : (part.kind === 'visual' || compare);
-  const heading=part.role==='heading';
-  return <View testID={`source-part-${part.id}`} style={{gap:10,paddingVertical:18,borderBottomWidth:1,borderBottomColor:c.line}}>
-    <View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
-      <Txt size={11} color={c.muted}>{roles[part.role] ?? 'Élément source'} · p. {printed} · {showAsText ? (isTrueIllustration ? 'Illustration médicale' : 'Texte') : (part.kind==='visual' ? 'Visuel original' : 'Texte extrait')}</Txt>
+  const [showSources, setShowSources] = useState(false);
+  const base = frozen ?? sourcePresentation(printed, part);
+  const presentation = frozen ? (base.hide ? null : base) : workingPresentation(printed, part, validation);
+  if (!presentation || (showAsText && presentation.hide)) return null;
+  const merge = mergeAtAnchor(validation?.merges, printed, part.id);
+  const showImage = showAsText ? presentation.imageOnly : (part.kind === 'visual' || compare);
+  const heading = part.role === 'heading';
+  return <View testID={`source-part-${part.id}`} style={{ gap: 10, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: c.line }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+      <Txt size={11} color={c.muted}>{roles[part.role] ?? 'Élément source'} · p. {printed} · {showAsText ? (presentation.imageOnly ? 'Illustration médicale' : (merge ? 'Texte fusionné' : 'Texte')) : (part.kind === 'visual' ? 'Visuel original' : 'Texte extrait')}</Txt>
       <Pressable accessibilityRole="button" accessibilityLabel={`PDF ${pdf}, ${part.id}`} onPress={original}><Txt size={11} color={c.primary}>Voir dans le PDF ↗</Txt></Pressable>
     </View>
-    {showImage ? <OriginalVisual image={part.image} ratio={(part.bbox[3]-part.bbox[1])/(part.bbox[2]-part.bbox[0])}
-      wide={['table','contents','box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
-      : showAsText && presentation.contents ? <View style={{flexDirection:'row',gap:18,flexWrap:'wrap'}}>
-        {presentation.contents.map((column, ci) => <View key={ci} style={{flex:1,minWidth:245,gap:5}}>
-          {column.map((entry, ri) => <View key={ri} style={{flexDirection:'row',justifyContent:'space-between',gap:8}}>
-            <Text selectable style={{color:c.ink,fontSize:14,flex:1}}>{entry.label}</Text>
-            <Text selectable style={{color:c.ink,fontSize:14,minWidth:28,textAlign:'right'}}>{entry.page}</Text>
-          </View>)}
-        </View>)}
-      </View>
-      : <View style={{borderLeftWidth: part.reasons.length>0 ? 3 : 0, borderLeftColor: c.peach, paddingLeft: part.reasons.length>0 ? 8 : 0}}>
-        {showAsText ? <SourcePresentationText presentation={presentation} heading={heading} /> : (
-          <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{fontSize:heading?23:17,lineHeight:heading?32:29,color:c.ink,fontWeight:heading?'600':'400'}}>{part.text}</Text>
+    {showImage ? <OriginalVisual image={part.image} ratio={(part.bbox[3] - part.bbox[1]) / (part.bbox[2] - part.bbox[0])}
+      wide={['table', 'contents', 'box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
+      : <View style={{ borderLeftWidth: part.reasons.length > 0 ? 3 : 0, borderLeftColor: c.peach, paddingLeft: part.reasons.length > 0 ? 8 : 0 }}>
+        {showAsText ? <CourseReadingText presentation={presentation} printedPage={printed} blockId={part.id}
+          associations={associations} heading={heading} onAssociation={onAssociation} /> : (
+          <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{ fontSize: heading ? 23 : 17, lineHeight: heading ? 32 : 29, color: c.ink, fontWeight: heading ? '600' : '400' }}>{part.text}</Text>
         )}
-        {part.reasons.length>0 && showAsText && <Txt size={10} color={c.peach} style={{marginTop:4}}>⚠️ Passage à vérifier</Txt>}
+        {merge && showAsText && <>
+          <Pressable accessibilityRole="button" onPress={() => setShowSources(!showSources)} style={{ paddingVertical: 6 }}>
+            <Txt size={12} color={c.primary}>{showSources ? 'Masquer les sources de la fusion' : 'Voir les sources de la fusion'}</Txt>
+          </Pressable>
+          {showSources && merge.sourceTexts.map((text, i) => <View key={i} style={{ padding: 10, backgroundColor: c.mint, borderRadius: 8, gap: 4 }}>
+            <Txt size={11} bold>Source {i + 1} · p. {merge.sources[i].printedPage} · {merge.sources[i].blockId}</Txt>
+            <Text selectable style={{ color: c.ink, fontSize: 14, lineHeight: 22 }}>{text}</Text>
+          </View>)}
+        </>}
       </View>}
-    {!showAsText && (part.kind==='text' || part.text) && <Pressable accessibilityRole="button" onPress={()=>setCompare(!compare)} style={{paddingVertical:6}}>
-      <Txt size={12} color={c.primary}>{compare?'Revenir au texte extrait':'Comparer ce passage au visuel original'}</Txt>
+    {!showAsText && (part.kind === 'text' || part.text) && <Pressable accessibilityRole="button" onPress={() => setCompare(!compare)} style={{ paddingVertical: 6 }}>
+      <Txt size={12} color={c.primary}>{compare ? 'Revenir au texte extrait' : 'Comparer ce passage au visuel original'}</Txt>
     </Pressable>}
   </View>;
 }
 
 /** Private source reader; navigation is ephemeral and never updates learning/progress. */
-export function PrivateSourceCourse() {
-  const [packet,setPacket]=useState<SourcePacket|null>(null);
+export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketLoaded, onStructure, reviewTarget }: {
+  finalizedVersion?: FinalCourseVersion; initialPacket?: SourcePacket;
+  onPacketLoaded?: (packet: SourcePacket | null) => void;
+  /** Titre H1, auteurs et sections du cours, pour l'en-tête du chapitre. */
+  onStructure?: (structure: CourseStructure) => void;
+  reviewTarget?: { printedPage?: number; blockId?: string; nonce: number };
+} = {}) {
+  const [packet,setPacket]=useState<SourcePacket|null>((finalizedVersion?.packet as SourcePacket) ?? initialPacket ?? null);
   const [index,setIndex]=useState(0);
   const [mode,setMode]=useState<Mode>('Cours reconstitué');
   const [busy,setBusy]=useState(true);
   const [error,setError]=useState('');
-  const [toc,setToc]=useState(false);
+  const [sectionIndex,setSectionIndex]=useState(0);
+  const [picker,setPicker]=useState(false);
+  const [outlineOpen,setOutlineOpen]=useState(false);
+  const [outlineTarget,setOutlineTarget]=useState<string | null>(null);
+  const [inspector, setInspector] = useState<CourseItem | null>(null);
   const [contentWidth,setContentWidth]=useState(900);
   const [controlReport, setControlReport] = useState<any>(null);
-  const [verificationVisible, setVerificationVisible] = useState(false);
+  const [validation, setValidation] = useState<ChapterValidation | null>(finalizedVersion?.validation ?? null);
   const scroll=useRef<ScrollView>(null);
-  const positions=useRef<Record<string,number>>({});
+  const itemOffsets=useRef(new Map<string,number>());
   const {height}=useWindowDimensions();
-  
-  // Charger le control-report localement si on est en mode v2
-  useEffect(() => {
-    if (packet?.schemaVersion === 2 && !controlReport) {
-      // Essayer de charger depuis le filesystem local (dans Codespaces/dev)
-      // Ce n'est pas nécessaire en production, seulement pour le développement
-      // En production, le control-report sera chargé via importPrivateCourse
-      const loadReport = async () => {
-        try {
-          // Sur mobile, on ne peut pas accéder directement au filesystem
-          // Le rapport doit être inclus dans le paquet ou chargé séparément
-          // Pour l'instant, on laisse controlReport à null et on désactive le mode vérification
-          // Le mode vérification sera activé quand on passera explicitement le rapport
-        } catch {
-          // Ignorer
-        }
-      };
-      loadReport();
-    }
-  }, [packet, controlReport]);
-  
+
   useEffect(()=>{
     let active=true;
-    loadPrivateCourse().then(value=>{if(active){setPacket(value);if(value?.schemaVersion===1)setMode('Pages originales');}})
+    const loading = finalizedVersion ? Promise.resolve(finalizedVersion.packet as SourcePacket)
+      : initialPacket && initialPacket.chapterId !== 'kum-08' ? Promise.resolve(initialPacket)
+      : loadPrivateCourse().then(value => value ?? initialPacket ?? null);
+    loading.then(async value=>{
+      if(!active) return;
+      setPacket(value);onPacketLoaded?.(value);if(value?.schemaVersion===1)setMode('Pages originales');
+      if (!finalizedVersion && value?.chapterId) {
+        try {
+          const saved = await loadValidation(value.chapterId);
+          if (active) setValidation(saved ?? null);
+        } catch { /* lecture seule : l'absence de fusions ne bloque pas le cours */ }
+      }
+    })
       .catch(reason=>{if(active)setError(String(reason));}).finally(()=>{if(active)setBusy(false);});
     return()=>{active=false;};
   },[]);
+  useEffect(() => { if (reviewTarget && !finalizedVersion) setMode('Vérification manuelle'); }, [reviewTarget]);
+  // Recharger les fusions à la sortie de la vérification manuelle.
+  useEffect(() => {
+    if (finalizedVersion || mode === 'Vérification manuelle' || !packet?.chapterId) return;
+    let active = true;
+    loadValidation(packet.chapterId).then(saved => { if (active) setValidation(saved ?? null); }).catch(() => {});
+    return () => { active = false; };
+  }, [mode, packet?.chapterId, finalizedVersion]);
   async function pick(){
     setBusy(true);setError('');
-    try{const value=await importPrivateCourse();if(value){setPacket(value);setIndex(0);setMode(value.schemaVersion===2?'Cours reconstitué':'Pages originales');}}
+    try{const value=await importPrivateCourse();if(value){setPacket(value);onPacketLoaded?.(value);setIndex(0);setMode(value.schemaVersion===2?'Cours reconstitué':'Pages originales');}}
     catch(reason){setError(reason instanceof Error?reason.message:'Import impossible.');}
     finally{setBusy(false);}
   }
   const page=packet?.pages[index];
-  const parts=page?.parts ?? [];
   const wide=contentWidth>=900;
-  function changePage(next:number){setIndex(next);positions.current={};scroll.current?.scrollTo({y:0,animated:false});}
-  function open(){if(page)void openOriginalPage(page).catch(reason=>setError(String(reason)));}
-  const sections=parts.filter(part=>part.role==='heading'||part.kind==='visual'&&part.role!=='page-header');
-  const menu=<View style={{gap:8}}>
-    <Txt bold size={13}>Sur cette page</Txt>
-    {sections.map(part=><Pressable key={part.id} accessibilityRole="button" onPress={()=>{setMode('Cours reconstitué');setToc(false);requestAnimationFrame(()=>scroll.current?.scrollTo({y:positions.current[part.id]??0,animated:true}));}} style={{paddingVertical:8,paddingHorizontal:10,borderLeftWidth:2,borderLeftColor:c.line}}>
-      <Txt size={12}>{part.role==='heading'?part.text:(part.text&&part.text.trim()?(part.text.length>50?part.text.substring(0,47)+'…':part.text):(roles[part.role]??'Passage original'))}</Txt>
-    </Pressable>)}
+  const compact=contentWidth<640;
+  const activeValidation=finalizedVersion ? finalizedVersion.validation : validation;
+  const structure=useMemo(()=>buildCourseStructure(packet,activeValidation,finalizedVersion?.presentations),[packet,activeValidation,finalizedVersion]);
+  useEffect(()=>{ if(packet) onStructure?.(structure); },[structure]);
+  const sectionCount=structure.sections.length;
+  const sectionAt=Math.min(sectionIndex,Math.max(0,sectionCount-1));
+  const shown: CourseItem[]=sectionCount
+    ? [...(sectionAt===0 ? structure.intro : []),...structure.sections[sectionAt].items]
+    : structure.intro;
+  const associationList = activeAssociations(activeValidation);
+  function changePage(next:number){setIndex(next);scroll.current?.scrollTo({y:0,animated:false});}
+  function changeSection(next:number){setSectionIndex(Math.max(0,Math.min(sectionCount-1,next)));setPicker(false);scroll.current?.scrollTo({y:0,animated:false});}
+  function openOutlineItem(item: CourseOutlineItem) {
+    const targetSection = structure.sections.findIndex(section => section.id === item.sectionId);
+    if (targetSection < 0) return;
+    setOutlineTarget(item.key);
+    setOutlineOpen(false);
+    changeSection(targetSection);
+  }
+  function registerItemOffset(item: CourseItem, y: number) {
+    itemOffsets.current.set(item.key, y);
+    if (outlineTarget === item.key) {
+      scroll.current?.scrollTo({ y: Math.max(0, y - 12), animated: true });
+      setOutlineTarget(null);
+    }
+  }
+  function openAssociation(value: ManualAssociation) {
+    if (typeof window !== 'undefined' && window.getSelection?.()?.toString()) return;
+    if (value.state !== 'active') { setError('Cette association doit être revue dans la vérification manuelle.'); return; }
+    const destination = [...structure.intro, ...structure.sections.flatMap(section => section.items)]
+      .find(item => item.printedPage === value.target.printedPage && item.blockId === value.target.blockId);
+    if (!destination) { setError('Destination d’association indisponible : réassociation manuelle requise.'); return; }
+    setError('');
+    setInspector(destination);
+  }
+  function open(target:SourcePage|undefined=page){if(target)void openOriginalPage(target).catch(reason=>setError(String(reason)));}
+  const pageOf=(item:CourseItem)=>packet?.pages.find(p=>p.printedPage===item.printedPage);
+  const sectionNav=sectionCount>0&&<View style={{gap:8}} testID="section-nav">
+    {compact
+      ? <>
+        <Pressable accessibilityRole="button" accessibilityLabel="Choisir une section" onPress={()=>setPicker(!picker)}
+          style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:12,flexDirection:'row',justifyContent:'space-between',gap:8}}>
+          <Txt bold size={14} style={{flex:1}}>{structure.sections[sectionAt].title}</Txt><Txt>{picker?'▴':'▾'}</Txt>
+        </Pressable>
+        {picker&&<View style={{borderWidth:1,borderColor:c.line,borderRadius:10}}>
+          {structure.sections.map((section,i)=><Pressable key={section.id} accessibilityRole="button" onPress={()=>changeSection(i)}
+            style={{padding:12,backgroundColor:i===sectionAt?c.mint:undefined}}><Txt size={14} bold={i===sectionAt}>{section.title}</Txt></Pressable>)}
+        </View>}
+      </>
+      : <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
+        {structure.sections.map((section,i)=><Chip key={section.id} label={section.title} selected={i===sectionAt} onPress={()=>changeSection(i)} />)}
+      </View>}
+    <View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+      <Button title="Section précédente" secondary disabled={sectionAt===0} onPress={()=>changeSection(sectionAt-1)} />
+      <Txt size={12} color={c.muted}>{sectionAt+1} / {sectionCount}</Txt>
+      <Button title="Section suivante" secondary disabled={sectionAt>=sectionCount-1} onPress={()=>changeSection(sectionAt+1)} />
+    </View>
   </View>;
-  return <Card>
+  const courseOutline=structure.outline.length>0&&<View style={{gap:8}} testID="course-outline">
+    <Pressable accessibilityRole="button" accessibilityLabel="Afficher le sommaire du cours" onPress={()=>setOutlineOpen(!outlineOpen)}
+      style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:12,flexDirection:'row',justifyContent:'space-between',gap:8}}>
+      <Txt bold size={14}>Sommaire du cours</Txt><Txt>{outlineOpen?'▴':'▾'}</Txt>
+    </Pressable>
+    {outlineOpen&&<View style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:6,gap:2}}>
+      {structure.outline.map(item=><Pressable key={item.key} accessibilityRole="button" onPress={()=>openOutlineItem(item)}
+        style={{paddingVertical:8,paddingHorizontal:10,paddingLeft:item.level==='h2'?10:item.level==='h3'?24:38}}>
+        <Txt size={item.level==='h2'?14:13} bold={item.level==='h2'}>{item.title}</Txt>
+      </Pressable>)}
+    </View>}
+  </View>;
+  return <CourseReadingProvider key={`${packet?.chapterId}-${packet?.sourceSha256}`} chapterId={packet?.chapterId ?? ''}
+    sourceSha256={packet?.sourceSha256 ?? ''} version={finalizedVersion ? String(finalizedVersion.version) : 'draft'}
+    structure={structure} enabled={mode === 'Cours reconstitué' && !!packet}>
+    <Card>
     <View testID="private-source-reader" onLayout={e=>setContentWidth(e.nativeEvent.layout.width)} style={{gap:16,minWidth:0}}>
-      <View style={{gap:5}}>
-        <Txt size={12} color={c.primary} bold>KUMAR · CHAPITRE 8 · ROUMAIN</Txt>
-        <Txt size={27} bold>Cours source</Txt>
-        <View style={{backgroundColor:'#FFF4DD',padding:14,borderRadius:12,gap:4}}>
-          <Txt bold size={13}>Chapitre non validé</Txt>
-          <Txt size={13}>Cours numérique reconstruit. Toutes les informations sont présentées sous forme de texte natif. La fidélité de chaque passage reste à vérifier par rapport au PDF original.</Txt>
-        </View>
-      </View>
-      <Button title={packet?'Importer une nouvelle version privée':'Importer le cours privé'} secondary disabled={busy} onPress={()=>void pick()} />
+      {!finalizedVersion && <Txt size={12} color={c.muted}>Chapitre non finalisé · cours numérique en préparation : la fidélité de chaque passage reste à vérifier par rapport au PDF original.</Txt>}
+      {!finalizedVersion && (!packet || packet.chapterId === 'kum-08') && <Button title={packet?'Importer une nouvelle version privée':'Importer le cours privé'} secondary disabled={busy} onPress={()=>void pick()} />}
       {!!error&&<Txt>{error}</Txt>}
       {packet?.schemaVersion===1&&<View style={{backgroundColor:'#FFF3CD',padding:14,borderRadius:12,gap:8,marginVertical:12}}>
         <Txt bold size={13} color={'#856404'}>⚠️ Version obsolète du paquet</Txt>
@@ -150,65 +229,112 @@ export function PrivateSourceCourse() {
         <Txt size={13}><Txt bold>norya-private-course-</Txt>v2.json</Txt>
         <Txt size={12}>Ce fichier se trouve dans : references-privees/cours/kum-08/v1/</Txt>
       </View>}
-      {packet?.schemaVersion===2&&(
-        <View style={{backgroundColor:'#E8F4FD',padding:14,borderRadius:12,gap:8,marginVertical:12}}>
-          <Txt bold size={13} color={c.primary}>🔍 Vérification manuelle</Txt>
-          <Txt size={13}>
-            {controlReport 
-              ? 'Sélectionnez le mode "Vérification manuelle" pour contrôler la fidélité du texte extrait.'
-              : 'Pour activer la vérification, importez un paquet contenant le rapport de contrôle.'
-            }
-          </Txt>
-          <Txt size={12}>Priorités : Pages 162, 152-157, 163-164</Txt>
-        </View>
-      )}
       {page&&<>
-        <View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['Cours reconstitué','À vérifier','Pages originales', packet?.schemaVersion===2 ? 'Vérification manuelle' : null].filter(Boolean) as Mode[]).map(value=>
-          <Chip key={value} label={value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}</View>
-        <View style={{gap:10,borderBottomWidth:1,borderBottomColor:c.line,paddingBottom:14}}>
+        {(finalizedVersion ? false : true)&&<View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['Cours reconstitué','Pages originales', packet?.schemaVersion===2 ? 'Vérification manuelle' : null].filter(Boolean) as Mode[]).map(value=>
+          <Chip key={value} label={value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}</View>}
+        {finalizedVersion&&<View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['Cours reconstitué','Pages originales'] as Mode[]).map(value=>
+          <Chip key={value} label={value==='Cours reconstitué'?'Cours':value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}</View>}
+        {mode==='Pages originales'&&<View style={{gap:10,borderBottomWidth:1,borderBottomColor:c.line,paddingBottom:14}}>
           <View style={{flexDirection:'row',gap:8,flexWrap:'wrap',alignItems:'center',justifyContent:'space-between'}}>
             <Txt bold>Page {page.printedPage} du livre · PDF {page.pdfPage}</Txt>
-            <Pressable accessibilityRole="button" onPress={open}><Txt color={c.primary} size={13}>Ouvrir la page PDF ↗</Txt></Pressable>
+            <Pressable accessibilityRole="button" onPress={()=>open()}><Txt color={c.primary} size={13}>Ouvrir la page PDF ↗</Txt></Pressable>
           </View>
           <View style={{flexDirection:'row',flexWrap:'wrap',gap:5}}>{packet.pages.map((p,i)=><Pressable accessibilityRole="button" accessibilityLabel={`Page ${p.printedPage}`} accessibilityState={{selected:index===i}} key={p.printedPage} onPress={()=>changePage(i)} style={{padding:9,minWidth:40,borderRadius:8,backgroundColor:index===i?c.primary:c.mint}}>
             <Txt size={12} color={index===i?'white':c.ink}>{p.printedPage}</Txt></Pressable>)}</View>
-        </View>
-        {!wide&&mode==='Cours reconstitué'&&<Button title={toc?'Masquer les sections':'Sections de cette page'} secondary onPress={()=>setToc(!toc)} />}
-        {!wide&&toc&&menu}
-        <View style={{flexDirection:wide?'row':'column',gap:22,minWidth:0}}>
-          {wide&&mode==='Cours reconstitué'&&<View style={{width:190}}>{menu}</View>}
-          <ScrollView ref={scroll} testID="source-reading-pane" nestedScrollEnabled style={{flex:1,height:Math.max(420,Math.min(height*.74,900)),minWidth:0}} contentContainerStyle={{paddingHorizontal:4,paddingBottom:24}}>
-            <View key={`${index}-${mode}`} style={{maxWidth:760,width:'100%',alignSelf:'center'}}>
-              {mode==='Pages originales'&&<OriginalVisual image={page.image} ratio={page.height/page.width} wide={false} label={`Page originale ${page.printedPage}`} />}
-              {mode==='Cours reconstitué'&&!parts.length&&<Txt>Importez le paquet structuré pour afficher le cours.</Txt>}
-              {mode==='Cours reconstitué'&&parts.map(part=><View key={part.id} onLayout={e=>{positions.current[part.id]=e.nativeEvent.layout.y;}}>
-                <Part part={part} printed={page.printedPage} pdf={page.pdfPage} original={open} showAsText={true} />
-              </View>)}
-              {mode==='À vérifier'&&<View style={{gap:14}}>
-                <Txt bold>Contrôles séparés du texte du livre</Txt>
-                <Txt size={13}>Aucun élément n’est marqué comme vérifié. Les alertes sont des points à examiner, pas des erreurs médicales confirmées.</Txt>
-                {parts.map(part=><View key={part.id} style={{padding:14,backgroundColor:c.mint,borderRadius:12,gap:7}}>
-                  <Txt bold size={13}>{roles[part.role]} · {part.id} · p. {page.printedPage}</Txt>
-                  <Txt size={12}>{part.reasons.length?part.reasons.map(reason=>reasons[reason]??reason).join('\n'):'Aucune alerte automatique. Contrôle visuel et ordre de lecture à confirmer.'}</Txt>
-                  <Pressable accessibilityRole="button" onPress={()=>{setMode('Cours reconstitué');requestAnimationFrame(()=>scroll.current?.scrollTo({y:positions.current[part.id]??0,animated:false}));}}><Txt color={c.primary} size={12}>Afficher ce passage</Txt></Pressable>
-                </View>)}
-              </View>}
-            </View>
-          </ScrollView>
-        </View>
-        <View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+        </View>}
+        {mode==='Cours reconstitué'&&<CourseReadingToolbar />}
+        {mode==='Cours reconstitué'&&courseOutline}
+        {mode==='Cours reconstitué'&&sectionNav}
+        {mode!=='Vérification manuelle'&&<ScrollView ref={scroll} testID="source-reading-pane" nestedScrollEnabled style={{flex:1,height:Math.max(420,Math.min(height*.74,900)),minWidth:0}} contentContainerStyle={{paddingHorizontal:4,paddingBottom:24}}>
+          <View key={`${mode}-${sectionAt}-${index}`} style={{maxWidth:760,width:'100%',alignSelf:'center'}}>
+            {mode==='Pages originales'&&<OriginalVisual image={page.image} ratio={page.height/page.width} wide={false} label={`Page originale ${page.printedPage}`} />}
+            {mode==='Cours reconstitué'&&!shown.length&&<Txt>{packet.schemaVersion===2?'Aucun contenu à afficher pour cette section.':'Importez le paquet structuré pour afficher le cours.'}</Txt>}
+            {mode==='Cours reconstitué'&&shown.map(item=>{
+              const heading=item.kind==='h2'||item.kind==='h3'||item.kind==='h4' ? item.kind : undefined;
+              const digital=item.kind==='table'&&item.table?.validated&&!item.table.keepOriginal ? item.table : undefined;
+              return <View key={item.key} testID={`course-item-${item.blockId}`} onLayout={event=>registerItemOffset(item,event.nativeEvent.layout.y)}>
+                {heading && !associationList.some(value => value.source.printedPage === item.printedPage && value.source.blockId === item.blockId) ? <CourseReadingText level={heading} presentation={item.presentation} printedPage={item.printedPage} blockId={item.blockId} />
+                  : digital ? <TableItem item={item} table={digital} onOpen={()=>open(pageOf(item))} />
+                  : <AssociatedPart part={item.part} printed={item.printedPage} pdf={item.pdfPage} original={()=>open(pageOf(item))} showAsText={true}
+                    validation={activeValidation}
+                    frozen={finalizedVersion?.presentations[presentationKey(item.printedPage, item.blockId)]}
+                    associations={associationList.filter(value => value.source.printedPage === item.printedPage && value.source.blockId === item.blockId)}
+                    onAssociation={openAssociation} />}
+              </View>;
+            })}
+          </View>
+        </ScrollView>}
+        {inspector && <Modal visible transparent animationType="fade" onRequestClose={() => setInspector(null)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 16 }}>
+          <View accessibilityViewIsModal style={{ backgroundColor: c.paper, borderRadius: 14, padding: 16, gap: 10, maxHeight: '90%', width: '100%', maxWidth: 900, alignSelf: 'center' }}>
+            <Txt bold>Destination associée · p. {inspector.printedPage} · {inspector.blockId}</Txt>
+            <Button title="Fermer l’inspecteur" secondary onPress={() => setInspector(null)} />
+            <Txt size={12} color={c.muted}>Fermez cette référence pour revenir au même passage du cours.</Txt>
+            <ScrollView nestedScrollEnabled style={{ flexShrink: 1 }}>
+            {inspector.kind === 'table' && inspector.table?.validated && !inspector.table.keepOriginal ? <CourseTable table={inspector.table} />
+              : !(inspector.presentation.imageOnly || inspector.part.role === 'figure' || inspector.part.role === 'table')
+                ? <SourcePresentationText presentation={inspector.presentation} heading={inspector.part.role === 'heading'} /> : null}
+            {(inspector.presentation.imageOnly || inspector.part.role === 'figure' || inspector.part.role === 'table' || inspector.kind === 'table') &&
+            <OriginalVisual image={inspector.part.image} ratio={(inspector.part.bbox[3] - inspector.part.bbox[1]) / Math.max(1, inspector.part.bbox[2] - inspector.part.bbox[0])} wide label={`Destination originale p. ${inspector.printedPage}`} />
+            }
+            </ScrollView>
+          </View>
+          </View>
+        </Modal>}
+        {mode==='Pages originales'&&<View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
           <Button title="Page précédente" secondary disabled={index===0} onPress={()=>changePage(index-1)} />
-          <Button title="Page suivante" secondary disabled={index===17} onPress={()=>changePage(index+1)} />
-        </View>
-        <Txt size={11} color={c.muted}>Navigation de lecture uniquement · aucune validation de progression. Les titres et limites de paragraphes reconstitués restent à contrôler.</Txt>
+          <Button title="Page suivante" secondary disabled={index===(packet?.pages.length ?? 1)-1} onPress={()=>changePage(index+1)} />
+        </View>}
       </>}
-      {mode==='Vérification manuelle' && packet?.schemaVersion===2 && (
+      {mode==='Vérification manuelle' && packet?.schemaVersion===2 && !finalizedVersion && (
         <SourceCourseVerification
           packet={packet}
+          initialTarget={reviewTarget}
           controlReport={controlReport}
           onClose={() => setMode('Cours reconstitué')}
         />
       )}
     </View>
-  </Card>;
+  </Card></CourseReadingProvider>;
+}
+
+function AssociatedPart(props: Parameters<typeof Part>[0] & { associations: ManualAssociation[]; onAssociation: (value: ManualAssociation) => void }) {
+  const { associations, onAssociation, ...partProps } = props;
+  return <View style={{ gap: 6 }}>
+    <Part {...partProps} associations={associations} onAssociation={onAssociation} />
+    {associations.length > 0 && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+      {associations.map(value => <Pressable key={value.id} accessibilityRole="link" onPress={() => onAssociation(value)}
+        style={{ paddingVertical: 5, paddingHorizontal: 8, borderRadius: 8, backgroundColor: value.state === 'active' ? c.mint : '#FFF3CD' }}>
+        <Txt size={12} color={c.primary}>↗ {value.anchor.text} {value.state === 'active' ? '' : '(à réassocier)'}</Txt>
+      </Pressable>)}
+    </View>}
+  </View>;
+}
+
+function AnchoredText({ text, associations, heading, onAssociation }: { text: string; associations: ManualAssociation[]; heading: boolean; onAssociation: (value: ManualAssociation) => void }) {
+  const anchors = associations.filter(value => value.state === 'active' && text.slice(value.anchor.start, value.anchor.end) === value.anchor.text)
+    .sort((a, b) => a.anchor.start - b.anchor.start || a.anchor.end - b.anchor.end);
+  const pieces: Array<string | ManualAssociation> = []; let cursor = 0;
+  for (const value of anchors) {
+    if (value.anchor.start < cursor) continue;
+    if (value.anchor.start > cursor) pieces.push(text.slice(cursor, value.anchor.start));
+    pieces.push(value); cursor = value.anchor.end;
+  }
+  if (cursor < text.length) pieces.push(text.slice(cursor));
+  return <Text selectable style={{ fontSize: heading ? 23 : 17, lineHeight: heading ? 32 : 29, color: c.ink, fontWeight: heading ? '600' : '400' }}>
+    {pieces.map((piece, index) => typeof piece === 'string' ? piece : <Text key={`${piece.id}-${index}`} accessibilityRole="link" onPress={() => onAssociation(piece)}
+      style={{ color: c.primary, textDecorationLine: 'underline' }}>{piece.anchor.text}</Text>)}
+  </Text>;
+}
+
+function TableItem({ item, table, onOpen }: { item: CourseItem; table: BlockTable; onOpen: () => void }) {
+  const [original, setOriginal] = useState(false);
+  return <View style={{ gap: 8, paddingVertical: 14 }}>
+    <CourseTable table={table} />
+    <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+      <Pressable accessibilityRole="button" onPress={() => setOriginal(!original)}><Txt size={12} color={c.primary}>{original ? 'Masquer l’image originale' : 'Comparer à l’image originale'}</Txt></Pressable>
+      <Pressable accessibilityRole="button" onPress={onOpen}><Txt size={12} color={c.primary}>Voir dans le PDF ↗ (p. {item.printedPage})</Txt></Pressable>
+    </View>
+    {original && <OriginalVisual image={item.part.image} ratio={(item.part.bbox[3] - item.part.bbox[1]) / Math.max(1, item.part.bbox[2] - item.part.bbox[0])} wide label={`Tableau original, page ${item.printedPage}`} />}
+  </View>;
 }

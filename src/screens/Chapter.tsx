@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Platform, Pressable, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Screen, Card, Txt, Chip, Button, Progress, s } from '../components/ui';
 import { BilingualText } from '../components/BilingualText';
 import { ChapterAudio } from '../components/ChapterAudio';
@@ -11,7 +11,10 @@ import { glossary } from '../data/glossary';
 import { estimateLesson } from '../domain/learning/estimate';
 import { revisionTables } from '../data/revisionTables';
 import { RevisionTable } from '../components/RevisionTable';
-import { PrivateSourceCourse } from '../components/PrivateSourceCourse';
+import { CourseWorkspace } from '../components/CourseWorkspace';
+import { loadFinalCourse } from '../domain/sourceCourse/finalizedStorage';
+import type { CourseStructure } from '../domain/sourceCourse/courseStructure';
+import { readingTime, type FinalCourseArchive } from '../domain/sourceCourse/finalization';
 import { MarkdownCourseContent } from '../components/MarkdownCourseContent';
 import { passProgress } from '../domain/preparation/passes';
 import { usePreparation } from '../state/PreparationProvider';
@@ -24,6 +27,19 @@ type ChapterMode = 'COURS SOURCE' | 'COURS COMPLET' | 'FICHES' | 'FLASHCARDS';
 
 export default function Chapter() {
   const { id, section: requestedSection, sectionId: requestedSectionId } = useLocalSearchParams<{ id: string; section?: string; sectionId?: string }>();
+  const [finalArchive, setFinalArchive] = useState<FinalCourseArchive | null>();
+  const [archiveError, setArchiveError] = useState('');
+  const [structure, setStructure] = useState<CourseStructure | null>(null);
+  useFocusEffect(useCallback(() => {
+    let active = true; setFinalArchive(undefined); setArchiveError('');
+    loadFinalCourse(id).then(a => {
+      if (!active) return;
+      setFinalArchive(a);
+      if (a) setMode('COURS SOURCE');
+    })
+      .catch(e => { if (active) setArchiveError(String(e)); });
+    return () => { active = false; };
+  }, [id]));
   const source = documentaryMap.find(chapter => chapter.id === id);
   const lesson = source?.lesson;
   const { state, today, record, plan, profile } = usePreparation();
@@ -47,7 +63,17 @@ export default function Chapter() {
   const [highlightPaletteOpen, setHighlightPaletteOpen] = useState(false);
   const noteTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const lock = useRef(false);
-  if (!source) return <Screen title="Chapitre introuvable" back><Button title="Bibliothèque" onPress={() => router.replace('/library')} /></Screen>;
+  const showSourceWorkspace = id === 'kum-08' || !!finalArchive;
+  if (archiveError) return <Screen title="Cours" back><Txt>{archiveError}</Txt></Screen>;
+  // Chapitre hors catalogue documentaire : n'afficher que l'archive finalisée, sans masquer
+  // fiches/flashcards des chapitres qui en ont déjà.
+  if (!source) {
+    if (finalArchive === undefined) return <Screen title="Cours" back><Txt>Chargement…</Txt></Screen>;
+    if (finalArchive) return <Screen title={id} back>
+      <CourseWorkspace key={id} chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} />
+    </Screen>;
+    return <Screen title="Chapitre introuvable" back><Button title="Bibliothèque" onPress={() => router.replace('/library')} /></Screen>;
+  }
 
   const sectionCount = lesson?.sections.length ?? 0;
   const index = Math.min(reading.section, Math.max(0, sectionCount - 1));
@@ -254,27 +280,33 @@ export default function Chapter() {
     }, allPartsDone ? `Tour ${activePass} terminé pour ce chapitre. Le calendrier et les rappels sont actualisés.` : 'Partie terminée. Progression, calendrier et flashcards actualisés.');
   }
 
-  return <Screen title={source.chapter} subtitle={`${source.book.title} · ${source.book.edition} · ${source.book.year}`} back>
+  const finalVersion = finalArchive?.status === 'finalized' ? finalArchive.versions.find(v => v.version === finalArchive.activeVersion) : undefined;
+  const finalReading = finalVersion ? (finalVersion.reading ?? readingTime(finalVersion.presentations)) : undefined;
+  const chapterNumber = /(\d+)$/.exec(id)?.[1];
+  const headerSubtitle = [
+    `${source.book.title} · ${source.book.edition} · ${source.book.year}`,
+    structure?.authors.length ? structure.authors.join('\n') : '',
+    finalReading ? `Lecture estimée : ${finalReading.minutes} min` : '',
+  ].filter(Boolean).join('\n');
+  return <Screen title={structure?.title ?? source.chapter} subtitle={headerSubtitle} eyebrow={chapterNumber ? `CHAPITRE ${chapterNumber}` : undefined} back>
     {mode !== 'COURS SOURCE' && lesson?.verification === 'beta' && <Card style={{ borderLeftWidth: 4, borderLeftColor: c.primary }}>
       <Txt bold size={13} color={c.primary}>Version bêta — vérification en cours</Txt>
       <Txt size={12}>Cours documenté à partir des pages indiquées, mais non intégralement vérifié. Les passages incertains sont signalés « De verificat / À vérifier ». Les traitements du manuel 2021 sont historiques et ne constituent pas des recommandations cliniques actuelles.</Txt>
     </Card>}
-    <Card>
+    {mode !== 'COURS SOURCE' && <Card>
       <View style={s.between}>
-        <Txt bold>{source.book.title}</Txt>
+        <Txt bold>Progression de lecture</Txt>
         <Pressable accessibilityRole="button" accessibilityLabel={learning.favorites.includes(id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           onPress={() => void save(() => commit({ type: 'favorite', id }))}>
           <Txt size={20} color={c.primary}>{learning.favorites.includes(id) ? '★' : '☆'}</Txt>
         </Pressable>
       </View>
-      {estimate ? <Txt size={13}>Lecture estimée : {estimate.readingMinutes} min</Txt> : <Txt size={13}>Durée de lecture non estimée</Txt>}
-      {mode === 'COURS SOURCE' && <Txt size={12}>Progression existante de l’ancien cours · indépendante du cours source</Txt>}
       <Progress value={progress} />
       <View style={s.between}>
         <Txt size={12}>{reading.readSections.length}/{sectionCount} parties</Txt>
         <Txt size={11} color={c.muted}>{lesson?.verification === 'beta' ? 'Version bêta · couverture documentaire, validation en cours' : lesson ? 'Contenu partiel · non vérifié' : 'Contenu en préparation'}</Txt>
       </View>
-    </Card>
+    </Card>}
     {id !== 'kum-08' && (learning.archivedReadings?.[id] || learning.archivedReadingHistory?.[id]?.length || learning.orphanedAnnotations?.some(annotation => annotation.chapterId === id)) && <Card>
       <Txt bold>Anciennes données conservées</Txt>
       {!!learning.archivedReadings?.[id] && <Txt size={12}>
@@ -294,8 +326,10 @@ export default function Chapter() {
     </Card>}
 
     <View style={s.wrap}>
-      {((id === 'kum-08' ? ['COURS SOURCE', 'FICHES', 'FLASHCARDS'] : ['COURS COMPLET', 'FICHES', 'FLASHCARDS']) as ChapterMode[]).map(choice =>
-        <Chip key={choice} label={choice} selected={mode === choice} onPress={() => setMode(choice)} />
+      {((showSourceWorkspace
+        ? ['COURS SOURCE', 'FICHES', 'FLASHCARDS']
+        : ['COURS COMPLET', 'FICHES', 'FLASHCARDS']) as ChapterMode[]).map(choice =>
+        <Chip key={choice} label={choice === 'COURS SOURCE' || choice === 'COURS COMPLET' ? 'COURS' : choice} selected={mode === choice} onPress={() => setMode(choice)} />
       )}
     </View>
     {mode !== 'COURS SOURCE' && lesson && <View style={[s.row, { flexWrap: 'wrap', alignItems: 'center' }]}>
@@ -306,7 +340,7 @@ export default function Chapter() {
       <ChapterAudio key={`${id}:${displayLanguage}`} lesson={lesson} language={displayLanguage} />
     </View>}
 
-    {mode === 'COURS SOURCE' && id === 'kum-08' ? <PrivateSourceCourse /> : mode === 'FLASHCARDS' ? <Card>
+    {mode === 'COURS SOURCE' && showSourceWorkspace ? <CourseWorkspace chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} /> : mode === 'FLASHCARDS' ? <Card>
       <Txt bold size={21}>Mémoriser les notions du chapitre</Txt>
       <Txt>{cards.length} cartes liées aux cours et fiches. Les cartes sont consultables avant toute validation de partie ; les réponses et échéances restent enregistrées.</Txt>
       <Button title="Commencer les flashcards" disabled={busy || !cards.length} onPress={() => void save(async () => {

@@ -1,4 +1,5 @@
 import type { SourcePart } from './packet';
+import { repairPdfHyphenation, type HyphenationDecision } from './hyphenation';
 
 /** User-requested reading corrections for Kumar 8, 2026-10-15.
  * Never modifies source spans, original PDFs or stored anomaly states.
@@ -12,6 +13,8 @@ export type CoursePresentation = {
   text: string;
   heading?: string;
   contents?: [ContentsEntry[], ContentsEntry[]];
+  /** Décisions de reconstruction dérivée, exportées avec le cours sans toucher au brut. */
+  hyphenation?: HyphenationDecision[];
 };
 
 const leftContents: ContentsEntry[] = [
@@ -46,7 +49,8 @@ const rightContents: ContentsEntry[] = [
 // Keep paragraph breaks while joining only PDF line wraps. Do not modernize
 // the language or replace uncertain glyphs with guessed medical terminology.
 function paragraphFlow(text: string): string {
-  return text.replace(/([\p{L}])[-‐‑\u00ad]\s*\n\s*([\p{L}])/gu, '$1$2')
+  const repaired = repairPdfHyphenation(text);
+  return repaired.text
     .replace(/([^\n])\n(?!\n)/g, '$1 ')
     .replace(/[ \t]{2,}/g, ' ')
     .trim();
@@ -103,7 +107,7 @@ export function sourcePresentation(printedPage: number, part: SourcePart): Cours
   // Only content explicitly requested as a retained image is image-only.
   // Tables are complex PDFs;
   // figure 8.1 is a diagram whose internal text is positional information.
-  const imageOnly = (printedPage === 152 && id === 'part-3') ||
+  const imageOnly = part.role === 'figure' || (printedPage === 152 && id === 'part-3') ||
     (printedPage === 153 && id === 'part-4') ||
     (printedPage === 155 && id === 'part-2') ||
     (printedPage === 156 && id === 'part-2') ||
@@ -112,6 +116,7 @@ export function sourcePresentation(printedPage: number, part: SourcePart): Cours
   let text = part.text;
   let contents: CoursePresentation['contents'];
   let heading: string | undefined;
+  let hyphenation: HyphenationDecision[] = [];
   if (printedPage === 151 && id === 'part-1') {
     heading = 'Sepsisul şi tratamentul infecţiilor bacteriene';
     text = `${heading}\n\nMark Melzer, Andrew Leitch, David Wareham`;
@@ -150,7 +155,15 @@ export function sourcePresentation(printedPage: number, part: SourcePart): Cours
   const page156Flow = printedPage === 156 && ['part-4', 'part-5', 'part-6', 'part-9'].includes(id);
   const needsReflow = page154Flow || page155Flow || page156Flow || (printedPage === 153 && id === 'part-3') || ([163, 164, 167].includes(printedPage) && id === 'part-2') ||
     (printedPage === 168 && (id === 'part-3' || id === 'part-8'));
-  if (needsReflow) text = paragraphFlow(text);
+  if (needsReflow) {
+    const repaired = repairPdfHyphenation(text);
+    text = paragraphFlow(repaired.text);
+    hyphenation = repaired.decisions;
+  } else {
+    const repaired = repairPdfHyphenation(text);
+    text = repaired.text;
+    hyphenation = repaired.decisions;
+  }
   // The private packet may carry an explicitly reviewed presentation overlay.
   // Raw source lines remain untouched for page-by-page audit. Older packets use
   // the same rules above, so reinstalling the packet is not mandatory.
@@ -161,7 +174,9 @@ export function sourcePresentation(printedPage: number, part: SourcePart): Cours
     (printedPage === 155 && ['part-5', 'part-6', 'part-14'].includes(id));
   if (!correctedHere && saved && typeof saved.text === 'string' && typeof saved.imageOnly === 'boolean' &&
       typeof saved.hide === 'boolean') {
-    return { ...saved, contents: Array.isArray(saved.contents) ? saved.contents : undefined };
+    // A persisted overlay must never turn prose, titles or contents into a scan.
+    return { ...saved, imageOnly: imageOnly || (part.role === 'table' && saved.imageOnly),
+      contents: Array.isArray(saved.contents) ? saved.contents : undefined };
   }
-  return { imageOnly, hide, text, contents, heading };
+  return { imageOnly, hide, text, contents, heading, hyphenation: hyphenation.length ? hyphenation : undefined };
 }

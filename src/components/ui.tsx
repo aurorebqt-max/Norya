@@ -230,11 +230,13 @@ export function Screen({
   children,
   title,
   subtitle,
+  eyebrow,
   back = false,
 }: {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
+  eyebrow?: string;
   back?: boolean;
 }) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -271,6 +273,11 @@ export function Screen({
           </Pressable>
         )}
         <View>
+          {eyebrow && (
+            <Txt size={12} bold color={c.primary} style={{ letterSpacing: 1.5, marginBottom: 4 }}>
+              {eyebrow}
+            </Txt>
+          )}
           <Txt size={30} bold style={{ letterSpacing: -1 }}>
             {title}
           </Txt>

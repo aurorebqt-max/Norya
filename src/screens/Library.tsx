@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { listFinalCourses } from '../domain/sourceCourse/finalizedStorage';
+import { useCallback, useMemo, useState } from "react";
 import { TextInput, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import {
   Screen,
   Card,
@@ -23,6 +24,14 @@ const bookLabels = {
 } as const;
 
 export default function Library() {
+  const [finalCourses, setFinalCourses] = useState<Awaited<ReturnType<typeof listFinalCourses>>>([]);
+  const [archiveError, setArchiveError] = useState('');
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    listFinalCourses().then(list => { if (active) { setFinalCourses(list); setArchiveError(''); } })
+      .catch(e => { if (active) setArchiveError(String(e)); });
+    return () => { active = false; };
+  }, []));
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Tous");
   const filtered = useMemo(
@@ -30,13 +39,13 @@ export default function Library() {
       examChapters.filter((chapter) => {
         const book = referenceBooks.find((entry) => entry.id === chapter.bookId)!;
         return (
-          (filter === "Tous" || bookLabels[chapter.bookId] === filter) &&
+          (filter === "Tous" || (filter === "Finalisés" && finalCourses.some(c => c.chapterId === chapter.id)) || bookLabels[chapter.bookId] === filter) &&
           `${chapter.chapter} ${chapter.pages} ${chapter.scope.join(" ")} ${book.title}`
             .toLocaleLowerCase()
             .includes(query.trim().toLocaleLowerCase())
         );
       }),
-    [filter, query],
+    [filter, query, finalCourses],
   );
 
   return (
@@ -44,6 +53,7 @@ export default function Library() {
       title="Bibliothèque des cours"
       subtitle="Programme du résidanat roumain · Médecine · Référentiel 2026"
     >
+      {!!archiveError && <Txt>{archiveError}</Txt>}
       <TextInput
         style={s.input}
         accessibilityLabel="Rechercher un chapitre ou une page"
@@ -52,7 +62,7 @@ export default function Library() {
         onChangeText={setQuery}
       />
       <View style={s.wrap}>
-        {["Tous", "Kumar", "Lawrence", "Sinopsis"].map((label) => (
+        {["Tous", "Finalisés", "Kumar", "Lawrence", "Sinopsis"].map((label) => (
           <Chip
             key={label}
             label={label}
@@ -79,7 +89,7 @@ export default function Library() {
                 · {item}
               </Txt>
             ))}
-            <RowLink title="Ouvrir le chapitre" subtitle={chapter.id === 'kum-08' || chapter.id === 'kum-09' ? 'Version bêta · cours complet · fiches · flashcards' : chapter.id === 'kum-31' || chapter.id === 'kum-10' || chapter.id === 'kum-21' ? 'Cours complet · fiches · flashcards' : 'Contenu Norya en préparation'} href={{pathname:'/chapter',params:{id:chapter.id}}} />
+            <RowLink title="Ouvrir le chapitre" subtitle={finalCourses.some(c => c.chapterId === chapter.id) ? `Cours finalisé · version ${finalCourses.find(c => c.chapterId === chapter.id)!.activeVersion}${finalCourses.find(c => c.chapterId === chapter.id)!.status === 'editing' ? ' · correction en cours' : ''}` : chapter.id === 'kum-08' || chapter.id === 'kum-09' ? 'Version bêta · cours complet · fiches · flashcards' : chapter.id === 'kum-31' || chapter.id === 'kum-10' || chapter.id === 'kum-21' ? 'Cours complet · fiches · flashcards' : 'Contenu Norya en préparation'} href={{pathname:'/chapter',params:{id:chapter.id}}} />
             <Button
               title="Continuer dans Norya"
               secondary

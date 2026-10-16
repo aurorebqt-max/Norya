@@ -7,6 +7,10 @@ import { reviewBlocks } from './reviewNavigation';
  */
 
 import type { AnomalyReport } from './anomalies';
+import type { BlockMerge, BlockSplit, CorrectionEntry, MergeLogEntry } from './merges';
+import type { BlockKind, BlockTable, KindEntry } from './classification';
+import type { ManualBlock } from './manualBlocks';
+import type { ManualAssociation } from './associations';
 
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +23,7 @@ export type BlockValidationStatus =
   | 'issue-found'  // Anomalie détectée
   | 'corrected'    // Corrigé et revérifié
   ;
+export type BlockStatusEntry = { at: string; before: BlockValidationStatus; after: BlockValidationStatus; reason: string };
 
 /** Statuts possibles pour une page */
 export type PageValidationStatus = 
@@ -35,8 +40,17 @@ export interface BlockValidation {
   notes?: string;              // Notes de vérification
   verifiedAt?: string;          // Date ISO de vérification
   verifiedBy?: string;          // Identifiant du vérificateur
+  /** Transitions explicitement provoquées par une transformation persistée. */
+  statusHistory?: BlockStatusEntry[];
   issueDescription?: string;   // Description de l'anomalie
-  correction?: string;          // Correction apportée (si applicable)
+  correction?: string;          // Texte corrigé manuellement (le brut de la source reste intact)
+  /** Historique avant/après de chaque correction manuelle (jamais purgé). */
+  correctionHistory?: CorrectionEntry[];
+  /** Classification manuelle (H1–H5, auteurs, sommaire, tableau) ; absente = paragraphe normal. */
+  kind?: BlockKind;
+  kindHistory?: KindEntry[];
+  /** Reconstruction numérique d'un bloc classé « Tableau » ; la source n'est jamais modifiée. */
+  table?: BlockTable;
 }
 
 /** Données de validation pour une page */
@@ -53,6 +67,16 @@ export interface ChapterValidation {
   chapterId: string;
   /** Présent après reprise des anciennes anomalies ; sauvegarde atomique avec les blocs. */
   anomalies?: AnomalyReport[];
+  /** Fusions manuelles réversibles ; n'altèrent jamais le paquet source. */
+  merges?: BlockMerge[];
+  /** Séparations de blocs logiques, réversibles et indépendantes du paquet brut. */
+  splits?: BlockSplit[];
+  /** Journal chronologique des fusions et annulations. */
+  mergeLog?: MergeLogEntry[];
+  /** Blocs logiques saisis par la personne, ancrés dans la provenance PDF sans muter le paquet. */
+  manualBlocks?: ManualBlock[];
+  /** Associations manuelles entre une ancre exacte et un bloc logique de destination. */
+  associations?: ManualAssociation[];
   pages: PageValidation[];
   startedAt?: string;
   lastUpdatedAt?: string;
@@ -87,7 +111,7 @@ function calculatePageStatus(blocks: BlockValidation[]): PageValidationStatus {
 /**
  * Calcule les statistiques globales pour un chapitre.
  */
-function calculateChapterStats(pages: PageValidation[]): Omit<ChapterValidation, 'chapterId' | 'pages' | 'startedAt' | 'lastUpdatedAt'> {
+export function calculateChapterStats(pages: PageValidation[]): Omit<ChapterValidation, 'chapterId' | 'pages' | 'startedAt' | 'lastUpdatedAt'> {
   const allBlocks = pages.flatMap(p => p.blocks);
   const verifiedBlocks = allBlocks.filter(b => b.status === 'verified' || b.status === 'corrected').length;
   const activePages = pages.filter(p => p.blocks.length > 0);
@@ -404,8 +428,8 @@ export function getAnomalyCount(validation: ChapterValidation): { high: number; 
   return { high: 0, medium: 0, total: 0 };
 }
 
-/** Une seule écriture contient la validation et tout l'historique des anomalies. */
-export async function saveBlockReview(
+/** Calcule la nouvelle validation (statut + anomalies) sans écrire. */
+export function reviewBlock(
   validation: ChapterValidation,
   anomalies: AnomalyReport[],
   printedPage: number,
@@ -413,7 +437,7 @@ export async function saveBlockReview(
   status: BlockValidationStatus,
   anomaly?: AnomalyReport,
   mode: 'create' | 'edit' = 'create',
-): Promise<ChapterValidation> {
+): ChapterValidation {
   const pageIndex = validation.pages.findIndex(p => p.printedPage === printedPage);
   if (pageIndex < 0 || !validation.pages[pageIndex].blocks.some(b => b.id === blockId)) {
     throw new Error('Bloc de validation introuvable');
@@ -444,6 +468,20 @@ export async function saveBlockReview(
       updated.anomalies.push(anomaly);
     }
   }
+  return updated;
+}
+
+/** Une seule écriture contient la validation et tout l'historique des anomalies. */
+export async function saveBlockReview(
+  validation: ChapterValidation,
+  anomalies: AnomalyReport[],
+  printedPage: number,
+  blockId: string,
+  status: BlockValidationStatus,
+  anomaly?: AnomalyReport,
+  mode: 'create' | 'edit' = 'create',
+): Promise<ChapterValidation> {
+  const updated = reviewBlock(validation, anomalies, printedPage, blockId, status, anomaly, mode);
   await saveValidation(updated);
   return updated;
 }
@@ -468,5 +506,5 @@ export function reconcileReviewValidation(validation: ChapterValidation | null, 
     page.status = calculatePageStatus(page.blocks);
     if (page.status !== 'verified') page.verifiedAt = undefined;
   }
-  return { ...validation, pages, ...calculateChapterStats(pages) };
+  return { ...validation, pages, merges: validation.merges, mergeLog: validation.mergeLog, ...calculateChapterStats(pages) };
 }
