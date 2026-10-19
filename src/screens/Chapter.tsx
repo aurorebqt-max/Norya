@@ -1,3 +1,5 @@
+import { CatalogCourseReader } from '../components/CatalogCourseReader';
+import { loadPrivateCourse } from '../services/storage/privateCourse';
 import { useCallback, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Platform, Pressable, Text, TextInput, View } from 'react-native';
@@ -12,6 +14,7 @@ import { estimateLesson } from '../domain/learning/estimate';
 import { revisionTables } from '../data/revisionTables';
 import { RevisionTable } from '../components/RevisionTable';
 import { CourseWorkspace } from '../components/CourseWorkspace';
+import { RevisionCardsViewer } from '../components/RevisionCardsViewer';
 import { loadFinalCourse } from '../domain/sourceCourse/finalizedStorage';
 import type { CourseStructure } from '../domain/sourceCourse/courseStructure';
 import { readingTime, type FinalCourseArchive } from '../domain/sourceCourse/finalization';
@@ -28,10 +31,13 @@ type ChapterMode = 'COURS SOURCE' | 'COURS COMPLET' | 'FICHES' | 'FLASHCARDS';
 export default function Chapter() {
   const { id, section: requestedSection, sectionId: requestedSectionId } = useLocalSearchParams<{ id: string; section?: string; sectionId?: string }>();
   const [finalArchive, setFinalArchive] = useState<FinalCourseArchive | null>();
+  const [hasPrivate, setHasPrivate] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [archiveError, setArchiveError] = useState('');
   const [structure, setStructure] = useState<CourseStructure | null>(null);
   useFocusEffect(useCallback(() => {
     let active = true; setFinalArchive(undefined); setArchiveError('');
+    loadPrivateCourse(id).then(p => { if (active) { setHasPrivate(!!p); if (p) setMode('COURS SOURCE'); } }).catch(e => { if (active) setArchiveError(String(e)); });
     loadFinalCourse(id).then(a => {
       if (!active) return;
       setFinalArchive(a);
@@ -54,7 +60,7 @@ export default function Chapter() {
     ? { ...savedReading, ...(requestedIsValid ? { section: sectionTarget } : {}) }
     : { section: requestedIsValid ? sectionTarget : 0, readSections: [], language: 'RO', mode: 'Complet', updatedOn: today };
   const [reading, setReading] = useState<Reading>(initial);
-  const [mode, setMode] = useState<ChapterMode>(id === 'kum-08' ? 'COURS SOURCE' : 'COURS COMPLET');
+  const [mode, setMode] = useState<ChapterMode>(!lesson || id === 'kum-08' ? 'COURS SOURCE' : 'COURS COMPLET');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [term, setTerm] = useState<string | null>(null);
@@ -63,16 +69,16 @@ export default function Chapter() {
   const [highlightPaletteOpen, setHighlightPaletteOpen] = useState(false);
   const noteTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const lock = useRef(false);
-  const showSourceWorkspace = id === 'kum-08' || !!finalArchive;
+  const showSourceWorkspace = !lesson || id === 'kum-08' || !!finalArchive || hasPrivate || reviewOpen;
   if (archiveError) return <Screen title="Cours" back><Txt>{archiveError}</Txt></Screen>;
   // Chapitre hors catalogue documentaire : n'afficher que l'archive finalisée, sans masquer
   // fiches/flashcards des chapitres qui en ont déjà.
   if (!source) {
     if (finalArchive === undefined) return <Screen title="Cours" back><Txt>Chargement…</Txt></Screen>;
-    if (finalArchive) return <Screen title={id} back>
-      <CourseWorkspace key={id} chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} />
+    return <Screen title={id} back>
+      <View style={s.wrap}><Chip label="Cours" selected={mode !== 'FICHES'} onPress={() => setMode('COURS SOURCE')} /><Chip label="Fiches" selected={mode === 'FICHES'} onPress={() => setMode('FICHES')} /></View>
+      {mode === 'FICHES' ? <RevisionCardsViewer key={id} chapterId={id} archive={finalArchive ?? null} structure={structure} /> : <CourseWorkspace key={id} chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} />}
     </Screen>;
-    return <Screen title="Chapitre introuvable" back><Button title="Bibliothèque" onPress={() => router.replace('/library')} /></Screen>;
   }
 
   const sectionCount = lesson?.sections.length ?? 0;
@@ -293,7 +299,7 @@ export default function Chapter() {
       <Txt bold size={13} color={c.primary}>Version bêta — vérification en cours</Txt>
       <Txt size={12}>Cours documenté à partir des pages indiquées, mais non intégralement vérifié. Les passages incertains sont signalés « De verificat / À vérifier ». Les traitements du manuel 2021 sont historiques et ne constituent pas des recommandations cliniques actuelles.</Txt>
     </Card>}
-    {mode !== 'COURS SOURCE' && <Card>
+    {mode === 'FICHES' && !showSourceWorkspace && <Card>
       <View style={s.between}>
         <Txt bold>Progression de lecture</Txt>
         <Pressable accessibilityRole="button" accessibilityLabel={learning.favorites.includes(id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
@@ -332,7 +338,7 @@ export default function Chapter() {
         <Chip key={choice} label={choice === 'COURS SOURCE' || choice === 'COURS COMPLET' ? 'COURS' : choice} selected={mode === choice} onPress={() => setMode(choice)} />
       )}
     </View>
-    {mode !== 'COURS SOURCE' && lesson && <View style={[s.row, { flexWrap: 'wrap', alignItems: 'center' }]}>
+    {mode === 'FICHES' && !showSourceWorkspace && lesson && <View style={[s.row, { flexWrap: 'wrap', alignItems: 'center' }]}>
       {hasFrench && <>
         <Button title={displayLanguage === 'RO' ? 'Traduire en français' : 'Retour au roumain'} secondary
           onPress={() => remember({ language: displayLanguage === 'RO' ? 'FR' : 'RO' })} />
@@ -340,7 +346,16 @@ export default function Chapter() {
       <ChapterAudio key={`${id}:${displayLanguage}`} lesson={lesson} language={displayLanguage} />
     </View>}
 
-    {mode === 'COURS SOURCE' && showSourceWorkspace ? <CourseWorkspace chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} /> : mode === 'FLASHCARDS' ? <Card>
+    {mode === 'FICHES' && showSourceWorkspace ? <RevisionCardsViewer key={id} chapterId={id} archive={finalArchive ?? null} structure={structure} /> : null}
+    {mode === 'FICHES' && !showSourceWorkspace && lesson ? (
+      <Card>
+        <Txt>Générer une fiche à partir du cours finalisé enregistré dans Safari.</Txt>
+        <Button title="Ouvrir le cours finalisé" onPress={() => { setReviewOpen(true); setMode('COURS SOURCE'); }} />
+      </Card>
+    ) : null}
+
+    {reviewOpen && !hasPrivate && !finalArchive && <Pressable accessibilityRole="button" onPress={() => { setReviewOpen(false); setMode('COURS COMPLET'); }}><Txt size={12} color={c.primary}>Revenir au cours disponible</Txt></Pressable>}
+    {mode === 'FICHES' ? null : (mode === 'COURS SOURCE' || !lesson && mode === 'COURS COMPLET') && showSourceWorkspace ? <CourseWorkspace chapterId={id} initialReview={reviewOpen} onArchiveChange={setFinalArchive} onStructure={setStructure} /> : mode === 'COURS COMPLET' && lesson ? <CatalogCourseReader key={id} lesson={lesson} onReview={() => { setReviewOpen(true); setMode('COURS SOURCE'); }} /> : mode === 'FLASHCARDS' ? <Card>
       <Txt bold size={21}>Mémoriser les notions du chapitre</Txt>
       <Txt>{cards.length} cartes liées aux cours et fiches. Les cartes sont consultables avant toute validation de partie ; les réponses et échéances restent enregistrées.</Txt>
       <Button title="Commencer les flashcards" disabled={busy || !cards.length} onPress={() => void save(async () => {

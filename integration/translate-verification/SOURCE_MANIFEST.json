@@ -1,0 +1,77 @@
+{
+  "baseCommit": "288321aacf60eaa255d317e20bfc5a1cd5e2f354",
+  "workingTree": true,
+  "typescript": "5.9.3",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "esModuleInterop": true
+  },
+  "files": [
+    {
+      "path": "src/domain/sourceCourse/translateBridge.ts",
+      "sha256": "387b22aa43afabb0d1c3b585abb2785b78a20ae5346751bc28397fc06327ca5a"
+    },
+    {
+      "path": "src/domain/sourceCourse/translateClient.ts",
+      "sha256": "ea4179a0af8468351fac6b71c4fd994d62de06c122be36c17443037635ac5dbf"
+    },
+    {
+      "path": "src/domain/sourceCourse/packet.ts",
+      "sha256": "6e424f8247e74d902e5ecdeca1b4f20a5b8e45b7bb668b100f577c47f7b9254f"
+    },
+    {
+      "path": "src/domain/sourceCourse/manualBlocks.ts",
+      "sha256": "dd436035c58c0c467a319e6c7ab785b22ab55a5700756766f58783babc43ccd8"
+    },
+    {
+      "path": "src/domain/sourceCourse/verification.ts",
+      "sha256": "0db0f619e250680502f36e93c64bc186452c0687beb497152886c0a28172b231"
+    },
+    {
+      "path": "src/domain/sourceCourse/reviewNavigation.ts",
+      "sha256": "75e11faa4827d22de111b3184c97c3a36a94606af94559e79daf2ccb2a4265a4"
+    },
+    {
+      "path": "src/domain/sourceCourse/merges.ts",
+      "sha256": "70bb4902b407b21452647fcd2d6145de39a9a614a0640b977fc690ccd9f041ff"
+    },
+    {
+      "path": "src/domain/sourceCourse/associations.ts",
+      "sha256": "e048bf906075dc9593e49cf9d8547935967883e8616b8868ca2788690a699508"
+    },
+    {
+      "path": "src/domain/sourceCourse/classification.ts",
+      "sha256": "ce0380b19af7706c161f657e8949f51a713200953696e4861f4a564e74bf1b69"
+    },
+    {
+      "path": "src/domain/sourceCourse/structureExport.ts",
+      "sha256": "41e56ee4bb0e882c16e0fafaf55778dde3c5f91cef39b79669214ffd542c9cf9"
+    },
+    {
+      "path": "src/domain/sourceCourse/anomalies.ts",
+      "sha256": "44417370078afefe7881db9a8d726d9b933befddd14139a26ad5df8fb5b2aae4"
+    },
+    {
+      "path": "src/domain/sourceCourse/courseStructure.ts",
+      "sha256": "a9c1fe9d8913b36eaaec443599d820f5cd501f913be8c9cd48f771b6f2e74f8c"
+    },
+    {
+      "path": "src/domain/sourceCourse/blockEdits.ts",
+      "sha256": "4f1f40c3e39ac9fe554af8068f855ddf8fc84bec7ed4c6a3006c4b9e7fdda6a8"
+    },
+    {
+      "path": "api/translate.js",
+      "sha256": "85ad097bbf6de98121f281f5fdcf97f9394a1512b977fb45c7d249f8665b6a3c"
+    },
+    {
+      "path": "server/translate.cjs",
+      "sha256": "0f76fdb4827414de73116b01757494a3d4afacf1411e25283746cfbce69c02f4"
+    }
+  ],
+  "excluded": [
+    "displayCorrections.ts: real chapter text; fail-closed guard in runtime/load.cjs",
+    "React Native / AsyncStorage: disabled storage guards",
+    "all environment files and private resources"
+  ]
+}

@@ -1,6 +1,7 @@
 export type SourceRun = { text: string; bold: boolean; italic: boolean };
 export type SourcePart = {
   id: string; kind: 'text' | 'visual'; role: string; bbox: number[];
+  suggestedKind?: 'h1' | 'h2' | 'h3' | 'h4' | 'authors' | 'toc' | 'bibliography' | 'table';
   status: 'unverified'; sourceLineIds: string[]; text: string;
   lines: SourceRun[][]; reasons: string[]; image: string;
 };
@@ -11,7 +12,7 @@ export type SourcePage = {
   parts?: SourcePart[]; sourceLineIds?: string[];
 };
 export type SourcePacket = {
-  schemaVersion: 1 | 2; chapterId: 'kum-08';
+  schemaVersion: 1 | 2; chapterId: string;
   mode: 'original-facsimile-preview' | 'structured-source-draft';
   sourceSha256: string; complete: false; pages: SourcePage[];
 };
@@ -26,6 +27,7 @@ function validateParts(page: SourcePage) {
   for (const part of page.parts) {
     if (!part || typeof part.id !== 'string' || ids.has(part.id)
       || !['text','visual'].includes(part.kind) || !roles.has(part.role)
+      || (part.suggestedKind !== undefined && !['h1', 'h2', 'h3', 'h4', 'authors', 'toc', 'bibliography', 'table'].includes(part.suggestedKind))
       || part.status !== 'unverified' || !strings(part.sourceLineIds) || !strings(part.reasons)
       || !png(part.image) || typeof part.text !== 'string' || !Array.isArray(part.lines)
       || !part.lines.every(line => Array.isArray(line) && line.every(run => run && typeof run.text === 'string'
@@ -68,18 +70,18 @@ export function parseSourcePacket(raw: string): SourcePacket {
     throw new Error(`Paquet invalide : ${errorMessage}`);
   }
   const value = parsed as SourcePacket;
-  if (!value || ![1,2].includes(value.schemaVersion) || value.chapterId !== 'kum-08'
+  if (!value || ![1,2].includes(value.schemaVersion) || typeof value.chapterId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(value.chapterId)
     || value.mode !== (value.schemaVersion === 1 ? 'original-facsimile-preview' : 'structured-source-draft') || value.complete !== false
-    || !/^[a-f0-9]{64}$/.test(value.sourceSha256) || !Array.isArray(value.pages) || value.pages.length !== 18) {
-    throw new Error('Paquet privé Kumar 8 invalide. Réexportez-le depuis la chaîne de contrôle.');
+    || !/^[a-f0-9]{64}$/.test(value.sourceSha256) || !Array.isArray(value.pages) || !value.pages.length || (value.chapterId === 'kum-08' && value.pages.length !== 18)) {
+    throw new Error('Paquet privé invalide. Réexportez-le depuis la chaîne de contrôle.');
   }
   for (const [i, page] of value.pages.entries()) {
-    if (!page || page.printedPage !== 151 + i || page.pdfPage !== 174 + i
+    if (!page || !Number.isInteger(page.printedPage) || !Number.isInteger(page.pdfPage) || page.printedPage < 1 || page.pdfPage < 1 || (i > 0 && (page.printedPage <= value.pages[i-1].printedPage || page.pdfPage <= value.pages[i-1].pdfPage)) || (value.chapterId === 'kum-08' && (page.printedPage !== 151 + i || page.pdfPage !== 174 + i))
       || !Number.isFinite(page.width) || !Number.isFinite(page.height)
       || page.width < 1 || page.height < 1 || page.width > 3000 || page.height > 3000
       || !png(page.image) || typeof page.pdf !== 'string' || !/^JVBERi0[A-Za-z0-9+/=]+$/.test(page.pdf)
       || page.control?.status !== 'human-review-pending') {
-      throw new Error(`Page privée ${151 + i} invalide ou absente.`);
+      throw new Error(`Page privée ${page?.printedPage ?? i + 1} invalide ou absente.`);
     }
     if (value.schemaVersion === 2) validateParts(page);
     else if (page.parts !== undefined) throw new Error('Version de cours incompatible.');

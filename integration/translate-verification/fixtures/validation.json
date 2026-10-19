@@ -1,0 +1,138 @@
+{
+  "chapterId": "fiction-contract-01",
+  "complete": false,
+  "startedAt": "2026-01-01T00:00:00.000Z",
+  "lastUpdatedAt": "2026-01-01T00:00:00.000Z",
+  "verifiedPages": 0,
+  "totalPages": 3,
+  "highPriorityBlocks": 0,
+  "mediumPriorityBlocks": 0,
+  "verifiedBlocks": 0,
+  "totalBlocks": 8,
+  "pages": [
+    {
+      "printedPage": 101,
+      "pdfPage": 11,
+      "status": "in-progress",
+      "blocks": [
+        {
+          "id": "title",
+          "page": 101,
+          "status": "pending",
+          "kind": "h1"
+        },
+        {
+          "id": "same-block",
+          "page": 101,
+          "status": "pending",
+          "correction": "Pacient fictiv unu. Corecție de test.",
+          "correctionHistory": [
+            {
+              "at": "2026-01-01T00:00:00.000Z",
+              "before": "Pacient fictiv 1. Text de test fără valoare clinică.",
+              "after": "Pacient fictiv unu. Corecție de test."
+            }
+          ]
+        },
+        {
+          "id": "styled",
+          "page": 101,
+          "status": "pending"
+        },
+        {
+          "id": "grid",
+          "page": 101,
+          "status": "pending",
+          "kind": "table",
+          "table": {
+            "validated": true,
+            "validatedAt": "2026-01-01T00:00:00.000Z",
+            "title": "Tabel fictiv",
+            "notes": "Date inventate. Nu utilizați clinic.",
+            "rowRoles": [
+              "header",
+              "normal",
+              "category"
+            ],
+            "rows": [
+              [
+                {
+                  "text": "Antet comun",
+                  "colSpan": 2,
+                  "header": true
+                },
+                {
+                  "text": "",
+                  "covered": true
+                },
+                {
+                  "text": "Coloană C",
+                  "header": true
+                }
+              ],
+              [
+                {
+                  "text": "Celulă verticală",
+                  "rowSpan": 2
+                },
+                {
+                  "text": "Valoare inventată B"
+                },
+                {
+                  "text": "Valoare inventată C"
+                }
+              ],
+              [
+                {
+                  "text": "Text acoperit păstrat",
+                  "covered": true
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "Ultima celulă"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "printedPage": 102,
+      "pdfPage": 12,
+      "status": "in-progress",
+      "blocks": [
+        {
+          "id": "same-block",
+          "page": 102,
+          "status": "pending"
+        },
+        {
+          "id": "section",
+          "page": 102,
+          "status": "pending",
+          "kind": "h2"
+        }
+      ]
+    },
+    {
+      "printedPage": 103,
+      "pdfPage": 13,
+      "status": "in-progress",
+      "blocks": [
+        {
+          "id": "same-block",
+          "page": 103,
+          "status": "pending"
+        },
+        {
+          "id": "figure",
+          "page": 103,
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}

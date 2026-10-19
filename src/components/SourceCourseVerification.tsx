@@ -165,7 +165,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
   const presentation = page && part ? workingPresentation(page.printedPage, part, validation) : null;
   const kind: BlockKind | undefined = page && part ? savedBlock(validation, page.printedPage, part.id)?.kind : undefined;
   const table: BlockTable | undefined = page && part ? savedBlock(validation, page.printedPage, part.id)?.table : undefined;
-  const imageOnly = !!part && (sourcePresentation(page!.printedPage, part).imageOnly || kind === 'table');
+  const imageOnly = !!part && (!!presentation?.imageOnly || kind === 'table');
   const mergeable = !!part && !currentLogical?.manual && !imageOnly && isMergeableRole(part.role);
   const shownText = presentation?.text ?? '';
   const associations = activeAssociations(validation);

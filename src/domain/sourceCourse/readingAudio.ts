@@ -1,11 +1,18 @@
 import type { CourseItem, CourseStructure } from './courseStructure';
 export type AudioChunk = { text: string; section: number; blockKey: string };
-export type ReadingVoice = { id: string; name: string; language: string; local: boolean };
+export type ReadingVoice = { id: string; name: string; language: string; local: boolean; quality?: 'enhanced' | 'default' };
 export type SpeechDriver = {
   voices(): Promise<ReadingVoice[]>; canPause: boolean;
   speak(text: string, voice: string, rate: number, done: () => void, fail: (error: unknown) => void): void;
   stop(): Promise<void>; pause(): Promise<void>; resume(): Promise<void>;
 };
+/** Quality metadata first; name hints are only a fallback, never a language substitute. */
+export function preferredVoices(voices: ReadingVoice[], language: 'ro' | 'fr'): ReadingVoice[] {
+  const score = (v: ReadingVoice) => (v.quality === 'enhanced' ? 100 : 0) +
+    (/neural|natural|premium|enhanced|amélior|haute qualité/i.test(`${v.name} ${v.id}`) ? 50 : 0);
+  return voices.filter(v => v.language.toLowerCase().split(/[-_]/)[0] === language)
+    .sort((a, b) => score(b) - score(a) || a.name.localeCompare(b.name));
+}
 export const romanianVoices = (voices: ReadingVoice[], localOnly = true) => voices.filter(v => /^ro(?:[-_]|$)/i.test(v.language) && (!localOnly || v.local));
 export function splitSpeech(text: string, limit = 220): string[] {
   const chunks: string[] = []; let rest = text;
@@ -73,6 +80,16 @@ export class ReadingAudioController {
     if (this.replay) { this.replay = false; this.speak(this.generation); }
     else { try { await this.driver.resume(); } catch (error) { this.state = 'paused'; this.report(String(error)); } }
   }
+  async setRate(rate: number) {
+    this.rate = Math.max(0.5, Math.min(2, rate));
+    if (this.state === 'playing') {
+      const token = ++this.generation; await this.driver.stop();
+      if (token !== this.generation) return;
+      this.speak(token);
+    }
+    this.report();
+  }
+
   async stop() { this.generation++; this.state = 'idle'; await this.driver.stop(); this.report(); }
   async section(delta: number) {
     const current = this.queue[this.index]?.section ?? 0;

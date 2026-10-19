@@ -1,0 +1,103 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const Module = require('node:module');
+const fs = require('node:fs');
+const ts = require('typescript');
+const React = require('react');
+const { create, act } = require('react-test-renderer');
+const { IDBFactory } = require('fake-indexeddb');
+global.IS_REACT_ACT_ENVIRONMENT = true;
+const original = Module._load;
+let learning = { reading: {} }, commits = 0, records = 0;
+Module._load = function(name, ...args) {
+  if(name === 'react-native') return { Platform: { OS: 'web' }, useWindowDimensions: () => ({width:1000,height:900}), View:'View',Text:'Text',Modal:'Modal',Pressable:'Pressable',ScrollView:'ScrollView',TextInput:'TextInput' };
+  if(name === '@react-native-async-storage/async-storage') return {};
+  if(name === './ui') return {Txt:'Txt',Icon:'Icon'};
+  if(name.endsWith('/LearningProvider')) return {useLearning:()=>({learning,commit:async a=>{commits++;learning.reading[a.id]=a.value;}})};
+  if(name.endsWith('/PreparationProvider')) return {usePreparation:()=>({record:async()=>{records++;},today:'2026-10-17',state:{progress:{}},plan:{passes:[]},profile:{targetPasses:1}})};
+  if(name === 'expo-router') return {router:{push:()=>{}}};
+  if(name.endsWith('/readingSpeech')) return {readingSpeechDriver:async()=>({})};
+  if(name === './CourseSelectionOverlay') return {CourseSelectionOverlay:({children})=>children};
+  return original.call(this,name,...args);
+};
+for(const ext of ['.ts','.tsx']) require.extensions[ext]=(m,f)=>m._compile(ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,f);
+const {GoogleFreeTranslator}=require('../src/domain/sourceCourse/translateFree.ts');
+const {CourseReadingProvider,CourseReadingToolbar,useCourseReading}=require('../src/components/CourseReadingTools.tsx');
+const {CourseReadingProgress}=require('../src/components/CourseReadingProgress.tsx');
+const {loadReadingData}=require('../src/domain/sourceCourse/readingStorage.ts');
+const structure={intro:[],outline:[],sections:[{id:'one',title:'Salut',items:[{key:'one',printedPage:151,blockId:'p',presentation:{text:'Bună ziua.',imageOnly:false},part:{role:'paragraph'}}]}]};
+let context;
+function Probe(){context=useCourseReading();return React.createElement('French',null,context.translated(151,'p','Bună ziua.'));}
+const settle=async()=>{for(let i=0;i<8;i++)await act(async()=>{await new Promise(r=>setImmediate(r));});};
+async function click(r,label){await act(async()=>r.root.findAll(n=>n.type==='Pressable'&&n.props.accessibilityLabel===label)[0].props.onPress());await settle();}
+test('GTX: response validation, network/HTTP errors and bounded wait',async()=>{
+ const tr=new GoogleFreeTranslator();
+ global.fetch=async()=>({ok:true,json:async()=>[[['Bonjour.','Bună ziua.']]]});
+ assert.equal(await tr.translate('Bună ziua.','ro','fr'),'Bonjour.');
+ global.fetch=async()=>({ok:true,json:async()=>[]});
+ await assert.rejects(tr.translate('Salut','ro','fr'),/invalide/);
+ global.fetch=async()=>({ok:false,status:429});
+ await assert.rejects(tr.translate('Salut','ro','fr'),/429/);
+ global.fetch=async()=>{throw new TypeError('Failed to fetch');};
+ await assert.rejects(tr.translate('Salut','ro','fr'),/CORS/);
+ const timeout=global.setTimeout;global.setTimeout=(fn)=>timeout(fn,5);
+ global.fetch=()=>new Promise(()=>{});
+ try{await assert.rejects(tr.translate('Salut','ro','fr'),/20 secondes/);}finally{global.setTimeout=timeout;}
+});
+test('section French appears and survives remount; failed later block preserves first translation',async()=>{
+ global.indexedDB=new IDBFactory();
+ global.fetch=async()=>({ok:true,json:async()=>[[['Bonjour.']]]});
+ const props={chapterId:'test',sourceSha256:'a'.repeat(64),version:'3',structure,enabled:true};
+ const tree=()=>React.createElement(CourseReadingProvider,props,React.createElement(CourseReadingToolbar),React.createElement(Probe));
+ let r;await act(async()=>{r=create(tree());});await settle();
+ assert.equal(r.root.findAll(n=>n.type==='Pressable'&&n.props.accessibilityLabel==='Traduction').length,0);
+ await click(r,'FR');await click(r,'Traduire la section');
+ assert.equal(context.language,'fr');assert.equal(r.root.findByType('French').props.children,'Bonjour.');
+ assert.equal((await loadReadingData('test')).translations.length,1);
+ await act(async()=>r.unmount());await act(async()=>{r=create(tree());});await settle();
+ assert.equal(context.language,'fr');assert.equal(r.root.findByType('French').props.children,'Bonjour.');
+ await act(async()=>r.unmount());
+ const second={...structure.sections[0].items[0],blockId:'q',key:'two',presentation:{text:'Alt text.',imageOnly:false}};
+ props.structure={...structure,sections:[{...structure.sections[0],items:[...structure.sections[0].items,second]}]};
+ global.fetch=async()=>{throw new TypeError('network');};
+ await act(async()=>{r=create(tree());});await settle();await click(r,'FR');await click(r,'Traduire la section');
+ assert.equal((await loadReadingData('test')).translations.length,1);
+ assert.ok(JSON.stringify(r.toJSON()).includes('GTX inaccessible'));
+ await act(async()=>r.unmount());
+});
+test('completion only last section, explicit click, idempotent after remount',async()=>{
+ learning={reading:{}};commits=0;records=0;
+ const eight={...structure,sections:Array.from({length:8},(_,i)=>({...structure.sections[0],id:`s${i}`}))};
+ let r;const tree=i=>React.createElement(CourseReadingProgress,{chapterId:'test',structure:eight,index:i,next:()=>{}});
+ await act(async()=>{r=create(tree(0));});assert.equal(r.toJSON(),null);
+ await act(async()=>r.update(tree(7)));assert.equal(commits,0);assert.equal(records,0);
+ await click(r,'Terminer le chapitre et passer aux QCM');assert.equal(commits,1);assert.equal(records,1);
+ assert.ok(JSON.stringify(r.toJSON()).includes('QCM bientôt disponibles'));
+ await act(async()=>r.unmount());await act(async()=>{r=create(tree(7));});
+ await click(r,'Terminer le chapitre et passer aux QCM');assert.equal(commits,1);assert.equal(records,1);
+ await act(async()=>r.unmount());
+});
+test('pencil hides management; rollback requires existing confirmation and preserves versions',async()=>{
+ let archive={status:'finalized',activeVersion:3,revision:1,versions:[1,2,3,4].map(version=>({version,finalizedAt:'2026-10-17'}))},selected=[];
+ const loader=Module._load;
+ Module._load=function(name,...args){
+  if(name==='./ui')return {Txt:'Txt',Icon:'Icon',Button:'Button',Card:'Card'};
+  if(name==='./PrivateSourceCourse')return {PrivateSourceCourse:p=>React.createElement('Reader',p,p.managementAction,p.managementMenu)};
+  if(name==='./ChapterPdfActions')return {ChapterPdfActions:()=>React.createElement('ImportPDF')};
+  if(name.endsWith('/finalizedStorage'))return {loadFinalCourse:async()=>archive,selectFinalVersion:async(id,revision,version)=>{selected.push(version);archive={...archive,activeVersion:version,revision:revision+1};return archive;}};
+  if(name.endsWith('/storage/privateCourse'))return {};
+  return loader.call(this,name,...args);
+ };
+ const {CourseWorkspace}=require('../src/components/CourseWorkspace.tsx');
+ let r;await act(async()=>{r=create(React.createElement(CourseWorkspace,{chapterId:'test'}));});await settle();
+ assert.equal(r.root.findAllByType('ImportPDF').length,0);assert.equal(r.root.findByType('Reader').props.finalizedVersion.version,3);
+ await click(r,'Gérer le chapitre');assert.equal(r.root.findAllByType('ImportPDF').length,1);
+ const button=t=>r.root.findAll(n=>n.type==='Button'&&n.props.title===t)[0];
+ assert.ok(button('Revenir à la version 4'));
+ await act(async()=>button('Revenir à la version 1').props.onPress());assert.deepEqual(selected,[]);
+ await act(async()=>button('Annuler').props.onPress());assert.deepEqual(selected,[]);
+ await act(async()=>button('Revenir à la version 2').props.onPress());
+ await act(async()=>button('Confirmer le retour à cette version').props.onPress());await settle();
+ assert.deepEqual(selected,[2]);assert.equal(archive.versions.length,4);assert.equal(r.root.findAllByType('ImportPDF').length,0);
+ await act(async()=>r.unmount());Module._load=loader;
+});

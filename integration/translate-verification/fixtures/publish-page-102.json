@@ -1,0 +1,15 @@
+{
+  "sourceRevision": "1392495bc5d4a23fe8a742dcd10a8f251cc8938c706b9ac5717e2a9053275bc1",
+  "translations": [
+    {
+      "id": "a1f9fbeb345f747ca91fac552013db6fdcb337ef3ca43fa6765137b11c0a009e",
+      "text": "FR fictif : Pacient fictiv 2. Text de test fără valoare clinică.",
+      "validated": true
+    },
+    {
+      "id": "2bcc11ce497d0540ba8e794265c8483a5a428c503e99320e035b30750c6e03c8",
+      "text": "FR fictif : Secțiune fictivă",
+      "validated": true
+    }
+  ]
+}

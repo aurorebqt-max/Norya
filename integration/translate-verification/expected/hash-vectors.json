@@ -1,0 +1,65 @@
+[
+  {
+    "value": {
+      "b": 2,
+      "a": 1
+    },
+    "canonical": "{\"a\":1,\"b\":2}",
+    "sha256": "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+  },
+  {
+    "value": [
+      "page",
+      101,
+      "same-block"
+    ],
+    "canonical": "[\"page\",101,\"same-block\"]",
+    "sha256": "a8dbb985e2f75a040d3b15a067486b33cf128678237d1033725af72f3cfc4286"
+  },
+  {
+    "value": "Știință fictivă 😀",
+    "canonical": "\"Știință fictivă 😀\"",
+    "sha256": "e4d1e112c844b333800c0c7756a74801789aa357c9aae64be1049f1b836eacc7"
+  },
+  {
+    "value": "é",
+    "canonical": "\"é\"",
+    "sha256": "f2886017e9c7abacf804b54d64787dce2b611c9544ba21f3affdd126a6e50086"
+  },
+  {
+    "value": "é",
+    "canonical": "\"é\"",
+    "sha256": "3d68ce21f2899a475713cdbe7562ba9bdb6b1dfde8af1f221bdff4a0935b53b2"
+  },
+  {
+    "value": null,
+    "canonical": "null",
+    "sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  {
+    "value": {
+      "z": [
+        "b",
+        "a"
+      ],
+      "a": {
+        "field": "cell",
+        "row": 1,
+        "column": 0
+      }
+    },
+    "canonical": "{\"a\":{\"column\":0,\"field\":\"cell\",\"row\":1},\"z\":[\"b\",\"a\"]}",
+    "sha256": "46ed9d222d0bbd4dc2a7bcae400b21b787cf939cb5d691baa493e182bef82249"
+  },
+  {
+    "value": {
+      "chapterRevision": "51d94b8122376e856e3a46d983a582def87ea1241c5b8e7c7583d514de8f3a7a",
+      "scope": {
+        "kind": "chapter"
+      },
+      "contract": 1
+    },
+    "canonical": "{\"chapterRevision\":\"51d94b8122376e856e3a46d983a582def87ea1241c5b8e7c7583d514de8f3a7a\",\"contract\":1,\"scope\":{\"kind\":\"chapter\"}}",
+    "sha256": "8697e5cfa769a5b0917edcb91bf93e37263ae3ef038246e0c11f333d0a22dce1"
+  }
+]

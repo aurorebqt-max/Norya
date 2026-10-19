@@ -151,6 +151,7 @@ export function initializeValidationFromControlReport(
         page: page.printedPage,
         status: 'pending',
         notes: '',
+        ...( ['h1', 'h2', 'h3', 'h4', 'authors', 'toc', 'bibliography', 'table'].includes(block.suggestedKind) ? { kind: block.suggestedKind } : {}),
       });
     }
     
@@ -500,7 +501,7 @@ export function reconcileReviewValidation(validation: ChapterValidation | null, 
     }
     for (const block of reviewBlocks(source)) {
       if (!page.blocks.some(b => b.id === block.id)) {
-        page.blocks.push({ id: block.id, page: source.printedPage, status: 'pending' });
+        page.blocks.push({ id: block.id, page: source.printedPage, status: 'pending', kind: block.suggestedKind });
       }
     }
     page.status = calculatePageStatus(page.blocks);

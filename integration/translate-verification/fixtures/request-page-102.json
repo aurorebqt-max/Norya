@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "chapterId": "fiction-contract-01",
+  "title": "fiction-contract-01",
+  "sourceLang": "ro",
+  "targetLang": "fr",
+  "sourceRevision": "1392495bc5d4a23fe8a742dcd10a8f251cc8938c706b9ac5717e2a9053275bc1",
+  "blocks": [
+    {
+      "id": "a1f9fbeb345f747ca91fac552013db6fdcb337ef3ca43fa6765137b11c0a009e",
+      "type": "paragraph",
+      "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+      "meta": {
+        "printedPage": 102,
+        "blockId": "same-block",
+        "field": "text"
+      }
+    },
+    {
+      "id": "2bcc11ce497d0540ba8e794265c8483a5a428c503e99320e035b30750c6e03c8",
+      "type": "h2",
+      "text": "Secțiune fictivă",
+      "meta": {
+        "printedPage": 102,
+        "blockId": "section",
+        "field": "text"
+      }
+    }
+  ],
+  "norya": {
+    "contract": 1,
+    "scope": {
+      "kind": "page",
+      "printedPage": 102
+    },
+    "chapterRevision": "51d94b8122376e856e3a46d983a582def87ea1241c5b8e7c7583d514de8f3a7a",
+    "sourceSha256": "584b72596fcad8d418189ddee2f4b6f6c1072bbf6e4d97e657cbd28789c808f1",
+    "layout": {
+      "pages": [
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "width": 600,
+          "height": 800
+        },
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "width": 600,
+          "height": 800
+        },
+        {
+          "printedPage": 103,
+          "pdfPage": 13,
+          "width": 600,
+          "height": 800
+        }
+      ],
+      "nodes": [
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "blockId": "same-block",
+          "role": "paragraph",
+          "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "rawText": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "blockId": "section",
+          "role": "heading",
+          "kind": "h2",
+          "text": "Secțiune fictivă",
+          "rawText": "Secțiune fictivă",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Secțiune fictivă",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        }
+      ]
+    }
+  }
+}

@@ -46,12 +46,13 @@ export function buildCourseStructure(packet: SourcePacket | null | undefined, va
     const { printedPage, pdfPage, blockId, part } = logical;
     if (isAbsorbedByMerge(validation?.merges, printedPage, blockId)) continue;
     const saved = savedBlock(validation, printedPage, blockId);
-    const presentation = frozen ? frozen[key(printedPage, blockId)] : workingPresentation(printedPage, part, validation);
+    const presentation = frozen ? frozen[key(printedPage, blockId)] : workingPresentation(printedPage, part, validation, packet?.chapterId);
     if (!presentation) continue;
-    const kind = saved?.kind;
+    const kind = saved ? saved.kind : part.suggestedKind;
     if (kind === 'h1') { if (presentation.text.trim()) titles.push(presentation.text.trim()); continue; }
     if (kind === 'authors') { if (presentation.text.trim()) result.authors.push(presentation.text.trim()); continue; }
     if (kind === 'toc' || kind === 'bibliography' || presentation.hide) continue;
+    if (part.role === 'page-header') continue;
     const item: CourseItem = { key: key(printedPage, blockId), printedPage, pdfPage,
       blockId, part, presentation, kind, table: kind === 'table' ? saved?.table : undefined };
     if (kind === 'h2') {

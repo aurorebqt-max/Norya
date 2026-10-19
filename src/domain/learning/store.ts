@@ -23,6 +23,13 @@ export function decodeLearning(raw: string): LearningState {
   if (![...s.favorites,...s.difficultTerms].every(x=>typeof x==='string') || new Set(s.attempts.map(a=>a.id)).size!==s.attempts.length) throw new Error('Historique pédagogique invalide.');
   for(const a of s.attempts) if(!a.id || !a.questionId || !a.chapterId || !isDay(a.on) || !isDay(a.nextReviewOn) || !Array.isArray(a.selected) || !a.selected.every(Number.isInteger) || !Array.isArray(a.correctAnswers) || typeof a.correct!=='boolean' || !Number.isFinite(a.score) || !a.snapshot || !Array.isArray(a.snapshot.choices)) throw new Error('Tentative illisible. Historique conservé.');
   for(const r of Object.values(s.reading)) if(!Number.isInteger(r.section) || r.section<0 || !Array.isArray(r.readSections) || !r.readSections.every(n=>Number.isInteger(n)&&n>=0) || (r.completedByPass!==undefined&&(!r.completedByPass||typeof r.completedByPass!=='object'||Object.entries(r.completedByPass).some(([pass,sections])=>!/^([1-9]|10)$/.test(pass)||!Array.isArray(sections)||!sections.every(n=>Number.isInteger(n)&&n>=0)))) || !['RO','FR','Bilingue'].includes(r.language) || !['Complet','Express'].includes(r.mode)) throw new Error('Repère de lecture invalide.');
+  for (const r of Object.values(s.reading)) {
+    if ([r.sectionIds, r.sourceSections].some(ids => ids !== undefined && (!Array.isArray(ids) || ids.some(id => typeof id !== 'string') || new Set(ids).size !== ids.length)) ||
+      (r.sourceSection !== undefined && typeof r.sourceSection !== 'string') ||
+      (r.courseCompleted !== undefined && typeof r.courseCompleted !== 'boolean') ||
+      (r.courseCompletedPass !== undefined && (!Number.isInteger(r.courseCompletedPass) || r.courseCompletedPass < 1 || r.courseCompletedPass > 10)))
+      throw new Error('Progression du cours invalide. Données conservées.');
+  }
   for(const c of s.personalCards) if(!c.id || !c.objectiveId || !c.recto || !c.verso) throw new Error('Carte personnelle invalide.');
   for(const c of s.errorCards) if(!c.id||!c.chapterId||!c.notion||!Array.isArray(c.questionIds)||!isDay(c.nextReviewOn)||!['awaiting-verification','fragile','corrected'].includes(c.status)||!Number.isInteger(c.attemptCount))throw new Error('Mini-fiche d’erreur invalide. Historique conservé.');
   if(!s.sectionNotes||typeof s.sectionNotes!=='object'||Array.isArray(s.sectionNotes)||Object.values(s.sectionNotes).some(value=>typeof value!=='string'))throw new Error('Notes de section invalides. Données conservées.');

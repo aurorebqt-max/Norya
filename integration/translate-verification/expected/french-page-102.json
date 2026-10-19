@@ -1,0 +1,55 @@
+[
+  {
+    "printedPage": 102,
+    "pdfPage": 12,
+    "blockId": "same-block",
+    "role": "paragraph",
+    "text": "FR fictif : Pacient fictiv 2. Text de test fără valoare clinică.",
+    "rawText": "Pacient fictiv 2. Text de test fără valoare clinică.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 102,
+    "pdfPage": 12,
+    "blockId": "section",
+    "role": "heading",
+    "kind": "h2",
+    "text": "FR fictif : Secțiune fictivă",
+    "rawText": "Secțiune fictivă",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Secțiune fictivă",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  }
+]

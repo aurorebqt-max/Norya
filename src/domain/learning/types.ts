@@ -6,7 +6,7 @@ export type Attempt = {
   scoring: 'exact' | 'romanian-draft'; elapsedSeconds: number; nextReviewOn: string;
   snapshot: { prompt: string; choices: string[]; explanation: string; pages: string; version: string; notion?: string; sectionId?: string; sectionIndex?: number };
 };
-export type Reading = { section: number; readSections: number[]; completedByPass?: Record<number, number[]>; language: Language; mode: 'Complet' | 'Express'; updatedOn: string };
+export type Reading = { sectionIds?: string[]; courseCompletedPass?: number; sourceSections?: string[]; sourceSection?: string; courseCompleted?: boolean; section: number; readSections: number[]; completedByPass?: Record<number, number[]>; language: Language; mode: 'Complet' | 'Express'; updatedOn: string };
 export type ErrorCard = {
   id: string;
   chapterId: string;

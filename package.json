@@ -25,6 +25,8 @@
     "expo-sharing": "~55.0.24",
     "expo-speech": "~55.0.18",
     "expo-status-bar": "~55.0.6",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.10",

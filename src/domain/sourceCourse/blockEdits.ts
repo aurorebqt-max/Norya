@@ -19,8 +19,10 @@ export function savedBlock(validation: ChapterValidation | null | undefined, pri
  * Retourne `null` pour un bloc absorbé par une fusion.
  */
 export function workingPresentation(printedPage: number, part: SourcePart,
-  validation: ChapterValidation | null | undefined): CoursePresentation | null {
-  let base = sourcePresentation(printedPage, part);
+  validation: ChapterValidation | null | undefined, chapterId = validation?.chapterId ?? 'kum-08'): CoursePresentation | null {
+  let base: CoursePresentation = chapterId === 'kum-08' ? sourcePresentation(printedPage, part) : {
+    text: part.text, imageOnly: part.role === 'figure' || part.role === 'table', hide: part.role === 'page-header',
+  };
   const correction = savedBlock(validation, printedPage, part.id)?.correction;
   if (correction !== undefined && !base.imageOnly && !base.hide) {
     base = { ...base, text: correction, heading: undefined, contents: undefined };

@@ -146,7 +146,7 @@ export function archiveFinalCourse(previous: FinalCourseArchive | null, evidence
   const presentations: Record<string, CoursePresentation> = {};
   for (const page of packet.pages) for (const part of page.parts ?? []) {
     const presentation = packet.chapterId === 'kum-08' ? sourcePresentation(page.printedPage, part)
-      : { imageOnly: part.role === 'figure', hide: false, text: part.text };
+      : { imageOnly: part.role === 'figure' || part.role === 'table', hide: part.role === 'page-header', text: part.text };
     if (isAbsorbedByMerge(merges, page.printedPage, part.id)) {
       presentations[presentationKey(page.printedPage, part.id)] = { ...presentation, hide: true };
       continue;
@@ -159,7 +159,7 @@ export function archiveFinalCourse(previous: FinalCourseArchive | null, evidence
     const block = evidence.validation?.pages.find(p => p.printedPage === page.printedPage)?.blocks.find(b => b.id === part.id);
     shown = applyClassification(shown, block);
     // Les références restent dans les données privées/exportées, mais quittent le cours de révision.
-    if (block?.kind === 'h1' || block?.kind === 'authors' || block?.kind === 'toc' || block?.kind === 'bibliography') {
+    if (part.role === 'page-header' || block?.kind === 'h1' || block?.kind === 'authors' || block?.kind === 'toc' || block?.kind === 'bibliography') {
       shown = { ...shown, hide: true };
     }
     presentations[presentationKey(page.printedPage, part.id)] = shown;

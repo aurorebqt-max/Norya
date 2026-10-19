@@ -1,0 +1,52 @@
+[
+  {
+    "file": "fixtures/reject-missing.json",
+    "expected": "reject",
+    "name": "missing"
+  },
+  {
+    "file": "fixtures/reject-duplicate.json",
+    "expected": "reject",
+    "name": "duplicate"
+  },
+  {
+    "file": "fixtures/reject-unknown.json",
+    "expected": "reject",
+    "name": "unknown"
+  },
+  {
+    "file": "fixtures/reject-empty.json",
+    "expected": "reject",
+    "name": "empty"
+  },
+  {
+    "file": "fixtures/reject-whitespace.json",
+    "expected": "reject",
+    "name": "whitespace"
+  },
+  {
+    "file": "fixtures/reject-unvalidated.json",
+    "expected": "reject",
+    "name": "unvalidated"
+  },
+  {
+    "file": "fixtures/reject-string-validation.json",
+    "expected": "reject",
+    "name": "string-validation"
+  },
+  {
+    "file": "fixtures/reject-wrong-chapter.json",
+    "expected": "reject",
+    "name": "wrong-chapter"
+  },
+  {
+    "file": "fixtures/reject-wrong-revision.json",
+    "expected": "reject",
+    "name": "wrong-revision"
+  },
+  {
+    "file": "fixtures/reject-extra.json",
+    "expected": "reject",
+    "name": "extra"
+  }
+]

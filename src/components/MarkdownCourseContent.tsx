@@ -12,7 +12,7 @@ function cleanInline(text: string) {
   return text.replace(/\*\*|__|`/g, '').replace(/^\s*[-*+]\s+/, '');
 }
 
-function parse(markdown: string): Block[] {
+export function parse(markdown: string): Block[] {
   const lines = markdown.split('\n');
   const blocks: Block[] = [];
   for (let i = 0; i < lines.length;) {

@@ -1,0 +1,20 @@
+--- a/lib/schema.ts
++++ b/lib/schema.ts
+@@ -1,4 +1,4 @@
+ import {z} from 'zod';
+ export const block=z.object({id:z.string().min(1).max(180),type:z.string().max(60),text:z.string().max(30000),meta:z.record(z.unknown()).optional()}).passthrough();
+ export const source=z.object({schemaVersion:z.literal(1),chapterId:z.string().regex(/^[a-zA-Z0-9_-]{1,120}$/),title:z.string().max(500),sourceLang:z.literal('ro'),targetLang:z.literal('fr'),sourceRevision:z.string().min(1).max(128),blocks:z.array(block).min(1).max(3000)}).passthrough();
+-export const complete=z.object({sourceRevision:z.string().min(1),translations:z.array(z.object({id:z.string(),text:z.string().max(30000),validated:z.boolean().default(false)})).min(1)});
++export const complete=z.object({sourceRevision:z.string().min(1),translations:z.array(z.object({id:z.string(),text:z.string().min(1).max(30000).refine(v=>v.trim().length>0),validated:z.literal(true)})).min(1)});
+--- a/app/api/jobs/[id]/complete/route.ts
++++ b/app/api/jobs/[id]/complete/route.ts
+@@ -13,8 +13,7 @@
+   const blocks=job.source_json.blocks as {id:string;text:string}[];const ids=new Set(blocks.map(b=>b.id));const seen=new Set<string>();
+   for(const t of parsed.data.translations){if(!ids.has(t.id)||seen.has(t.id))return NextResponse.json({error:'Unknown or duplicate block ID'},{status:400,headers:headers(req)});seen.add(t.id);}
+   if(seen.size!==ids.size)return NextResponse.json({error:'Every block must be translated (empty text allowed)'},{status:400,headers:headers(req)});
+-  const {error:te}=await client.from('chapter_translations').upsert({chapter_id:job.chapter_id,source_revision:job.source_revision,job_id:id,translations:parsed.data.translations},{onConflict:'chapter_id,source_revision'});if(te)throw te;
+-  const {error:ue}=await client.from('translation_jobs').update({status:'complete',completed_at:new Date().toISOString()}).eq('id',id);if(ue)throw ue;
++  const {error:publishError}=await client.rpc('publish_validated_translation',{p_job_id:id,p_source_revision:parsed.data.sourceRevision,p_translations:parsed.data.translations});if(publishError)throw publishError;
+   // Only explicitly validated exact pairs enter reusable memory. Failure here must not invalidate published translation.
+   const memory=parsed.data.translations.filter(t=>t.validated&&t.text.trim()).map(t=>({source_text:blocks.find(b=>b.id===t.id)!.text,target_text:t.text,validated:true})).filter(t=>t.source_text.trim());
+   if(memory.length){const {error:me}=await client.from('translation_memory').upsert(memory,{onConflict:'source_text'});if(me)console.error('Memory update failed',me);}

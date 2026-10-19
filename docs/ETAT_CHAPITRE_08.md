@@ -644,3 +644,74 @@ une autre page avec identifiant répété, lecture d’une version finalisée, o
 modale d’une figure et fermeture conservant le lecteur. TypeScript réussit.
 Ces tests simulent React et ne certifient pas le clic tactile Safari/iPad ; aucune
 association ni archive finalisée existante n’est réécrite par le correctif.
+
+## Addendum — Corrections prioritaires du lecteur (17 octobre 2026)
+
+Travail repris sur les modifications locales existantes, sans opération Git en
+cours détectée et sans modification des sources médicales ou du stockage Safari.
+Sauvegarde de code préalable : `/tmp/norya-priorites-20261017` (temporaire).
+
+Traduction : défauts constatés dans le code avant correction : absence de délai
+GTX, repli silencieux sur le roumain si la réponse était vide/invalide, sauvegarde
+seulement à la fin du lot, chapitre lancé en requêtes simultanées, absence de
+bascule en français après succès et erreurs cachées derrière la fenêtre modale.
+La traduction utilise toujours le même endpoint GTX, séquentiellement, avec
+20 secondes maximum par requête (lecture JSON comprise). Chaque passage reçu est
+sauvegardé avant de poursuivre ; une erreur conserve les passages précédents et
+s’affiche dans la fenêtre. La sélection possède son action effective et un essai
+sur un seul paragraphe est disponible avant la section. Les tableaux numériques
+restent explicitement indisponibles en français, sans fausse traduction.
+
+Test réseau réel hors sandbox autorisé : une salutation non médicale roumaine a
+reçu son équivalent français, HTTP 200, `Access-Control-Allow-Origin: *`.
+Ce résultat ne démontre ni le fonctionnement de Safari, ni la traduction du
+paragraphe/section du cours finalisé privé : ce navigateur et son archive ne sont
+pas accessibles depuis cet environnement. La cause précise d’un éventuel échec
+réseau propre à Safari reste donc à vérifier. Aucun fournisseur supplémentaire,
+service payant ou transfert de texte médical privé n’a été activé.
+
+Interface : retrait de l’icône de traduction de la barre, maintien du casque,
+RO/FR et traduction contextuelle. Le bouton de fin figure seulement après le
+contenu de la dernière section, dans le défilement. Aucun affichage ni défilement
+ne marque le chapitre terminé. L’action réutilise progression et événement à
+identifiant stable ; elle ouvre les QCM du catalogue ou affiche leur indisponibilité.
+Le menu crayon du cours finalisé contient les actions existantes de réouverture,
+retour aux versions avec confirmation et import PDF. Aucun changement automatique
+de version ni retrait d’historique.
+
+Tests ciblés : `node tests/chapter-priorities.test.cjs` (4 réussis : réponses GTX,
+erreurs/délai, traduction/persistance après remontage et erreur ultérieure,
+fin explicite/idempotence, menu/confirmation des versions) ;
+`node tests/source-reading-data.test.cjs` (2 réussis) ;
+`node tests/source-finalization.test.cjs` (5 réussis).
+Ces tests utilisent React et IndexedDB simulés, pas Safari réel. Les deux suites
+existantes utilisent la compilation de tests déjà présente ; le nouveau test
+transpile directement les fichiers courants. Pas de suite complète relancée.
+L’unique `npm run typecheck` final et `git diff --check` réussissent.
+Aucune publication ni mise à jour d’un bundle déjà servi n’a été effectuée.
+L’essai demandé dans Safari (paragraphe réel, puis section, puis rechargement)
+reste nécessaire avant de déclarer la traduction du chapitre opérationnelle.
+
+### Diagnostic Safari après échec réel signalé — 17 octobre 2026
+
+L'utilisateur confirme l'échec GTX sur Safari/iPad. L'appel est direct depuis le
+navigateur ; le succès curl précédent n'était pas une validation navigateur.
+Le message générique TypeError ne prouve pas CORS : la trace Console/Réseau de
+l'iPad est nécessaire pour isoler la cause. Aucun nouvel appel fournisseur,
+proxy, transfert privé ou changement applicatif effectué. Test ciblé GTX :
+1 réussi (simulations uniquement). Architecture conditionnelle et alternative
+LibreTranslate auto-hébergée détaillées dans
+[DIAGNOSTIC_TRADUCTION_SAFARI.md](DIAGNOSTIC_TRADUCTION_SAFARI.md).
+Traduction Safari toujours non opérationnelle selon le retour utilisateur.
+
+### Faisabilité LibreTranslate — 17 octobre 2026
+
+Étude uniquement, sans téléchargement de modèle, installation, serveur ou appel
+GTX. RO→FR possible par RO→EN (67 MB) puis EN→FR (62 MB), versions 1.9 dans l'index
+consulté ; qualité médicale non évaluée. Disque de travail à 98 %, environ 834 Mio
+libres : installation durable déconseillée. Deux CPU, 7,8 Gio RAM visibles et
+Python 3.12 alternatif disponible. Budget prudent estimé : 6 Gio libres avant
+installation, 2–4 Gio RAM pour le pilote à mesurer. /tmp a de l'espace mais reste
+non durable. Architecture, consentement, préservation de l'origine Safari et
+limites détaillés dans [FAISABILITE_LIBRETRANSLATE.md](FAISABILITE_LIBRETRANSLATE.md).
+Contrôles en lecture seule et diff --check uniquement ; aucune intégration annoncée.

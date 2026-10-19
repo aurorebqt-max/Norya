@@ -1,0 +1,282 @@
+[
+  {
+    "printedPage": 101,
+    "pdfPage": 11,
+    "blockId": "title",
+    "role": "heading",
+    "kind": "h1",
+    "text": "FR fictif : Capitol fictiv",
+    "rawText": "Capitol fictiv",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "FR fictif : Capitol fictiv",
+          "bold": true,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 101,
+    "pdfPage": 11,
+    "blockId": "same-block",
+    "role": "paragraph",
+    "text": "FR fictif : Pacient fictiv unu. Corecție de test.",
+    "rawText": "Pacient fictiv 1. Text de test fără valoare clinică.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Pacient fictiv 1. Text de test fără valoare clinică.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 101,
+    "pdfPage": 11,
+    "blockId": "styled",
+    "role": "paragraph",
+    "text": "FR fictif : Exemplu FR fictif : inventat\nFR fictif : Linia a doua.",
+    "rawText": "Exemplu inventat\nLinia a doua.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "FR fictif : Exemplu",
+          "bold": true,
+          "italic": false
+        },
+        {
+          "text": " ",
+          "bold": false,
+          "italic": false
+        },
+        {
+          "text": "FR fictif : inventat",
+          "bold": false,
+          "italic": true
+        }
+      ],
+      [
+        {
+          "text": "FR fictif : Linia a doua.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 101,
+    "pdfPage": 11,
+    "blockId": "grid",
+    "role": "table",
+    "kind": "table",
+    "text": "Tabel fictiv\nAntet comun\tColoană C\nCelulă verticală\tValoare inventată B\tValoare inventată C\n\tUltima celulă\nDate inventate. Nu utilizați clinic.",
+    "rawText": "Tabel de test fictiv.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Tabel de test fictiv.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "table": {
+      "validated": true,
+      "validatedAt": "2026-01-01T00:00:00.000Z",
+      "title": "FR fictif : Tabel fictiv",
+      "notes": "FR fictif : Date inventate. Nu utilizați clinic.",
+      "rowRoles": [
+        "header",
+        "normal",
+        "category"
+      ],
+      "rows": [
+        [
+          {
+            "text": "FR fictif : Antet comun",
+            "colSpan": 2,
+            "header": true
+          },
+          {
+            "text": "",
+            "covered": true
+          },
+          {
+            "text": "FR fictif : Coloană C",
+            "header": true
+          }
+        ],
+        [
+          {
+            "text": "FR fictif : Celulă verticală",
+            "rowSpan": 2
+          },
+          {
+            "text": "FR fictif : Valoare inventată B"
+          },
+          {
+            "text": "FR fictif : Valoare inventată C"
+          }
+        ],
+        [
+          {
+            "text": "FR fictif : Text acoperit păstrat",
+            "covered": true
+          },
+          {
+            "text": ""
+          },
+          {
+            "text": "FR fictif : Ultima celulă"
+          }
+        ]
+      ]
+    },
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 102,
+    "pdfPage": 12,
+    "blockId": "same-block",
+    "role": "paragraph",
+    "text": "FR fictif : Pacient fictiv 2. Text de test fără valoare clinică.",
+    "rawText": "Pacient fictiv 2. Text de test fără valoare clinică.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 102,
+    "pdfPage": 12,
+    "blockId": "section",
+    "role": "heading",
+    "kind": "h2",
+    "text": "FR fictif : Secțiune fictivă",
+    "rawText": "Secțiune fictivă",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Secțiune fictivă",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 103,
+    "pdfPage": 13,
+    "blockId": "same-block",
+    "role": "paragraph",
+    "text": "FR fictif : Pacient fictiv 3. Text de test fără valoare clinică.",
+    "rawText": "Pacient fictiv 3. Text de test fără valoare clinică.",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": false,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  },
+  {
+    "printedPage": 103,
+    "pdfPage": 13,
+    "blockId": "figure",
+    "role": "figure",
+    "text": "",
+    "rawText": "",
+    "bbox": [
+      20,
+      40,
+      480,
+      180
+    ],
+    "lines": [
+      [
+        {
+          "text": "",
+          "bold": false,
+          "italic": false
+        }
+      ]
+    ],
+    "imageOnly": true,
+    "hide": false,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+  }
+]

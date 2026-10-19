@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 2,
+  "chapterId": "fiction-contract-01",
+  "mode": "structured-source-draft",
+  "sourceSha256": "584b72596fcad8d418189ddee2f4b6f6c1072bbf6e4d97e657cbd28789c808f1",
+  "complete": false,
+  "pages": [
+    {
+      "printedPage": 101,
+      "pdfPage": 11,
+      "width": 600,
+      "height": 800,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII=",
+      "pdf": "JVBERi0xLjQKJSBGSUNUSU9OIE9OTFkgLSBubyBwYXRpZW50IG9yIG1lZGljYWwgc291cmNlCiUlRU9GCg==",
+      "control": {
+        "status": "human-review-pending",
+        "counts": {}
+      },
+      "parts": [
+        {
+          "id": "title",
+          "kind": "text",
+          "role": "heading",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "suggestedKind": "h1",
+          "status": "unverified",
+          "sourceLineIds": [
+            "101:title:line:0"
+          ],
+          "text": "Capitol fictiv",
+          "lines": [
+            [
+              {
+                "text": "Capitol fictiv",
+                "bold": true,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        },
+        {
+          "id": "same-block",
+          "kind": "text",
+          "role": "paragraph",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "101:same-block:line:0"
+          ],
+          "text": "Pacient fictiv 1. Text de test fără valoare clinică.",
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 1. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        },
+        {
+          "id": "styled",
+          "kind": "text",
+          "role": "paragraph",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "101:styled:line:0",
+            "101:styled:line:1"
+          ],
+          "text": "Exemplu inventat\nLinia a doua.",
+          "lines": [
+            [
+              {
+                "text": "Exemplu",
+                "bold": true,
+                "italic": false
+              },
+              {
+                "text": " ",
+                "bold": false,
+                "italic": false
+              },
+              {
+                "text": "inventat",
+                "bold": false,
+                "italic": true
+              }
+            ],
+            [
+              {
+                "text": "Linia a doua.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        },
+        {
+          "id": "grid",
+          "kind": "visual",
+          "role": "table",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "101:grid:line:0"
+          ],
+          "text": "Tabel de test fictiv.",
+          "lines": [
+            [
+              {
+                "text": "Tabel de test fictiv.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        }
+      ],
+      "sourceLineIds": [
+        "101:title:line:0",
+        "101:same-block:line:0",
+        "101:styled:line:0",
+        "101:styled:line:1",
+        "101:grid:line:0"
+      ]
+    },
+    {
+      "printedPage": 102,
+      "pdfPage": 12,
+      "width": 600,
+      "height": 800,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII=",
+      "pdf": "JVBERi0xLjQKJSBGSUNUSU9OIE9OTFkgLSBubyBwYXRpZW50IG9yIG1lZGljYWwgc291cmNlCiUlRU9GCg==",
+      "control": {
+        "status": "human-review-pending",
+        "counts": {}
+      },
+      "parts": [
+        {
+          "id": "same-block",
+          "kind": "text",
+          "role": "paragraph",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "102:same-block:line:0"
+          ],
+          "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        },
+        {
+          "id": "section",
+          "kind": "text",
+          "role": "heading",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "suggestedKind": "h2",
+          "status": "unverified",
+          "sourceLineIds": [
+            "102:section:line:0"
+          ],
+          "text": "Secțiune fictivă",
+          "lines": [
+            [
+              {
+                "text": "Secțiune fictivă",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        }
+      ],
+      "sourceLineIds": [
+        "102:same-block:line:0",
+        "102:section:line:0"
+      ]
+    },
+    {
+      "printedPage": 103,
+      "pdfPage": 13,
+      "width": 600,
+      "height": 800,
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII=",
+      "pdf": "JVBERi0xLjQKJSBGSUNUSU9OIE9OTFkgLSBubyBwYXRpZW50IG9yIG1lZGljYWwgc291cmNlCiUlRU9GCg==",
+      "control": {
+        "status": "human-review-pending",
+        "counts": {}
+      },
+      "parts": [
+        {
+          "id": "same-block",
+          "kind": "text",
+          "role": "paragraph",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "103:same-block:line:0"
+          ],
+          "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        },
+        {
+          "id": "figure",
+          "kind": "visual",
+          "role": "figure",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "status": "unverified",
+          "sourceLineIds": [
+            "103:figure:line:0"
+          ],
+          "text": "",
+          "lines": [
+            [
+              {
+                "text": "",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "reasons": [],
+          "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jL1sAAAAASUVORK5CYII="
+        }
+      ],
+      "sourceLineIds": [
+        "103:same-block:line:0",
+        "103:figure:line:0"
+      ]
+    }
+  ]
+}

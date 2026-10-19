@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 1,
+  "chapterId": "fiction-contract-01",
+  "title": "fiction-contract-01",
+  "sourceLang": "ro",
+  "targetLang": "fr",
+  "sourceRevision": "8697e5cfa769a5b0917edcb91bf93e37263ae3ef038246e0c11f333d0a22dce1",
+  "blocks": [
+    {
+      "id": "fc59a2eefe47d655aa90de8c38149881eab99def33f650e43085ae80517711e3",
+      "type": "h1",
+      "text": "Capitol fictiv",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "title",
+        "field": "run",
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "id": "7b8e842e7c3e4e0a94445f09185ee6ba9d696d9d9c213d7d9fab39648fc619f2",
+      "type": "paragraph",
+      "text": "Pacient fictiv unu. Corecție de test.",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "same-block",
+        "field": "text"
+      }
+    },
+    {
+      "id": "8f4810b7f37014beed20dee45a06b3e7ccb85a85e46b3274e8040f724410a42e",
+      "type": "paragraph",
+      "text": "Exemplu",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "styled",
+        "field": "run",
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "id": "05a6d3bf3a0b73b490289b74f16b997b11026000d8a4e1478cf310070baf6942",
+      "type": "paragraph",
+      "text": "inventat",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "styled",
+        "field": "run",
+        "row": 0,
+        "column": 2
+      }
+    },
+    {
+      "id": "a0734b0a2e4f9fa95789544cdb5e12a9bb35cf7248100e70a9f3bfffcdaa4e69",
+      "type": "paragraph",
+      "text": "Linia a doua.",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "styled",
+        "field": "run",
+        "row": 1,
+        "column": 0
+      }
+    },
+    {
+      "id": "e059d4d7753ad4b6458dd2e051b524db7149f0dd3d4c3d969b13edba51ecd3ef",
+      "type": "table",
+      "text": "Tabel fictiv",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "title"
+      }
+    },
+    {
+      "id": "91f4fd0b4d3fa7b80820fb95d5b45a89fb489ffc1d016ca1b330c09a6ca9524c",
+      "type": "table",
+      "text": "Date inventate. Nu utilizați clinic.",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "notes"
+      }
+    },
+    {
+      "id": "d1e3f60a9dcf3abb7ca01ba6a7dea2ea703e0b91a1b9bcca7fc491a65a6d77fe",
+      "type": "table-cell",
+      "text": "Antet comun",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "id": "ee58607db23d84af650e7d17b3e4c38d5b14e6290757a2cc7a591a072fc8d497",
+      "type": "table-cell",
+      "text": "Coloană C",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 0,
+        "column": 2
+      }
+    },
+    {
+      "id": "a9134f311604b36947185f92d68b7f3ae1be3a92c8b34579077e8b6621dd0278",
+      "type": "table-cell",
+      "text": "Celulă verticală",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 1,
+        "column": 0
+      }
+    },
+    {
+      "id": "a3de3b9f1f5874ec0be67ca5db67da312abe82adae01c861fe337f25fd203614",
+      "type": "table-cell",
+      "text": "Valoare inventată B",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 1,
+        "column": 1
+      }
+    },
+    {
+      "id": "a70a9319a6381b333d6de9e5798decdd76a45a197db8b3e8b9392af469348466",
+      "type": "table-cell",
+      "text": "Valoare inventată C",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 1,
+        "column": 2
+      }
+    },
+    {
+      "id": "4ce6baec0a0dab7295b04bbfa68ca08391dfdb4a777948788a0f779a30d34439",
+      "type": "table-cell",
+      "text": "Text acoperit păstrat",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 2,
+        "column": 0
+      }
+    },
+    {
+      "id": "625f4f7647e948a4bcfbfc0b40133d5c6fda0dd1a9a2c68a3b1519151cd544d0",
+      "type": "table-cell",
+      "text": "Ultima celulă",
+      "meta": {
+        "printedPage": 101,
+        "blockId": "grid",
+        "field": "cell",
+        "row": 2,
+        "column": 2
+      }
+    },
+    {
+      "id": "a1f9fbeb345f747ca91fac552013db6fdcb337ef3ca43fa6765137b11c0a009e",
+      "type": "paragraph",
+      "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+      "meta": {
+        "printedPage": 102,
+        "blockId": "same-block",
+        "field": "text"
+      }
+    },
+    {
+      "id": "2bcc11ce497d0540ba8e794265c8483a5a428c503e99320e035b30750c6e03c8",
+      "type": "h2",
+      "text": "Secțiune fictivă",
+      "meta": {
+        "printedPage": 102,
+        "blockId": "section",
+        "field": "text"
+      }
+    },
+    {
+      "id": "7032e5fa3a49b4b1b68e82464c2c3f38f4c0c3cb010edf1e3c951288bd066f3d",
+      "type": "paragraph",
+      "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+      "meta": {
+        "printedPage": 103,
+        "blockId": "same-block",
+        "field": "text"
+      }
+    }
+  ],
+  "norya": {
+    "contract": 1,
+    "scope": {
+      "kind": "chapter"
+    },
+    "chapterRevision": "51d94b8122376e856e3a46d983a582def87ea1241c5b8e7c7583d514de8f3a7a",
+    "sourceSha256": "584b72596fcad8d418189ddee2f4b6f6c1072bbf6e4d97e657cbd28789c808f1",
+    "layout": {
+      "pages": [
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "width": 600,
+          "height": 800
+        },
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "width": 600,
+          "height": 800
+        },
+        {
+          "printedPage": 103,
+          "pdfPage": 13,
+          "width": 600,
+          "height": 800
+        }
+      ],
+      "nodes": [
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "blockId": "title",
+          "role": "heading",
+          "kind": "h1",
+          "text": "Capitol fictiv",
+          "rawText": "Capitol fictiv",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Capitol fictiv",
+                "bold": true,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "blockId": "same-block",
+          "role": "paragraph",
+          "text": "Pacient fictiv unu. Corecție de test.",
+          "rawText": "Pacient fictiv 1. Text de test fără valoare clinică.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 1. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "blockId": "styled",
+          "role": "paragraph",
+          "text": "Exemplu inventat\nLinia a doua.",
+          "rawText": "Exemplu inventat\nLinia a doua.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Exemplu",
+                "bold": true,
+                "italic": false
+              },
+              {
+                "text": " ",
+                "bold": false,
+                "italic": false
+              },
+              {
+                "text": "inventat",
+                "bold": false,
+                "italic": true
+              }
+            ],
+            [
+              {
+                "text": "Linia a doua.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 101,
+          "pdfPage": 11,
+          "blockId": "grid",
+          "role": "table",
+          "kind": "table",
+          "text": "Tabel fictiv\nAntet comun\tColoană C\nCelulă verticală\tValoare inventată B\tValoare inventată C\n\tUltima celulă\nDate inventate. Nu utilizați clinic.",
+          "rawText": "Tabel de test fictiv.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Tabel de test fictiv.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137",
+          "table": {
+            "rows": [
+              [
+                {
+                  "text": "Antet comun",
+                  "colSpan": 2,
+                  "header": true
+                },
+                {
+                  "text": "",
+                  "covered": true
+                },
+                {
+                  "text": "Coloană C",
+                  "header": true
+                }
+              ],
+              [
+                {
+                  "text": "Celulă verticală",
+                  "rowSpan": 2
+                },
+                {
+                  "text": "Valoare inventată B"
+                },
+                {
+                  "text": "Valoare inventată C"
+                }
+              ],
+              [
+                {
+                  "text": "Text acoperit păstrat",
+                  "covered": true
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "Ultima celulă"
+                }
+              ]
+            ],
+            "rowRoles": [
+              "header",
+              "normal",
+              "category"
+            ],
+            "title": "Tabel fictiv",
+            "notes": "Date inventate. Nu utilizați clinic.",
+            "validated": true
+          }
+        },
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "blockId": "same-block",
+          "role": "paragraph",
+          "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "rawText": "Pacient fictiv 2. Text de test fără valoare clinică.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 2. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 102,
+          "pdfPage": 12,
+          "blockId": "section",
+          "role": "heading",
+          "kind": "h2",
+          "text": "Secțiune fictivă",
+          "rawText": "Secțiune fictivă",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Secțiune fictivă",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 103,
+          "pdfPage": 13,
+          "blockId": "same-block",
+          "role": "paragraph",
+          "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+          "rawText": "Pacient fictiv 3. Text de test fără valoare clinică.",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "Pacient fictiv 3. Text de test fără valoare clinică.",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": false,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        },
+        {
+          "printedPage": 103,
+          "pdfPage": 13,
+          "blockId": "figure",
+          "role": "figure",
+          "text": "",
+          "rawText": "",
+          "bbox": [
+            20,
+            40,
+            480,
+            180
+          ],
+          "lines": [
+            [
+              {
+                "text": "",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "imageOnly": true,
+          "hide": false,
+          "imageSha256": "5586de233898c633758954f65143e796f266c07df8b2c7714aaf9e3696463137"
+        }
+      ]
+    }
+  }
+}

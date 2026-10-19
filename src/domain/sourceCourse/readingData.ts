@@ -11,7 +11,7 @@ export type ReadingTranslation = ReadingAnchor & {
 };
 export type ReadingData = {
   schemaVersion: 1; chapterId: string; annotations: ReadingAnnotation[]; translations: ReadingTranslation[];
-  preferences: { rate: number; voice?: string; language: 'ro' | 'fr' | 'both' };
+  preferences: { rate: number; voice?: string; voices?: Partial<Record<'ro' | 'fr', string>>; language: 'ro' | 'fr' | 'both' };
 };
 export const emptyReadingData = (chapterId: string): ReadingData => ({ schemaVersion: 1, chapterId,
   annotations: [], translations: [], preferences: { rate: 1, language: 'ro' } });
@@ -51,6 +51,7 @@ export function decodeReadingData(raw: string, chapterId: string): ReadingData {
       typeof a.provider !== 'string' || !Array.isArray(a.warnings) || a.warnings.some(w => typeof w !== 'string')) ||
     !value.preferences || ![0.7, 0.85, 1, 1.15, 1.3].includes(value.preferences.rate) ||
     !['ro', 'fr', 'both'].includes(value.preferences.language) || (value.preferences.voice !== undefined && typeof value.preferences.voice !== 'string') ||
+    (value.preferences.voices !== undefined && (!value.preferences.voices || typeof value.preferences.voices !== 'object' || Array.isArray(value.preferences.voices) || Object.entries(value.preferences.voices).some(([key, voice]) => !['ro', 'fr'].includes(key) || typeof voice !== 'string'))) ||
     new Set(value.annotations.map(a => a.id)).size !== value.annotations.length ||
     new Set(value.translations.map(a => a.id)).size !== value.translations.length)
     throw new Error('Sauvegarde de révision invalide ou appartenant à un autre chapitre. Données conservées.');

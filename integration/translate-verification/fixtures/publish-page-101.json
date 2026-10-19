@@ -1,0 +1,75 @@
+{
+  "sourceRevision": "d4e324d249843b5400c97a713bc3ba95671e059a41e5be6f863bc2e9601b8c69",
+  "translations": [
+    {
+      "id": "fc59a2eefe47d655aa90de8c38149881eab99def33f650e43085ae80517711e3",
+      "text": "FR fictif : Capitol fictiv",
+      "validated": true
+    },
+    {
+      "id": "7b8e842e7c3e4e0a94445f09185ee6ba9d696d9d9c213d7d9fab39648fc619f2",
+      "text": "FR fictif : Pacient fictiv unu. Corecție de test.",
+      "validated": true
+    },
+    {
+      "id": "8f4810b7f37014beed20dee45a06b3e7ccb85a85e46b3274e8040f724410a42e",
+      "text": "FR fictif : Exemplu",
+      "validated": true
+    },
+    {
+      "id": "05a6d3bf3a0b73b490289b74f16b997b11026000d8a4e1478cf310070baf6942",
+      "text": "FR fictif : inventat",
+      "validated": true
+    },
+    {
+      "id": "a0734b0a2e4f9fa95789544cdb5e12a9bb35cf7248100e70a9f3bfffcdaa4e69",
+      "text": "FR fictif : Linia a doua.",
+      "validated": true
+    },
+    {
+      "id": "e059d4d7753ad4b6458dd2e051b524db7149f0dd3d4c3d969b13edba51ecd3ef",
+      "text": "FR fictif : Tabel fictiv",
+      "validated": true
+    },
+    {
+      "id": "91f4fd0b4d3fa7b80820fb95d5b45a89fb489ffc1d016ca1b330c09a6ca9524c",
+      "text": "FR fictif : Date inventate. Nu utilizați clinic.",
+      "validated": true
+    },
+    {
+      "id": "d1e3f60a9dcf3abb7ca01ba6a7dea2ea703e0b91a1b9bcca7fc491a65a6d77fe",
+      "text": "FR fictif : Antet comun",
+      "validated": true
+    },
+    {
+      "id": "ee58607db23d84af650e7d17b3e4c38d5b14e6290757a2cc7a591a072fc8d497",
+      "text": "FR fictif : Coloană C",
+      "validated": true
+    },
+    {
+      "id": "a9134f311604b36947185f92d68b7f3ae1be3a92c8b34579077e8b6621dd0278",
+      "text": "FR fictif : Celulă verticală",
+      "validated": true
+    },
+    {
+      "id": "a3de3b9f1f5874ec0be67ca5db67da312abe82adae01c861fe337f25fd203614",
+      "text": "FR fictif : Valoare inventată B",
+      "validated": true
+    },
+    {
+      "id": "a70a9319a6381b333d6de9e5798decdd76a45a197db8b3e8b9392af469348466",
+      "text": "FR fictif : Valoare inventată C",
+      "validated": true
+    },
+    {
+      "id": "4ce6baec0a0dab7295b04bbfa68ca08391dfdb4a777948788a0f779a30d34439",
+      "text": "FR fictif : Text acoperit păstrat",
+      "validated": true
+    },
+    {
+      "id": "625f4f7647e948a4bcfbfc0b40133d5c6fda0dd1a9a2c68a3b1519151cd544d0",
+      "text": "FR fictif : Ultima celulă",
+      "validated": true
+    }
+  ]
+}

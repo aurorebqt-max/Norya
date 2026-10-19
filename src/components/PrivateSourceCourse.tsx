@@ -1,3 +1,9 @@
+import { PrivatePdfImport } from './PrivatePdfImport';
+import { CourseReaderPane, courseParagraphStyle } from './CourseReaderPane';
+import type { ReactNode } from 'react';
+import { CourseReadingProgress } from './CourseReadingProgress';
+import { CourseReaderNavigation } from './CourseReaderNavigation';
+import { useLearning } from '../state/LearningProvider';
 import { presentationKey, type FinalCourseVersion } from '../domain/sourceCourse/finalization';
 import type { CoursePresentation } from '../domain/sourceCourse/displayCorrections';
 import { SourcePresentationText } from './SourcePresentationText';
@@ -7,6 +13,8 @@ import { Button, Card, Chip, Txt } from './ui';
 import { colors as c } from '../design/theme';
 import type { SourcePacket, SourcePage, SourcePart } from '../domain/sourceCourse/packet';
 import type { BlockTable } from '../domain/sourceCourse/classification';
+import { translationSnapshot } from '../domain/sourceCourse/translateBridge';
+import { TranslateAdminPanel } from './TranslateAdminPanel';
 import { importPrivateCourse, loadPrivateCourse, openOriginalPage } from '../services/storage/privateCourse';
 import { SourceCourseVerification } from './SourceCourseVerification';
 import { loadValidation, type ChapterValidation } from '../domain/sourceCourse/verification';
@@ -16,7 +24,7 @@ import { mergeAtAnchor } from '../domain/sourceCourse/merges';
 import { buildCourseStructure, type CourseItem, type CourseOutlineItem, type CourseStructure } from '../domain/sourceCourse/courseStructure';
 import { CourseHeading, CourseTable } from './CourseBlocks';
 import { activeAssociations, type ManualAssociation } from '../domain/sourceCourse/associations';
-import { CourseReadingProvider, CourseReadingToolbar } from './CourseReadingTools';
+import { CourseReadingProvider, CourseReadingToolbar, useCourseReading } from './CourseReadingTools';
 import { CourseReadingText } from './CourseReadingText';
 
 type Mode = 'Cours reconstitué' | 'Pages originales' | 'Vérification manuelle';
@@ -46,26 +54,26 @@ function OriginalVisual({ image, ratio, wide, label }: { image:string; ratio:num
     </Pressable>
   </View>;
 }
-function Part({ part, printed, pdf, original, showAsText, frozen, validation, associations = [], onAssociation }: {
-  frozen?: CoursePresentation; validation?: ChapterValidation | null; part: SourcePart; printed: number; pdf: number;
+function Part({ chapterId, part, printed, pdf, original, showAsText, frozen, validation, associations = [], onAssociation }: {
+  chapterId?: string; frozen?: CoursePresentation; validation?: ChapterValidation | null; part: SourcePart; printed: number; pdf: number;
   original: () => void; showAsText?: boolean; associations?: ManualAssociation[]; onAssociation?: (value: ManualAssociation) => void;
 }) {
   const [compare, setCompare] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const base = frozen ?? sourcePresentation(printed, part);
-  const presentation = frozen ? (base.hide ? null : base) : workingPresentation(printed, part, validation);
+  const presentation = frozen ? (base.hide ? null : base) : workingPresentation(printed, part, validation, chapterId);
   if (!presentation || (showAsText && presentation.hide)) return null;
   const merge = mergeAtAnchor(validation?.merges, printed, part.id);
   const showImage = showAsText ? presentation.imageOnly : (part.kind === 'visual' || compare);
   const heading = part.role === 'heading';
-  return <View testID={`source-part-${part.id}`} style={{ gap: 10, paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: c.line }}>
+  return <View testID={`source-part-${part.id}`} style={courseParagraphStyle}>
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
       <Txt size={11} color={c.muted}>{roles[part.role] ?? 'Élément source'} · p. {printed} · {showAsText ? (presentation.imageOnly ? 'Illustration médicale' : (merge ? 'Texte fusionné' : 'Texte')) : (part.kind === 'visual' ? 'Visuel original' : 'Texte extrait')}</Txt>
       <Pressable accessibilityRole="button" accessibilityLabel={`PDF ${pdf}, ${part.id}`} onPress={original}><Txt size={11} color={c.primary}>Voir dans le PDF ↗</Txt></Pressable>
     </View>
     {showImage ? <OriginalVisual image={part.image} ratio={(part.bbox[3] - part.bbox[1]) / (part.bbox[2] - part.bbox[0])}
       wide={['table', 'contents', 'box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
-      : <View style={{ borderLeftWidth: part.reasons.length > 0 ? 3 : 0, borderLeftColor: c.peach, paddingLeft: part.reasons.length > 0 ? 8 : 0 }}>
+      : <View>
         {showAsText ? <CourseReadingText presentation={presentation} printedPage={printed} blockId={part.id}
           associations={associations} heading={heading} onAssociation={onAssociation} /> : (
           <Text selectable accessibilityRole={heading ? 'header' : undefined} testID="source-original-text" style={{ fontSize: heading ? 23 : 17, lineHeight: heading ? 32 : 29, color: c.ink, fontWeight: heading ? '600' : '400' }}>{part.text}</Text>
@@ -86,21 +94,23 @@ function Part({ part, printed, pdf, original, showAsText, frozen, validation, as
   </View>;
 }
 
-/** Private source reader; navigation is ephemeral and never updates learning/progress. */
-export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketLoaded, onStructure, reviewTarget }: {
-  finalizedVersion?: FinalCourseVersion; initialPacket?: SourcePacket;
+/** Shared private reader; review decisions remain separate from learning progress. */
+export function PrivateSourceCourse({ managementAction, managementMenu, chapterId = 'kum-08', initialReview = false, finalizedVersion, initialPacket, onPacketLoaded, onStructure, reviewTarget }: {
+  managementAction?: ReactNode; managementMenu?: ReactNode; chapterId?: string; initialReview?: boolean; finalizedVersion?: FinalCourseVersion; initialPacket?: SourcePacket;
   onPacketLoaded?: (packet: SourcePacket | null) => void;
   /** Titre H1, auteurs et sections du cours, pour l'en-tête du chapitre. */
   onStructure?: (structure: CourseStructure) => void;
   reviewTarget?: { printedPage?: number; blockId?: string; nonce: number };
 } = {}) {
+  const { learning } = useLearning();
+  const resumed = useRef(false);
   const [packet,setPacket]=useState<SourcePacket|null>((finalizedVersion?.packet as SourcePacket) ?? initialPacket ?? null);
   const [index,setIndex]=useState(0);
-  const [mode,setMode]=useState<Mode>('Cours reconstitué');
+  const [mode,setMode]=useState<Mode>(initialReview ? 'Vérification manuelle' : 'Cours reconstitué');
   const [busy,setBusy]=useState(true);
+  const [pdfImport, setPdfImport] = useState(false);
   const [error,setError]=useState('');
   const [sectionIndex,setSectionIndex]=useState(0);
-  const [picker,setPicker]=useState(false);
   const [outlineOpen,setOutlineOpen]=useState(false);
   const [outlineTarget,setOutlineTarget]=useState<string | null>(null);
   const [inspector, setInspector] = useState<CourseItem | null>(null);
@@ -114,8 +124,7 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
   useEffect(()=>{
     let active=true;
     const loading = finalizedVersion ? Promise.resolve(finalizedVersion.packet as SourcePacket)
-      : initialPacket && initialPacket.chapterId !== 'kum-08' ? Promise.resolve(initialPacket)
-      : loadPrivateCourse().then(value => value ?? initialPacket ?? null);
+      : loadPrivateCourse(chapterId).then(value => value ?? initialPacket ?? null);
     loading.then(async value=>{
       if(!active) return;
       setPacket(value);onPacketLoaded?.(value);if(value?.schemaVersion===1)setMode('Pages originales');
@@ -139,16 +148,23 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
   }, [mode, packet?.chapterId, finalizedVersion]);
   async function pick(){
     setBusy(true);setError('');
-    try{const value=await importPrivateCourse();if(value){setPacket(value);onPacketLoaded?.(value);setIndex(0);setMode(value.schemaVersion===2?'Cours reconstitué':'Pages originales');}}
+    try{const value=await importPrivateCourse(chapterId);if(value){setPacket(value);onPacketLoaded?.(value);setIndex(0);setMode(value.schemaVersion===2?(initialReview?'Vérification manuelle':'Cours reconstitué'):'Pages originales');}}
     catch(reason){setError(reason instanceof Error?reason.message:'Import impossible.');}
     finally{setBusy(false);}
   }
   const page=packet?.pages[index];
   const wide=contentWidth>=900;
-  const compact=contentWidth<640;
   const activeValidation=finalizedVersion ? finalizedVersion.validation : validation;
   const structure=useMemo(()=>buildCourseStructure(packet,activeValidation,finalizedVersion?.presentations),[packet,activeValidation,finalizedVersion]);
+  const translateSnapshot = useMemo(() => process.env.EXPO_PUBLIC_NORYA_TRANSLATE_ENABLED === 'true' && packet?.schemaVersion === 2
+    ? translationSnapshot(packet, activeValidation, finalizedVersion?.presentations) : null, [packet, activeValidation, finalizedVersion]);
   useEffect(()=>{ if(packet) onStructure?.(structure); },[structure]);
+  useEffect(() => {
+    if (resumed.current || !structure.sections.length) return;
+    resumed.current = true;
+    const at = structure.sections.findIndex(s => s.id === learning.reading[chapterId]?.sourceSection);
+    if (at >= 0) setSectionIndex(at);
+  }, [structure, chapterId, learning.reading]);
   const sectionCount=structure.sections.length;
   const sectionAt=Math.min(sectionIndex,Math.max(0,sectionCount-1));
   const shown: CourseItem[]=sectionCount
@@ -156,7 +172,7 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
     : structure.intro;
   const associationList = activeAssociations(activeValidation);
   function changePage(next:number){setIndex(next);scroll.current?.scrollTo({y:0,animated:false});}
-  function changeSection(next:number){setSectionIndex(Math.max(0,Math.min(sectionCount-1,next)));setPicker(false);scroll.current?.scrollTo({y:0,animated:false});}
+  function changeSection(next:number){setSectionIndex(Math.max(0,Math.min(sectionCount-1,next)));scroll.current?.scrollTo({y:0,animated:false});}
   function openOutlineItem(item: CourseOutlineItem) {
     const targetSection = structure.sections.findIndex(section => section.id === item.sectionId);
     if (targetSection < 0) return;
@@ -182,58 +198,31 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
   }
   function open(target:SourcePage|undefined=page){if(target)void openOriginalPage(target).catch(reason=>setError(String(reason)));}
   const pageOf=(item:CourseItem)=>packet?.pages.find(p=>p.printedPage===item.printedPage);
-  const sectionNav=sectionCount>0&&<View style={{gap:8}} testID="section-nav">
-    {compact
-      ? <>
-        <Pressable accessibilityRole="button" accessibilityLabel="Choisir une section" onPress={()=>setPicker(!picker)}
-          style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:12,flexDirection:'row',justifyContent:'space-between',gap:8}}>
-          <Txt bold size={14} style={{flex:1}}>{structure.sections[sectionAt].title}</Txt><Txt>{picker?'▴':'▾'}</Txt>
-        </Pressable>
-        {picker&&<View style={{borderWidth:1,borderColor:c.line,borderRadius:10}}>
-          {structure.sections.map((section,i)=><Pressable key={section.id} accessibilityRole="button" onPress={()=>changeSection(i)}
-            style={{padding:12,backgroundColor:i===sectionAt?c.mint:undefined}}><Txt size={14} bold={i===sectionAt}>{section.title}</Txt></Pressable>)}
-        </View>}
-      </>
-      : <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
-        {structure.sections.map((section,i)=><Chip key={section.id} label={section.title} selected={i===sectionAt} onPress={()=>changeSection(i)} />)}
-      </View>}
-    <View style={{flexDirection:'row',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
-      <Button title="Section précédente" secondary disabled={sectionAt===0} onPress={()=>changeSection(sectionAt-1)} />
-      <Txt size={12} color={c.muted}>{sectionAt+1} / {sectionCount}</Txt>
-      <Button title="Section suivante" secondary disabled={sectionAt>=sectionCount-1} onPress={()=>changeSection(sectionAt+1)} />
-    </View>
-  </View>;
-  const courseOutline=structure.outline.length>0&&<View style={{gap:8}} testID="course-outline">
-    <Pressable accessibilityRole="button" accessibilityLabel="Afficher le sommaire du cours" onPress={()=>setOutlineOpen(!outlineOpen)}
-      style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:12,flexDirection:'row',justifyContent:'space-between',gap:8}}>
-      <Txt bold size={14}>Sommaire du cours</Txt><Txt>{outlineOpen?'▴':'▾'}</Txt>
-    </Pressable>
-    {outlineOpen&&<View style={{borderWidth:1,borderColor:c.line,borderRadius:10,padding:6,gap:2}}>
-      {structure.outline.map(item=><Pressable key={item.key} accessibilityRole="button" onPress={()=>openOutlineItem(item)}
-        style={{paddingVertical:8,paddingHorizontal:10,paddingLeft:item.level==='h2'?10:item.level==='h3'?24:38}}>
-        <Txt size={item.level==='h2'?14:13} bold={item.level==='h2'}>{item.title}</Txt>
-      </Pressable>)}
-    </View>}
-  </View>;
+  const sectionNav = <CourseReaderNavigation structure={structure} index={sectionAt} onChange={changeSection} />;
+  const courseOutline = null;
   return <CourseReadingProvider key={`${packet?.chapterId}-${packet?.sourceSha256}`} chapterId={packet?.chapterId ?? ''}
+    translatePanel={translateSnapshot ? <TranslateAdminPanel snapshot={translateSnapshot} eligible={!!finalizedVersion} /> : undefined}
     sourceSha256={packet?.sourceSha256 ?? ''} version={finalizedVersion ? String(finalizedVersion.version) : 'draft'}
-    structure={structure} enabled={mode === 'Cours reconstitué' && !!packet}>
+    structure={structure} sectionIndex={sectionAt} onSectionChange={changeSection} enabled={mode === 'Cours reconstitué' && !!packet}>
     <Card>
     <View testID="private-source-reader" onLayout={e=>setContentWidth(e.nativeEvent.layout.width)} style={{gap:16,minWidth:0}}>
       {!finalizedVersion && <Txt size={12} color={c.muted}>Chapitre non finalisé · cours numérique en préparation : la fidélité de chaque passage reste à vérifier par rapport au PDF original.</Txt>}
-      {!finalizedVersion && (!packet || packet.chapterId === 'kum-08') && <Button title={packet?'Importer une nouvelle version privée':'Importer le cours privé'} secondary disabled={busy} onPress={()=>void pick()} />}
+      {!finalizedVersion && !packet && <Button title="Importer un cours privé (PDF)" disabled={busy} onPress={() => setPdfImport(true)} />}
+      {pdfImport && <PrivatePdfImport chapterId={chapterId} onClose={() => setPdfImport(false)} onImported={value => { setPacket(value); onPacketLoaded?.(value); setValidation(null); setIndex(0); setSectionIndex(0); setMode('Vérification manuelle'); setPdfImport(false); }} />}
+      {!finalizedVersion && true && <Button title={packet?'Importer une nouvelle version du cours (JSON)':'Importer le cours structuré (JSON)'} secondary disabled={busy} onPress={()=>void pick()} />}
       {!!error&&<Txt>{error}</Txt>}
       {packet?.schemaVersion===1&&<View style={{backgroundColor:'#FFF3CD',padding:14,borderRadius:12,gap:8,marginVertical:12}}>
         <Txt bold size={13} color={'#856404'}>⚠️ Version obsolète du paquet</Txt>
         <Txt size={13}>Ce paquet contient seulement les pages originales (mode facsimile). Pour accéder au cours structuré avec texte natif, importez le fichier :</Txt>
         <Txt size={13}><Txt bold>norya-private-course-</Txt>v2.json</Txt>
-        <Txt size={12}>Ce fichier se trouve dans : references-privees/cours/kum-08/v1/</Txt>
+        <Txt size={12}>Ce fichier se trouve dans : le dossier privé du chapitre</Txt>
       </View>}
       {page&&<>
         {(finalizedVersion ? false : true)&&<View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['Cours reconstitué','Pages originales', packet?.schemaVersion===2 ? 'Vérification manuelle' : null].filter(Boolean) as Mode[]).map(value=>
           <Chip key={value} label={value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}</View>}
-        {finalizedVersion&&<View style={{flexDirection:'row',gap:8,flexWrap:'wrap'}}>{(['Cours reconstitué','Pages originales'] as Mode[]).map(value=>
-          <Chip key={value} label={value==='Cours reconstitué'?'Cours':value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}</View>}
+        {finalizedVersion&&<View style={{flexDirection:'row',gap:8,flexWrap:'wrap',alignItems:'center'}}>{(['Cours reconstitué','Pages originales'] as Mode[]).map(value=>
+          <Chip key={value} label={value==='Cours reconstitué'?'Cours':value} selected={mode===value} onPress={()=>{setMode(value);scroll.current?.scrollTo({y:0,animated:false});}} />)}{managementAction}</View>}
+        {managementMenu}
         {mode==='Pages originales'&&<View style={{gap:10,borderBottomWidth:1,borderBottomColor:c.line,paddingBottom:14}}>
           <View style={{flexDirection:'row',gap:8,flexWrap:'wrap',alignItems:'center',justifyContent:'space-between'}}>
             <Txt bold>Page {page.printedPage} du livre · PDF {page.pdfPage}</Txt>
@@ -245,8 +234,7 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
         {mode==='Cours reconstitué'&&<CourseReadingToolbar />}
         {mode==='Cours reconstitué'&&courseOutline}
         {mode==='Cours reconstitué'&&sectionNav}
-        {mode!=='Vérification manuelle'&&<ScrollView ref={scroll} testID="source-reading-pane" nestedScrollEnabled style={{flex:1,height:Math.max(420,Math.min(height*.74,900)),minWidth:0}} contentContainerStyle={{paddingHorizontal:4,paddingBottom:24}}>
-          <View key={`${mode}-${sectionAt}-${index}`} style={{maxWidth:760,width:'100%',alignSelf:'center'}}>
+        {mode!=='Vérification manuelle'&&<CourseReaderPane ref={scroll} contentKey={`${mode}-${sectionAt}-${index}`}>
             {mode==='Pages originales'&&<OriginalVisual image={page.image} ratio={page.height/page.width} wide={false} label={`Page originale ${page.printedPage}`} />}
             {mode==='Cours reconstitué'&&!shown.length&&<Txt>{packet.schemaVersion===2?'Aucun contenu à afficher pour cette section.':'Importez le paquet structuré pour afficher le cours.'}</Txt>}
             {mode==='Cours reconstitué'&&shown.map(item=>{
@@ -255,15 +243,15 @@ export function PrivateSourceCourse({ finalizedVersion, initialPacket, onPacketL
               return <View key={item.key} testID={`course-item-${item.blockId}`} onLayout={event=>registerItemOffset(item,event.nativeEvent.layout.y)}>
                 {heading && !associationList.some(value => value.source.printedPage === item.printedPage && value.source.blockId === item.blockId) ? <CourseReadingText level={heading} presentation={item.presentation} printedPage={item.printedPage} blockId={item.blockId} />
                   : digital ? <TableItem item={item} table={digital} onOpen={()=>open(pageOf(item))} />
-                  : <AssociatedPart part={item.part} printed={item.printedPage} pdf={item.pdfPage} original={()=>open(pageOf(item))} showAsText={true}
+                  : <AssociatedPart chapterId={packet.chapterId} part={item.part} printed={item.printedPage} pdf={item.pdfPage} original={()=>open(pageOf(item))} showAsText={true}
                     validation={activeValidation}
                     frozen={finalizedVersion?.presentations[presentationKey(item.printedPage, item.blockId)]}
                     associations={associationList.filter(value => value.source.printedPage === item.printedPage && value.source.blockId === item.blockId)}
                     onAssociation={openAssociation} />}
               </View>;
             })}
-          </View>
-        </ScrollView>}
+            {mode==='Cours reconstitué' && <CourseReadingProgress chapterId={chapterId} structure={structure} index={sectionAt} next={changeSection} />}
+        </CourseReaderPane>}
         {inspector && <Modal visible transparent animationType="fade" onRequestClose={() => setInspector(null)}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: 16 }}>
           <View accessibilityViewIsModal style={{ backgroundColor: c.paper, borderRadius: 14, padding: 16, gap: 10, maxHeight: '90%', width: '100%', maxWidth: 900, alignSelf: 'center' }}>
@@ -329,6 +317,8 @@ function AnchoredText({ text, associations, heading, onAssociation }: { text: st
 
 function TableItem({ item, table, onOpen }: { item: CourseItem; table: BlockTable; onOpen: () => void }) {
   const [original, setOriginal] = useState(false);
+  const reading = useCourseReading();
+  if (reading?.language === 'fr') return <Txt size={13}>Traduction française du tableau indisponible.</Txt>;
   return <View style={{ gap: 8, paddingVertical: 14 }}>
     <CourseTable table={table} />
     <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
