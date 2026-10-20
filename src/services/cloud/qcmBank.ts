@@ -17,10 +17,23 @@ export function validateQcm(value:unknown):NoryaQcm {
  const q=value as NoryaQcm;
  if(typeof q.id!=='string'||!q.id.trim()||q.id.length>160||typeof q.stem!=='string'||!q.stem.trim())throw new Error('Identifiant ou énoncé manquant.');
  if(q.chapterIds!==undefined&&(!Array.isArray(q.chapterIds)||q.chapterIds.some(id=>typeof id!=='string')))throw new Error(`Liste des chapitres invalide pour ${q.id}.`);
- if(!Array.isArray(q.choices)||q.choices.length<2||q.choices.length>8||q.choices.some(c=>!c||typeof c.id!=='string'||typeof c.text!=='string'||!c.text.trim()||typeof c.correct!=='boolean'||(c.chapterId!==undefined&&typeof c.chapterId!=='string')))throw new Error(`Propositions invalides pour ${q.id}.`);
- if(new Set(q.choices.map(c=>c.id)).size!==q.choices.length)throw new Error('Identifiants des propositions en double.');
- if(typeof q.verified!=='boolean')throw new Error('Le champ verified doit être vrai ou faux.');
- return {id:q.id,chapterIds:(q.chapterIds??[]).filter(id=>chapterSet.has(id)),stem:q.stem,choices:q.choices,explanation:q.explanation||'',verified:q.verified};
+ if(!Array.isArray(q.choices)||q.choices.length<2||q.choices.length>8)throw new Error(`La question ${q.id} doit contenir entre 2 et 8 propositions.`);
+ const choices=q.choices.map((choice:any,index:number)=>{
+   // Les annales non corrigées n'ont pas nécessairement de champ correct.
+   // Une valeur manquante n'est JAMAIS considérée comme une correction fiable.
+   const id=String(choice?.id??String.fromCharCode(65+index)).trim().toUpperCase();
+   const txt=choice?.text;
+   if(!id||typeof txt!=='string'||!txt.trim())throw new Error(`Proposition ${index+1} incomplète pour ${q.id} : identifiant ou texte manquant.`);
+   if(choice.chapterId!==undefined&&typeof choice.chapterId!=='string')throw new Error(`Chapitre de proposition invalide pour ${q.id}, ${id}.`);
+   if(choice.correct!==undefined&&typeof choice.correct!=='boolean')throw new Error(`Correction invalide pour ${q.id}, ${id}.`);
+   return {...choice,id,text:txt,correct:choice.correct===true};
+ });
+ if(new Set(choices.map(c=>c.id)).size!==choices.length)throw new Error(`Identifiants des propositions en double pour ${q.id}.`);
+ // Jamais de publication si les corrections sont absentes ou non relues.
+ const verified=q.verified===true;
+ if(q.verified!==undefined&&typeof q.verified!=='boolean')throw new Error(`verified doit être vrai ou faux pour ${q.id}.`);
+ if(verified&&q.choices.some((c:any)=>typeof c.correct!=='boolean'))throw new Error(`Corrections manquantes pour ${q.id} : laissez verified:false.`);
+ return {id:q.id,chapterIds:(q.chapterIds??[]).filter(id=>chapterSet.has(id)),stem:q.stem,choices,explanation:q.explanation||'',verified};
 }
 export async function isContentEditor():Promise<boolean>{const {data}=await call('/rest/v1/norya_content_editors?select=user_id&limit=1');return Array.isArray(data)&&data.length>0;}
 export async function listSharedQcm():Promise<{q:NoryaQcm;published:boolean}[]> {
