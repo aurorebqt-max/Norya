@@ -1,4 +1,5 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
+import { RevisionSourceAssets } from './RevisionSourceAssets';
 import { CourseReaderPane, courseParagraphStyle } from './CourseReaderPane';
 import { CourseReadingProvider, CourseReadingToolbar, ReadingAction } from './CourseReadingTools';
 import { CourseReaderNavigation } from './CourseReaderNavigation';
@@ -158,6 +159,8 @@ export function RevisionCardsViewer({ chapterId, archive, structure }: {
 
   if (!loaded) return <Card><Txt>Chargement de la fiche…</Txt></Card>;
   const readingStructure = cards ? revisionCardStructure(cards) : { authors: [], intro: [], sections: [], outline: [] };
+  const sourceVersion = archive?.versions.find(v => v.version === archive.activeVersion);
+  const sourceStructure = useMemo(() => sourceVersion ? buildCourseStructure(sourceVersion.packet, sourceVersion.validation, sourceVersion.presentations) : null, [sourceVersion]);
   const index = Math.min(sectionIndex, Math.max(0, readingStructure.sections.length - 1));
   const shown = readingStructure.sections.length
     ? [...(index === 0 ? readingStructure.intro : []), ...readingStructure.sections[index].items] : readingStructure.intro;
@@ -204,6 +207,18 @@ export function RevisionCardsViewer({ chapterId, archive, structure }: {
               <CourseReadingText presentation={item.presentation} printedPage={item.printedPage} blockId={item.blockId}
                 level={item.kind === 'h1' || item.kind === 'h2' || item.kind === 'h3' || item.kind === 'h4' ? item.kind : undefined} />
             </View>)}
+            {cards && sourceStructure && archive && (() => {
+              const displayed = cards.sections.filter(section => section.id !== 'h1' && !section.id.startsWith('authors-'));
+              const sections = displayed.filter(section => section.level === 'h2');
+              const section = sections[index];
+              if (!section) return null;
+              const from = displayed.indexOf(section);
+              const until = displayed.findIndex((candidate, j) => j > from && candidate.level === 'h2');
+              return <View style={{ gap: 8 }}>
+                {displayed.slice(from, until < 0 ? undefined : until).map(candidate =>
+                  <RevisionSourceAssets key={candidate.id} section={candidate} structure={sourceStructure} archive={archive} />)}
+              </View>;
+            })()}
           </CourseReaderPane>
         </>}
         {editing && draft && draft.sections.map((section, i) => editSection(section, i))}
