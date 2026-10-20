@@ -77,13 +77,28 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
       <PrivateSourceCourse chapterId={chapterId} key={`final-${current.version}`} finalizedVersion={current} onStructure={onStructure}
         managementAction={<ReadingAction label="Gérer le chapitre" icon="create-outline" onPress={() => { setMenuOpen(!menuOpen); }} />}
         managementMenu={menuOpen ? (
-      <View style={{ gap: 6, padding: 10 }}>
-        <ManualTranslationActions final={current} />
-      <ChapterBackupActions chapterId={chapterId} onRestored={restored} />
-      <RevisionCardJsonActions chapterId={chapterId} archive={archive} />
-      <Button title="Modifier le cours" secondary disabled={busy}
-        onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
-      </View>
+             <View style={{ gap: 14, padding: 12 }}>
+         <View style={{ gap: 5 }}>
+           <Txt bold>Traduction française</Txt>
+           <Txt>Importer ou exporter la traduction sans modifier le cours original.</Txt>
+           <ManualTranslationActions final={current} />
+         </View>
+         <View style={{ gap: 5 }}>
+           <Txt bold>Chapitre · sauvegarde et restauration</Txt>
+           <Txt>Exporter une copie du chapitre ou restaurer un fichier JSON.</Txt>
+           <ChapterBackupActions chapterId={chapterId} onRestored={restored} />
+         </View>
+         <View style={{ gap: 5 }}>
+           <Txt bold>Fiche de révision</Txt>
+           <Txt>Créer une fiche avec ChatGPT, l'importer ou en conserver une copie.</Txt>
+           <RevisionCardJsonActions chapterId={chapterId} archive={archive} />
+         </View>
+         <View style={{ gap: 5 }}>
+           <Txt bold>Modifier le contenu du cours</Txt>
+           <Button title="Modifier le cours" secondary disabled={busy}
+             onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
+         </View>
+       </View>
         ) : null} />
     </> : <>
       <Card>
