@@ -19,8 +19,9 @@ export async function readingSpeechDriver(language: 'ro' | 'fr' = 'ro'): Promise
       },
       speak: (text, voiceId, rate, done, fail) => {
         const voice = synth.getVoices().find(v => v.voiceURI === voiceId && v.lang.toLowerCase().split(/[-_]/)[0] === language);
-        if (!voice) throw new Error('La voix compatible choisie n’est plus disponible.');
-        utterance = new SpeechSynthesisUtterance(text); utterance.voice = voice; utterance.lang = voice.lang; utterance.rate = rate;
+        // Safari may expose no voices until a user starts speaking; use the system default.
+        synth.cancel();
+        utterance = new SpeechSynthesisUtterance(text); if (voice) utterance.voice = voice; utterance.lang = voice?.lang ?? (language === 'ro' ? 'ro-RO' : 'fr-FR'); utterance.rate = rate;
         utterance.onend = done; utterance.onerror = e => fail(e.error); synth.speak(utterance);
       },
       stop: async () => { synth.cancel(); utterance = null; }, pause: async () => { synth.pause(); }, resume: async () => { synth.resume(); },
