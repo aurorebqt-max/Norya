@@ -296,7 +296,7 @@ export default function Chapter() {
     finalReading ? `Lecture estimée : ${finalReading.minutes} min` : '',
   ].filter(Boolean).join('\n');
   return <Screen title={structure?.title ?? source.chapter} subtitle={headerSubtitle} eyebrow={chapterNumber ? `CHAPITRE ${chapterNumber}` : undefined} back>
-    {mode !== 'COURS SOURCE' && lesson?.verification === 'beta' && <Card style={{ borderLeftWidth: 4, borderLeftColor: c.primary }}>
+    {mode !== 'COURS SOURCE' && mode !== 'FICHES' && lesson?.verification === 'beta' && <Card style={{ borderLeftWidth: 4, borderLeftColor: c.primary }}>
       <Txt bold size={13} color={c.primary}>Version bêta — vérification en cours</Txt>
       <Txt size={12}>Cours documenté à partir des pages indiquées, mais non intégralement vérifié. Les passages incertains sont signalés « De verificat / À vérifier ». Les traitements du manuel 2021 sont historiques et ne constituent pas des recommandations cliniques actuelles.</Txt>
     </Card>}
@@ -311,7 +311,7 @@ export default function Chapter() {
       <Progress value={progress} />
       <View style={s.between}>
         <Txt size={12}>{reading.readSections.length}/{sectionCount} parties</Txt>
-        <Txt size={11} color={c.muted}>{lesson?.verification === 'beta' ? 'Version bêta · couverture documentaire, validation en cours' : lesson ? 'Contenu partiel · non vérifié' : 'Contenu en préparation'}</Txt>
+        <Txt size={11} color={c.muted}>{lesson?.verification === 'beta' ? 'Fiche de révision' : lesson ? 'Contenu partiel · non vérifié' : 'Contenu en préparation'}</Txt>
       </View>
     </Card>}
     {id !== 'kum-08' && (learning.archivedReadings?.[id] || learning.archivedReadingHistory?.[id]?.length || learning.orphanedAnnotations?.some(annotation => annotation.chapterId === id)) && <Card>
