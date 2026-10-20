@@ -1,5 +1,32 @@
-1. Dans Supabase > SQL Editor, executer supabase/norya-device-backups.sql.
-2. Dans GitHub, ajouter/remplacer uniquement les fichiers de cette archive, aux chemins indiques. Ne pas importer INSTALLATION.txt.
-3. Attendre le deploiement Vercel. Se connecter a Norya > Mon compte. Tester Sauvegarder maintenant, puis Voir les archives.
-4. Ne supprimer aucune donnee Safari. Les archives cloud sont propres a chaque appareil; la recuperation est manuelle et ne remplace pas les donnees deja presentes.
-5. ATTENTION : les snapshots au-dela de 45 Mo echouent; ne pas considerer un PDF lourd comme protege sans confirmation. La sauvegarde ne s execute que si le site est ouvert, la session active, et une connexion disponible.
+NORYA — Correctif depuis Norya-main 11.zip
+
+FICHIERS À REMPLACER :
+  src/screens/QuestionBank.tsx
+  src/screens/Chapter.tsx
+  src/services/readingSpeech.ts
+FICHIERS À AJOUTER :
+  src/services/qcmPdf.web.ts
+  src/services/qcmPdf.ts
+
+AUCUN SQL À EXÉCUTER pour ce correctif : il utilise la banque norya_qcm déjà créée par le lot précédent.
+
+Utilisation : Entraînement > Banque de QCM > Importer un PDF de QCM.
+1. Le PDF est lu sur Safari ; le texte est proposé en brouillon JSON, sans réponses correctes présumées.
+2. « Exporter le brouillon PDF/JSON pour ChatGPT » enregistre le JSON avec les pages brutes et les 39 chapitres.
+3. Faire corriger et classer avec ChatGPT, puis importer un JSON norya-qcm-batch conforme au modèle.
+4. Revoir les réponses, chapitres et références ; verified:true uniquement pour les QCM effectivement vérifiés.
+5. Enregistrer en brouillon, puis publier explicitement après vérification.
+
+LIMITES IMPORTANTES :
+- Une extraction PDF n'est jamais fiable à 100 %, particulièrement les QCM en colonnes ou scannés. Les pages brutes sont fournies pour relecture.
+- Le PDF source n'est pas envoyé sur Supabase.
+- Aucun OCR d'image n'est inclus : les PDF sans couche texte nécessitent un OCR séparé.
+- Le classement par chapitre et les références exactes ne sont PAS automatisés sans l'étape ChatGPT.
+- Le JSON s'édite encore sous forme de texte ; pas encore d'éditeur visuel question par question.
+- Les liens vers les cours ouvrent le chapitre, pas encore précisément le bloc ou la page.
+- L'audio Safari est ajusté mais non validé sur iPad : si échec, signaler le comportement exact.
+- La traduction FR directe des fiches et la bibliothèque commune de cours n'ont pas été implémentées dans ce correctif.
+- Les flashcards restent inchangées.
+
+VÉRIFICATIONS : syntaxe TS/TSX contrôlée, sans compilation Expo ni essai Vercel/Supabase.
+IMPORTANT : n'effacez ni les anciens cours, ni vos sauvegardes JSON.
