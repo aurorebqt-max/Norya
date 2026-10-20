@@ -53,10 +53,11 @@ export async function openPdfImport(file: Blob): Promise<PdfImportSession> {
       const packet: SourcePacket = { schemaVersion: 2, mode: 'structured-source-draft', chapterId, sourceSha256: Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join(''), complete: false, pages: [] };
       const original = await PDFDocument.load(bytes);
       for (let number = first; number <= last; number++) {
-        if (!layouts[number]) throw new Error(`Vérifiez les zones de la page PDF ${number}.`);
         progress(number); const r = await render(number);
         try {
-          const parts = composePdfPage(r.spans, r.width, r.height, layouts[number], r.crop);
+          const inferred = inferPdfColumns(r.spans, r.width);
+          const pageLayout: PdfLayout = layouts[number] ?? { columns: inferred, regions: [] };
+          const parts = composePdfPage(r.spans, r.width, r.height, pageLayout, r.crop);
           const single = await PDFDocument.create(); const [copied] = await single.copyPages(original, [number - 1]); single.addPage(copied);
           packet.pages.push({ printedPage: folio + number - first, pdfPage: number, width: r.width, height: r.height,
             image: r.canvas.toDataURL('image/png'), pdf: await single.saveAsBase64(), parts, sourceLineIds: r.spans.map(s => s.id),
@@ -67,4 +68,15 @@ export async function openPdfImport(file: Blob): Promise<PdfImportSession> {
     },
     async close() { await doc.destroy(); },
   };
+}
+
+/** Conservative geometric suggestion only; all blocks remain unverified. */
+function inferPdfColumns(spans: PdfSpan[], width: number): 1 | 2 {
+  const left = spans.filter(span => span.bbox[2] < width * .51 && span.bbox[0] > width * .03);
+  const right = spans.filter(span => span.bbox[0] > width * .49 && span.bbox[2] < width * .97);
+  if (left.length < 12 || right.length < 12) return 1;
+  const leftY = left.map(span => span.bbox[1]);
+  const rightY = right.map(span => span.bbox[1]);
+  const overlap = Math.min(Math.max(...leftY), Math.max(...rightY)) - Math.max(Math.min(...leftY), Math.min(...rightY));
+  return overlap > 100 ? 2 : 1;
 }
