@@ -89,3 +89,9 @@ export const reopenCourse = (id: string, revision: number) => update(id, revisio
 export const selectFinalVersion = (id: string, revision: number, version: number) => update(id, revision, old => {
   if (!old) throw new Error('Cours finalisé introuvable.'); return activateFinalVersion(old, version);
 });
+
+/** Restoration is not finalization. Keep the imported human evidence and versions verbatim. */
+export const restoreFinalArchive = (archive: FinalCourseArchive) => update(archive.chapterId, 0, old => {
+  if (old) throw new Error('Une archive existe déjà. Restauration refusée.');
+  return archive;
+});

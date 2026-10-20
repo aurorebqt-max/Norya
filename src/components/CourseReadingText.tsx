@@ -53,6 +53,8 @@ export function CourseReadingText({ presentation, printedPage, blockId, heading 
         marginTop: level ? 12 : 0, marginBottom: level ? 6 : 0 }}>
       {pieces.length === 1 ? pieces[0] : pieces}
     </Text>
+    {context?.language === 'fr' && associations.filter(a => a.state === 'active').map(link =>
+      <ReadingAction key={link.id} label={`Référence : ${link.anchor.text}`} onPress={() => onAssociation?.(link)} />)}
     {nativeSelect && context && ref && <Modal transparent visible onRequestClose={() => setNativeSelect(false)}>
       <View style={{ flex: 1, justifyContent: 'center', padding: 16, backgroundColor: 'rgba(0,0,0,.2)' }}>
         <View style={{ padding: 12, backgroundColor: c.paper, borderRadius: 12 }}>

@@ -60,7 +60,7 @@ export default function Chapter() {
     ? { ...savedReading, ...(requestedIsValid ? { section: sectionTarget } : {}) }
     : { section: requestedIsValid ? sectionTarget : 0, readSections: [], language: 'RO', mode: 'Complet', updatedOn: today };
   const [reading, setReading] = useState<Reading>(initial);
-  const [mode, setMode] = useState<ChapterMode>(!lesson || id === 'kum-08' ? 'COURS SOURCE' : 'COURS COMPLET');
+  const [mode, setMode] = useState<ChapterMode>('COURS SOURCE');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [term, setTerm] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export default function Chapter() {
   const [highlightPaletteOpen, setHighlightPaletteOpen] = useState(false);
   const noteTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
   const lock = useRef(false);
-  const showSourceWorkspace = !lesson || id === 'kum-08' || !!finalArchive || hasPrivate || reviewOpen;
+  const showSourceWorkspace = true;
   if (archiveError) return <Screen title="Cours" back><Txt>{archiveError}</Txt></Screen>;
   // Chapitre hors catalogue documentaire : n'afficher que l'archive finalisée, sans masquer
   // fiches/flashcards des chapitres qui en ont déjà.
@@ -368,7 +368,7 @@ export default function Chapter() {
     </Card> : section && <>
       <Card>
         <View style={s.between}>
-          <Txt bold size={21}>{mode === 'FICHES' ? 'Fiche thématique' : `Partie ${index + 1} sur ${sectionCount}`}</Txt>
+          <Txt bold size={21}>{`Partie ${index + 1} sur ${sectionCount}`}</Txt>
           <Txt size={12}>Reprise {index + 1}</Txt>
         </View>
         <Progress value={(index + 1) / sectionCount * 100} />
@@ -391,9 +391,6 @@ export default function Chapter() {
               </View>}
             </View>}
         </View>
-        {mode === 'FICHES' && sectionTables.map(table => <RevisionTable key={table.id} table={table} language={displayLanguage} />)}
-        {mode === 'FICHES' && lesson.format === 'markdown' && <Txt size={12}>Fiche de révision documentaire bêta · les tableaux détaillés sont dans « Cours complet ».</Txt>}
-        {mode === 'FICHES' && lesson.format !== 'markdown' && !sectionTables.length && <Txt size={12}>Aucun tableau validé pour cette partie. Cette synthèse reste un contenu pédagogique en attente de relecture.</Txt>}
         {mode === 'COURS COMPLET' && <>
           <View style={s.wrap}>
             <Button title="Surligner la sélection" secondary onPress={() => {

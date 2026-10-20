@@ -1,3 +1,4 @@
+import type { BlockTable } from './classification';
 /** Personal overlays. Neither the packet nor its human validations are stored here. */
 export const highlightColors = { yellow: '#FFF0A8', green: '#DFF2CF', pink: '#F9DCE7', blue: '#DDEBFA' } as const;
 export type HighlightColor = keyof typeof highlightColors;
@@ -7,7 +8,7 @@ export type ReadingAnnotation = ReadingAnchor & {
   id: string; color?: HighlightColor; note: string; updatedAt: string; deletedAt?: string;
 };
 export type ReadingTranslation = ReadingAnchor & {
-  id: string; french: string; provider: string; updatedAt: string; warnings: string[];
+  id: string; french: string; frenchTable?: BlockTable; provider: string; updatedAt: string; warnings: string[];
 };
 export type ReadingData = {
   schemaVersion: 1; chapterId: string; annotations: ReadingAnnotation[]; translations: ReadingTranslation[];
@@ -48,6 +49,7 @@ export function decodeReadingData(raw: string, chapterId: string): ReadingData {
     value.annotations.some(a => !anchorValid(a) || !recordValid(a) || typeof a.note !== 'string' ||
       (a.color !== undefined && !Object.hasOwn(highlightColors, a.color)) || (a.deletedAt !== undefined && !Number.isFinite(Date.parse(a.deletedAt)))) ||
     value.translations.some(a => !anchorValid(a) || !recordValid(a) || typeof a.french !== 'string' || !a.french.trim() ||
+      (a.frenchTable !== undefined && (!Array.isArray(a.frenchTable.rows) || a.frenchTable.rows.some(row => !Array.isArray(row) || row.some(cell => typeof cell?.text !== 'string')))) ||
       typeof a.provider !== 'string' || !Array.isArray(a.warnings) || a.warnings.some(w => typeof w !== 'string')) ||
     !value.preferences || ![0.7, 0.85, 1, 1.15, 1.3].includes(value.preferences.rate) ||
     !['ro', 'fr', 'both'].includes(value.preferences.language) || (value.preferences.voice !== undefined && typeof value.preferences.voice !== 'string') ||

@@ -22,7 +22,7 @@ export function buildStructureExport(packet: SourcePacket, validation: ChapterVa
     const saved = validation?.pages.find(p => p.printedPage === page.printedPage)?.blocks.find(b => b.id === part.id);
     const ref = { printedPage: page.printedPage, blockId: part.id };
     const absorbedBy = active.find(m => m.sources.slice(1).some(s => sameMergeRef(s, ref)));
-    const shown = workingPresentation(page.printedPage, part, validation);
+    const shown = workingPresentation(page.printedPage, part, validation, packet.chapterId);
     return {
       printedPage: page.printedPage, pdfPage: page.pdfPage, id: part.id, role: part.role,
       rawText: part.text, correctedText: saved?.correction ?? null, displayedText: shown ? shown.text : null,

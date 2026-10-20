@@ -13,6 +13,7 @@ export type SourcePage = {
 };
 export type SourcePacket = {
   schemaVersion: 1 | 2; chapterId: string;
+  chapter?: { title: string; bookId: string; thematicPages: string; scope: string[] };
   mode: 'original-facsimile-preview' | 'structured-source-draft';
   sourceSha256: string; complete: false; pages: SourcePage[];
 };

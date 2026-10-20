@@ -1,3 +1,4 @@
+import { anchorMatches } from '../domain/sourceCourse/readingData';
 import { PrivatePdfImport } from './PrivatePdfImport';
 import { CourseReaderPane, courseParagraphStyle } from './CourseReaderPane';
 import type { ReactNode } from 'react';
@@ -14,7 +15,6 @@ import { colors as c } from '../design/theme';
 import type { SourcePacket, SourcePage, SourcePart } from '../domain/sourceCourse/packet';
 import type { BlockTable } from '../domain/sourceCourse/classification';
 import { translationSnapshot } from '../domain/sourceCourse/translateBridge';
-import { TranslateAdminPanel } from './TranslateAdminPanel';
 import { importPrivateCourse, loadPrivateCourse, openOriginalPage } from '../services/storage/privateCourse';
 import { SourceCourseVerification } from './SourceCourseVerification';
 import { loadValidation, type ChapterValidation } from '../domain/sourceCourse/verification';
@@ -201,7 +201,7 @@ export function PrivateSourceCourse({ managementAction, managementMenu, chapterI
   const sectionNav = <CourseReaderNavigation structure={structure} index={sectionAt} onChange={changeSection} />;
   const courseOutline = null;
   return <CourseReadingProvider key={`${packet?.chapterId}-${packet?.sourceSha256}`} chapterId={packet?.chapterId ?? ''}
-    translatePanel={translateSnapshot ? <TranslateAdminPanel snapshot={translateSnapshot} eligible={!!finalizedVersion} /> : undefined}
+    manualTranslationOnly translatePanel={<Txt>Importez la traduction FR (JSON) depuis le menu crayon du cours finalisé.</Txt>}
     sourceSha256={packet?.sourceSha256 ?? ''} version={finalizedVersion ? String(finalizedVersion.version) : 'draft'}
     structure={structure} sectionIndex={sectionAt} onSectionChange={changeSection} enabled={mode === 'Cours reconstitué' && !!packet}>
     <Card>
@@ -259,9 +259,9 @@ export function PrivateSourceCourse({ managementAction, managementMenu, chapterI
             <Button title="Fermer l’inspecteur" secondary onPress={() => setInspector(null)} />
             <Txt size={12} color={c.muted}>Fermez cette référence pour revenir au même passage du cours.</Txt>
             <ScrollView nestedScrollEnabled style={{ flexShrink: 1 }}>
-            {inspector.kind === 'table' && inspector.table?.validated && !inspector.table.keepOriginal ? <CourseTable table={inspector.table} />
+            {inspector.kind === 'table' && inspector.table?.validated && !inspector.table.keepOriginal ? <TableItem item={inspector} table={inspector.table} onOpen={() => open(pageOf(inspector))} />
               : !(inspector.presentation.imageOnly || inspector.part.role === 'figure' || inspector.part.role === 'table')
-                ? <SourcePresentationText presentation={inspector.presentation} heading={inspector.part.role === 'heading'} /> : null}
+                ? <CourseReadingText presentation={inspector.presentation} printedPage={inspector.printedPage} blockId={inspector.blockId} heading={inspector.part.role === 'heading'} /> : null}
             {(inspector.presentation.imageOnly || inspector.part.role === 'figure' || inspector.part.role === 'table' || inspector.kind === 'table') &&
             <OriginalVisual image={inspector.part.image} ratio={(inspector.part.bbox[3] - inspector.part.bbox[1]) / Math.max(1, inspector.part.bbox[2] - inspector.part.bbox[0])} wide label={`Destination originale p. ${inspector.printedPage}`} />
             }
@@ -318,9 +318,12 @@ function AnchoredText({ text, associations, heading, onAssociation }: { text: st
 function TableItem({ item, table, onOpen }: { item: CourseItem; table: BlockTable; onOpen: () => void }) {
   const [original, setOriginal] = useState(false);
   const reading = useCourseReading();
-  if (reading?.language === 'fr') return <Txt size={13}>Traduction française du tableau indisponible.</Txt>;
+  const french = reading?.data.translations.filter(t => t.version === reading.version && t.frenchTable &&
+    anchorMatches(t, reading.refFor(item.printedPage, item.blockId), item.presentation.text))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0]?.frenchTable;
+  if (reading?.language === 'fr' && !french) return <Txt size={13}>Traduction française du tableau indisponible.</Txt>;
   return <View style={{ gap: 8, paddingVertical: 14 }}>
-    <CourseTable table={table} />
+    <CourseTable table={reading?.language === 'fr' ? french! : table} />
     <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
       <Pressable accessibilityRole="button" onPress={() => setOriginal(!original)}><Txt size={12} color={c.primary}>{original ? 'Masquer l’image originale' : 'Comparer à l’image originale'}</Txt></Pressable>
       <Pressable accessibilityRole="button" onPress={onOpen}><Txt size={12} color={c.primary}>Voir dans le PDF ↗ (p. {item.printedPage})</Txt></Pressable>

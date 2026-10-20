@@ -1,3 +1,5 @@
+import { ManualTranslationActions } from './ManualTranslationActions';
+import { ChapterBackupActions } from './ChapterBackupActions';
 import { ChapterPdfActions } from './ChapterPdfActions';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
@@ -16,6 +18,9 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
   chapterId: string; initialReview?: boolean; onArchiveChange?: (archive: FinalCourseArchive) => void;
   onStructure?: (structure: CourseStructure) => void;
 }) {
+  const [restorationNotice, setRestorationNotice] = useState('');
+  function restored() { setRestorationNotice('Données enregistrées et relues. Actualisez puis contrôlez le lecteur et les illustrations.'); setRestoration(n => n + 1); }
+  const [restoration, setRestoration] = useState(0);
   const [archive, setArchive] = useState<FinalCourseArchive | null>();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -32,7 +37,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
     setArchive(undefined); setPacket(null); setConfirmation(null); setBlockages([]);
     loadFinalCourse(chapterId).then(a => { if (active) setArchive(a); }).catch(e => { if (active) setError(String(e)); });
     return () => { active = false; };
-  }, [chapterId]);
+  }, [chapterId, restoration]);
   function changed(a: FinalCourseArchive) { setArchive(a); setConfirmation(null); setPrevious(null); setMenuOpen(false); onArchiveChange?.(a); }
   async function run(action: () => Promise<void>) {
     if (lock.current) return;
@@ -66,6 +71,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
   const current = archive?.versions.find(v => v.version === archive.activeVersion);
   const blockageSummary = summarizeFinalizationBlockages(blockages);
   return <View style={{ gap: 16 }}>
+    {!!restorationNotice && <Card><Txt>{restorationNotice}</Txt></Card>}
     {!!error && <Card><Txt>{error}</Txt></Card>}
     {archive === undefined ? <Card><Txt>Chargement du cours…</Txt></Card> : archive?.status === 'finalized' && current ? <>
       <PrivateSourceCourse chapterId={chapterId} key={`final-${current.version}`} finalizedVersion={current} onStructure={onStructure}
@@ -73,6 +79,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
         managementMenu={menuOpen ? (
       <View style={{ gap: 6, padding: 10 }}>
         <Txt bold>Finalisé · Version {current.version}</Txt>
+        <ManualTranslationActions final={current} />
         <Txt>Finalisé le {new Date(current.finalizedAt).toLocaleDateString('fr-FR')}</Txt>
         <ReadingAction label="Rouvrir pour correction" icon="create-outline" disabled={busy}
           onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
@@ -84,11 +91,12 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
             onPress={() => void run(async () => changed(await selectFinalVersion(chapterId, archive.revision, previous)))} />
           <Button title="Annuler" secondary onPress={() => setPrevious(null)} />
         </>}
-      <ChapterPdfActions chapterId={chapterId} /></View>
+      <ChapterBackupActions chapterId={chapterId} onRestored={restored} /><ChapterPdfActions chapterId={chapterId} /></View>
         ) : null} />
     </> : <>
       <Card>
         <Txt bold>{archive ? 'En correction' : 'En préparation'}</Txt>
+        <ChapterBackupActions chapterId={chapterId} onRestored={restored} />
         {current && <>
           <Txt>La version {current.version} reste conservée. La prochaine finalisation créera une nouvelle version.</Txt>
           <Button title={`Revenir au cours finalisé · version ${current.version}`} secondary disabled={busy}
@@ -117,7 +125,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
           <Button title="Continuer la vérification" secondary disabled={busy} onPress={() => setConfirmation(null)} />
         </>}
       </Card>
-      <PrivateSourceCourse chapterId={chapterId} key={`draft-${chapterId}`} initialReview={initialReview} initialPacket={current?.packet as SourcePacket | undefined}
+      <PrivateSourceCourse chapterId={chapterId} key={`draft-${chapterId}-${restoration}`} initialReview={initialReview} initialPacket={current?.packet as SourcePacket | undefined}
         onPacketLoaded={setPacket} onStructure={onStructure} reviewTarget={target} />
     </>}
   </View>;

@@ -12,6 +12,7 @@ let learning = { reading: {} }, commits = 0, records = 0;
 Module._load = function(name, ...args) {
   if(name === 'react-native') return { Platform: { OS: 'web' }, useWindowDimensions: () => ({width:1000,height:900}), View:'View',Text:'Text',Modal:'Modal',Pressable:'Pressable',ScrollView:'ScrollView',TextInput:'TextInput' };
   if(name === '@react-native-async-storage/async-storage') return {};
+  if(['expo-document-picker', 'expo-file-system', 'expo-sharing'].includes(name)) return {};
   if(name === './ui') return {Txt:'Txt',Icon:'Icon'};
   if(name.endsWith('/LearningProvider')) return {useLearning:()=>({learning,commit:async a=>{commits++;learning.reading[a.id]=a.value;}})};
   if(name.endsWith('/PreparationProvider')) return {usePreparation:()=>({record:async()=>{records++;},today:'2026-10-17',state:{progress:{}},plan:{passes:[]},profile:{targetPasses:1}})};

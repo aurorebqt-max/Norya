@@ -1,3 +1,4 @@
+import { examChapters } from '../data/rezidentiat2026';
 import { useEffect, useRef, useState } from 'react';
 import { Image, Modal, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -45,12 +46,16 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
   async function extract() {
     if (!session.current || !file.current || !validRange || !range.every(p => confirmed[p])) throw new Error('Contrôlez les zones de chaque page choisie avant extraction.');
     const packet = await session.current.extract(chapterId, Number(first), Number(last), Number(folio), layouts, p => setMessage(`Extraction locale : page PDF ${p}`));
+    const metadata = examChapters.find(chapter => chapter.id === chapterId);
+    if (metadata) packet.chapter = { title: metadata.chapter, bookId: metadata.bookId, thematicPages: metadata.pages, scope: metadata.scope };
     await saveImportedPdfCourse(packet, file.current);
     if (alive.current) onImported(packet);
   }
   return <Modal visible animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
     <ScrollView contentContainerStyle={{ padding: 20, gap: 12, maxWidth: 900, width: '100%', alignSelf: 'center' }}>
       <Txt bold>Importer un cours privé · {chapterId}</Txt>
+      <Txt>{examChapters.find(chapter => chapter.id === chapterId)?.chapter}</Txt>
+      <Txt>Pages Thematica : {examChapters.find(chapter => chapter.id === chapterId)?.pages ?? "à préciser"}. Vérifiez la correspondance avec les pages PDF.</Txt>
       <Txt>PDF traité dans ce navigateur. Choisissez les pages du chapitre, les colonnes et les zones originales. Aucun passage ne sera validé automatiquement.</Txt>
       <Button title="Choisir le PDF" disabled={busy} onPress={() => void run(pick)} />
       <Button title="Fermer l’import PDF" secondary disabled={busy} onPress={onClose} />
@@ -79,7 +84,7 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
               setCorner(null); if (bbox[2] - bbox[0] < 2 || bbox[3] - bbox[1] < 2) return;
               update({ ...layout, regions: [...layout.regions, { bbox, role }] });
             }}>
-              <Image pointerEvents="none" source={{ uri: preview.image }} style={{ width: '100%', height: width * preview.height / preview.width }} resizeMode="contain" />
+              <View pointerEvents="none"><Image source={{ uri: preview.image }} style={{ width: '100%', height: width * preview.height / preview.width }} resizeMode="contain" /></View>
               {layout.regions.map((r, i) => <View key={i} pointerEvents="none" style={{ position: 'absolute', left: r.bbox[0] / preview.width * width, top: r.bbox[1] / preview.width * width,
                 width: (r.bbox[2] - r.bbox[0]) / preview.width * width, height: (r.bbox[3] - r.bbox[1]) / preview.width * width, borderWidth: 2, borderColor: r.role === 'page-header' ? '#b45309' : '#2563eb' }} />)}
               {corner && <View pointerEvents="none" style={{ position: 'absolute', left: corner[0] / preview.width * width - 4, top: corner[1] / preview.width * width - 4, width: 8, height: 8, backgroundColor: '#2563eb' }} />}

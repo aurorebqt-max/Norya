@@ -1,0 +1,6 @@
+references-privees/
+norya-chapitre-complet-*.json
+norya-chapter-backup-*.json
+.git/
+.test-build/
+build-validation/

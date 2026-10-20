@@ -9,6 +9,8 @@ web-build/
 .test-build/
 
 /references-privees/
+/norya-chapitre-complet-*.json
+/norya-chapter-backup-*.json
 
 /build-validation/
 /test-results.log

@@ -811,7 +811,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
     const name = `norya-chapitre-complet-${packet.chapterId}-${day}.json`;
     const ok = downloadFile(name, JSON.stringify(data, null, 2), 'application/json');
     setExportNotice(ok
-      ? `${name} téléchargé par le navigateur. Il n’est PAS encore enregistré dans Codespaces : transmettez-le ou placez-le sous references-privees/exports/. Votre travail reste enregistré automatiquement dans Norya.`
+      ? `${name} téléchargé. Cet export de structure ne contient pas les images ni l’archive finalisée. Utilisez aussi l’export du cours avec ressources depuis la gestion du chapitre.`
       : 'Téléchargement indisponible sur cet appareil. Votre travail reste enregistré localement dans Norya ; rien n’a été écrit dans Codespaces.');
   }
   async function importExport() {
@@ -828,7 +828,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
         <Txt bold>Exporter / importer</Txt>
         <Txt size={12} color={c.muted}>« Enregistré localement » = stockage de ce navigateur (Safari). « Exporté dans Codespaces » = fichier réel sous references-privees/ ; il n’est jamais publié sur GitHub.</Txt>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          <Button title="Exporter le chapitre complet" onPress={download} />
+          <Button title="Exporter la structure et les corrections" onPress={download} />
         </View>
         <TextInput multiline value={importText} onChangeText={setImportText} placeholder="Collez ici un export JSON (ancien ou nouveau) à réimporter"
           accessibilityLabel="Import d’un export"

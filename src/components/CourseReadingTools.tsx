@@ -39,8 +39,8 @@ export function ReadingAction({ label, icon, onPress, selected = false, disabled
   </Pressable>;
 }
 
-export function CourseReadingProvider({ chapterId, sourceSha256, version, structure, enabled, children, sectionIndex = 0, onSectionChange = () => {}, translations = {}, translatePanel }: {
-  translatePanel?: ReactNode;
+export function CourseReadingProvider({ chapterId, sourceSha256, version, structure, enabled, children, sectionIndex = 0, onSectionChange = () => {}, translations = {}, translatePanel, manualTranslationOnly = false }: {
+  translatePanel?: ReactNode; manualTranslationOnly?: boolean;
   translations?: Record<string, string>; sectionIndex?: number; onSectionChange?: (index: number) => void;
   chapterId: string; sourceSha256: string; version: string; structure: CourseStructure; enabled: boolean; children: ReactNode;
 }) {
@@ -162,6 +162,7 @@ export function CourseReadingProvider({ chapterId, sourceSha256, version, struct
   }, [panel, language]);
   const translationLock = useRef(false);
   async function translateScope(scope: 'selection' | 'paragraph' | 'section' | 'chapter') {
+    if (manualTranslationOnly) { setError('Importez votre traduction JSON depuis le menu crayon.'); return; }
     if (!enabled || !loaded || translationLock.current) return;
     translationLock.current = true; setTranslating(true); setError('');
     const translator = getFreeTranslator();
@@ -334,10 +335,10 @@ function CompactAudioPlayer() {
             <Txt size={13} selectable>{selected ? selectionTranslation() ?? 'Traduction de ce passage indisponible.' : 'Mode FR : traductions enregistrées localement.'}</Txt>
             {!!error && <Txt size={12}>{error}</Txt>}
             {translating && <Txt size={12}>Traduction en cours…</Txt>}
-            {selected && <ReadingAction label="Traduire ce passage" onPress={() => void translateScope('selection')} disabled={translating || !loaded || selected.language === 'fr'} />}
-            <ReadingAction label="Traduire un paragraphe" onPress={() => void translateScope('paragraph')} disabled={translating || !loaded} />
-            <ReadingAction label="Traduire la section" onPress={() => void translateScope('section')} disabled={translating || !loaded} />
-            <ReadingAction label="Traduire tout le chapitre" onPress={() => void translateScope('chapter')} disabled={translating || !loaded} />
+            {!manualTranslationOnly && selected && <ReadingAction label="Traduire ce passage" onPress={() => void translateScope('selection')} disabled={translating || !loaded || selected.language === 'fr'} />}
+            {!manualTranslationOnly && <ReadingAction label="Traduire un paragraphe" onPress={() => void translateScope('paragraph')} disabled={translating || !loaded} />}
+            {!manualTranslationOnly && <ReadingAction label="Traduire la section" onPress={() => void translateScope('section')} disabled={translating || !loaded} />}
+            {!manualTranslationOnly && <ReadingAction label="Traduire tout le chapitre" onPress={() => void translateScope('chapter')} disabled={translating || !loaded} />}
             <ReadingAction label="Fermer la traduction" onPress={() => openPanel(null)} />
           </View>}
         </View>
