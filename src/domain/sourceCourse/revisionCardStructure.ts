@@ -4,7 +4,7 @@ import type { RevisionCardSet } from './revisionCards';
 /** Read-only adapter: never condenses or rewrites a saved sheet. */
 export function revisionCardStructure(cards: RevisionCardSet): CourseStructure {
   const result: CourseStructure = { authors: [], intro: [], sections: [], outline: [] };
-  cards.sections.forEach((section, at) => {
+  cards.sections.filter(section => section.id !== 'h1' && !section.id.startsWith('authors-')).forEach((section, at) => {
     const item = (text: string, suffix: string, heading = false): CourseItem => {
       const blockId = `card:${section.id}:${suffix}`;
       return { key: JSON.stringify([at + 1, blockId]), printedPage: at + 1, pdfPage: 0, blockId,
