@@ -31,14 +31,13 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
   const [confirmation, setConfirmation] = useState<FinalizationEvidence | null>(null);
   const [target, setTarget] = useState<{ printedPage?: number; blockId?: string; nonce: number }>();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [previous, setPrevious] = useState<number | null>(null);
   useEffect(() => {
     let active = true;
     setArchive(undefined); setPacket(null); setConfirmation(null); setBlockages([]);
     loadFinalCourse(chapterId).then(a => { if (active) setArchive(a); }).catch(e => { if (active) setError(String(e)); });
     return () => { active = false; };
   }, [chapterId, restoration]);
-  function changed(a: FinalCourseArchive) { setArchive(a); setConfirmation(null); setPrevious(null); setMenuOpen(false); onArchiveChange?.(a); }
+  function changed(a: FinalCourseArchive) { setArchive(a); setConfirmation(null); setMenuOpen(false); onArchiveChange?.(a); }
   async function run(action: () => Promise<void>) {
     if (lock.current) return;
     lock.current = true; setBusy(true); setError('');
@@ -75,23 +74,14 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
     {!!error && <Card><Txt>{error}</Txt></Card>}
     {archive === undefined ? <Card><Txt>Chargement du cours…</Txt></Card> : archive?.status === 'finalized' && current ? <>
       <PrivateSourceCourse chapterId={chapterId} key={`final-${current.version}`} finalizedVersion={current} onStructure={onStructure}
-        managementAction={<ReadingAction label="Gérer le chapitre" icon="create-outline" onPress={() => { setMenuOpen(!menuOpen); setPrevious(null); }} />}
+        managementAction={<ReadingAction label="Gérer le chapitre" icon="create-outline" onPress={() => { setMenuOpen(!menuOpen); }} />}
         managementMenu={menuOpen ? (
       <View style={{ gap: 6, padding: 10 }}>
-        <Txt bold>Finalisé · Version {current.version}</Txt>
         <ManualTranslationActions final={current} />
-        <Txt>Finalisé le {new Date(current.finalizedAt).toLocaleDateString('fr-FR')}</Txt>
-        <ReadingAction label="Rouvrir pour correction" icon="create-outline" disabled={busy}
-          onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
-        {archive.versions.filter(v => v.version !== archive.activeVersion).map(v => <Button key={v.version}
-          title={`Revenir à la version ${v.version}`} secondary disabled={busy} onPress={() => setPrevious(v.version)} />)}
-        {previous !== null && <>
-          <Txt>La version {previous} redeviendra le cours affiché. Toutes les versions et les données de fabrication seront conservées.</Txt>
-          <Button title="Confirmer le retour à cette version" disabled={busy}
-            onPress={() => void run(async () => changed(await selectFinalVersion(chapterId, archive.revision, previous)))} />
-          <Button title="Annuler" secondary onPress={() => setPrevious(null)} />
-        </>}
-      <ChapterBackupActions chapterId={chapterId} onRestored={restored} /><ChapterPdfActions chapterId={chapterId} /></View>
+      <ChapterBackupActions chapterId={chapterId} onRestored={restored} />
+      <Button title="Modifier le cours" secondary disabled={busy}
+        onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
+      </View>
         ) : null} />
     </> : <>
       <Card>

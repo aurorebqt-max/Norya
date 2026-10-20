@@ -207,7 +207,7 @@ export function CourseReadingProvider({ chapterId, sourceSha256, version, struct
       if (!alive.current || request !== audioRequest.current) return;
       const compatible = preferredVoices(voices, language);
       const voice = compatible.find(v => v.id === (data.preferences.voices?.[language] ?? data.preferences.voice)) ?? compatible[0];
-      if (!voice) throw new Error(`Aucune voix ${language === 'ro' ? 'roumaine' : 'française'} disponible sur cet appareil.`);
+      if (!voice && Platform.OS !== 'web') throw new Error(`Aucune voix ${language === 'ro' ? 'roumaine' : 'française'} disponible sur cet appareil.`);
       let queue;
       if (scope === 'preview') {
         queue = [{ text: language === 'fr' ? 'Bonjour. Voici un aperçu de la voix utilisée pour la lecture du cours.' : 'Bună ziua. Aceasta este vocea folosită pentru lectura cursului.', section: sectionIndex, blockKey: 'voice-preview' }];
@@ -234,7 +234,7 @@ export function CourseReadingProvider({ chapterId, sourceSha256, version, struct
         setAudioStatus(status);
         if (scope === 'chapter' && status.state === 'playing') onSectionChange(status.section);
       });
-      await audio.current.start(queue, voice.id, data.preferences.rate);
+      await audio.current.start(queue, voice?.id ?? "", data.preferences.rate);
       setError('');
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   }

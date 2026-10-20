@@ -12,11 +12,11 @@ export function ChapterBackupActions({ chapterId, onRestored }: { chapterId: str
     try { await fn(); } catch (e) { setMessage(String(e)); } finally { setBusy(false); }
   }
   return <View style={{ gap: 8 }}>
-    <Button title="Exporter cours, ressources et annotations (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
+    <Button title="Exporter le chapitre (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
       downloadPrivateJson(`norya-chapter-backup-${chapterId}-${Date.now()}.json`, await exportChapterBackup(chapterId));
       setMessage('Fichier téléchargé. Conservez une copie indépendante. La progression du planning et des QCM n’est pas incluse.');
     })} />
-    <Button title="Restaurer une sauvegarde de chapitre (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
+    <Button title="Importer le chapitre (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
       setPreview(null); const raw = await pickPrivateJson(); if (raw) setPreview(parseChapterBackup(raw, chapterId));
     })} />
     {preview && <>

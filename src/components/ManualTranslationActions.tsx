@@ -10,7 +10,7 @@ export function ManualTranslationActions({ final }: { final: FinalCourseVersion 
   async function run(work: () => Promise<void>) { if (busy) return; setBusy(true); setMessage('');
     try { await work(); } catch (e) { setMessage(String(e)); } finally { setBusy(false); } }
   return <View style={{ gap: 4 }}>
-    <Button title="Exporter le modèle de traduction FR (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
+    <Button title="Exporter traduction FR (JSON)" secondary disabled={busy} onPress={() => void run(async () => {
       downloadPrivateJson(`norya-manual-fr-${final.packet.chapterId}.json`, await manualTranslationTemplate(final));
     })} />
     <Button title="Importer traduction FR (JSON)" secondary disabled={busy || !reading} onPress={() => void run(async () => {
