@@ -22,7 +22,7 @@ export async function readingSpeechDriver(language: 'ro' | 'fr' = 'ro'): Promise
         // Les évènements « canceled » de Safari peuvent venir du précédent énoncé.
         // Ne jamais confondre cette annulation normale avec l'échec du nouvel énoncé.
         if (utterance) { utterance.onend = null; utterance.onerror = null; }
-        synth.cancel();
+        if (synth.speaking || synth.pending) synth.cancel();
         const next = new SpeechSynthesisUtterance(text);
         utterance = next;
         if (voice) next.voice = voice;
@@ -33,8 +33,10 @@ export async function readingSpeechDriver(language: 'ro' | 'fr' = 'ro'): Promise
           if (utterance !== next) return;
           if (e.error !== 'canceled' && e.error !== 'interrupted') fail(e.error);
         };
-        // Laisser Safari terminer cancel() avant de déclencher la nouvelle lecture.
-        setTimeout(() => { if (utterance === next) { if (synth.paused) synth.resume(); synth.speak(next); } }, 100);
+        // Safari iOS exige parfois speak() directement lors du geste utilisateur.
+        // Aucun délai artificiel : il ferait perdre l'activation audio.
+        if (synth.paused) synth.resume();
+        synth.speak(next);
       },
       stop: async () => { synth.cancel(); utterance = null; }, pause: async () => { synth.pause(); }, resume: async () => { synth.resume(); },
     };
