@@ -19,11 +19,22 @@ export async function readingSpeechDriver(language: 'ro' | 'fr' = 'ro'): Promise
       },
       speak: (text, voiceId, rate, done, fail) => {
         const voice = synth.getVoices().find(v => v.voiceURI === voiceId && v.lang.toLowerCase().split(/[-_]/)[0] === language);
-        // Safari may expose no voices until a user starts speaking; use the system default.
+        // Les évènements « canceled » de Safari peuvent venir du précédent énoncé.
+        // Ne jamais confondre cette annulation normale avec l'échec du nouvel énoncé.
+        if (utterance) { utterance.onend = null; utterance.onerror = null; }
         synth.cancel();
-        if (synth.paused) synth.resume();
-        utterance = new SpeechSynthesisUtterance(text); if (voice) utterance.voice = voice; utterance.lang = voice?.lang ?? (language === 'ro' ? 'ro-RO' : 'fr-FR'); utterance.rate = rate;
-        utterance.onend = done; utterance.onerror = e => fail(e.error); synth.speak(utterance);
+        const next = new SpeechSynthesisUtterance(text);
+        utterance = next;
+        if (voice) next.voice = voice;
+        next.lang = voice?.lang ?? (language === 'ro' ? 'ro-RO' : 'fr-FR');
+        next.rate = rate;
+        next.onend = () => { if (utterance === next) done(); };
+        next.onerror = e => {
+          if (utterance !== next) return;
+          if (e.error !== 'canceled' && e.error !== 'interrupted') fail(e.error);
+        };
+        // Laisser Safari terminer cancel() avant de déclencher la nouvelle lecture.
+        setTimeout(() => { if (utterance === next) { if (synth.paused) synth.resume(); synth.speak(next); } }, 100);
       },
       stop: async () => { synth.cancel(); utterance = null; }, pause: async () => { synth.pause(); }, resume: async () => { synth.resume(); },
     };
