@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Txt } from './ui';
 import { parseChapterBackup, type ChapterBackup } from '../domain/sourceCourse/chapterBackup';
-import { downloadPrivateJson, exportChapterBackup, pickPrivateJson, restoreChapterBackup } from '../services/storage/chapterBackup';
+import { downloadPrivateJson, exportChapterBackup, pickPrivateJson, replaceDraftChapterBackup, restoreChapterBackup } from '../services/storage/chapterBackup';
 
 export function ChapterBackupActions({ chapterId, onRestored }: { chapterId: string; onRestored: () => void }) {
   const [preview, setPreview] = useState<ChapterBackup | null>(null);
@@ -27,6 +27,10 @@ export function ChapterBackupActions({ chapterId, onRestored }: { chapterId: str
         await restoreChapterBackup(preview); setPreview(null); onRestored();
         setMessage('Données enregistrées et relues. Actualisez puis contrôlez le lecteur et les illustrations.');
       })} />
+      {!preview.archive && <Button title="Remplacer le brouillon existant (sauvegarde préalable)" secondary disabled={busy} onPress={() => void run(async () => {
+        await replaceDraftChapterBackup(preview); setPreview(null); onRestored();
+        setMessage('Brouillon remplacé. Sauvegarde préalable téléchargée. Actualisez et vérifiez le cours.');
+      })} />}
       <Button title="Annuler" secondary disabled={busy} onPress={() => setPreview(null)} />
     </>}
     {!!message && <Txt>{message}</Txt>}
