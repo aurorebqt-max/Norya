@@ -17,7 +17,7 @@ export function validateQcm(value:unknown):NoryaQcm {
  const q=value as NoryaQcm;
  if(typeof q.id!=='string'||!q.id.trim()||q.id.length>160||typeof q.stem!=='string'||!q.stem.trim())throw new Error('Identifiant ou énoncé manquant.');
  if(q.chapterIds!==undefined&&(!Array.isArray(q.chapterIds)||q.chapterIds.some(id=>typeof id!=='string')))throw new Error(`Liste des chapitres invalide pour ${q.id}.`);
- if(!Array.isArray(q.choices)||q.choices.length<2||q.choices.length>8)throw new Error(`La question ${q.id} doit contenir entre 2 et 8 propositions.`);
+ if(!Array.isArray(q.choices)||q.choices.length>8)throw new Error(`La question ${q.id} ne peut pas dépasser 8 propositions.`);
  const choices=q.choices.map((choice:any,index:number)=>{
    // Les annales non corrigées n'ont pas nécessairement de champ correct.
    // Une valeur manquante n'est JAMAIS considérée comme une correction fiable.
@@ -47,6 +47,7 @@ export async function saveQcm(items:NoryaQcm[],publish:boolean):Promise<number>{
  const validated=items.map(validateQcm);
  if(new Set(validated.map(q=>q.id)).size!==validated.length)throw new Error('Questions en double.');
  if(publish&&validated.some(q=>!q.verified))throw new Error('Vérifiez chaque QCM avant publication (verified: true).');
+ if(publish&&validated.some(q=>q.choices.length<2||q.choices.length>8||/^\[Transcription à compléter/.test(q.stem)))throw new Error('Publication impossible : certaines questions sont incomplètes ou sans propositions. Elles peuvent rester en brouillon.');
  const rows=validated.map(q=>({id:q.id,chapter_ids:q.chapterIds,payload:q,published:publish,updated_at:new Date().toISOString(),updated_by:s.user.id}));
  await call('/rest/v1/norya_qcm?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});
  return rows.length;
