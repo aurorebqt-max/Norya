@@ -45,6 +45,38 @@ export default function Profile() {
       back
     >
       <Card>
+        <Button
+          title={editing ? "Fermer les réglages" : "Disponibilités et dates"}
+          secondary
+          onPress={() => {
+            setDraft(profile);
+            setEditing(!editing);
+            setSaved(false);
+          }}
+        />
+        {editing && (
+          <>
+            <AvailabilityFields profile={draft} onChange={setDraft} />
+            <DateFields profile={draft} onChange={setDraft} />
+            <PassFields profile={draft} onChange={setDraft} />
+            <Button
+              title={busy ? "Enregistrement…" : "Enregistrer et recalculer"}
+              disabled={
+                busy ||
+                validateProfile({ ...draft, name: name.trim() }).length > 0
+              }
+              onPress={() => void persist()}
+            />
+            {validateProfile({ ...draft, name: name.trim() }).map((p) => (
+              <Txt key={p} color="#9A513C">
+                {p}
+              </Txt>
+            ))}
+          </>
+        )}
+        {!!error && <Txt color="#9A513C">{error}</Txt>}
+      </Card>
+      <Card>
         <View style={s.row}>
           <View
             style={[
@@ -65,6 +97,7 @@ export default function Profile() {
             </Txt>
           </View>
         </View>
+        <RowLink title="Compte et sauvegardes" subtitle="Connexion et archives automatiques" icon="cloud-outline" href="/account" />
         <Txt size={13}>Prénom</Txt>
         <TextInput
           accessibilityLabel="Prénom du profil"
@@ -94,7 +127,6 @@ export default function Profile() {
           onPress={() => router.push("/onboarding")}
         />
       </Card>
-      <Card><RowLink title="Mon compte et mes sauvegardes" subtitle="Connexion Supabase et sauvegarde de progression" icon="cloud-outline" href="/account" /></Card>
       <PlanStatus plan={plan} profile={profile} editable={false} />
       <Card>
         <RowLink title="Coach Norya" subtitle="Conseils de préparation en démonstration, sans réponses médicales générées." icon="sparkles-outline" href="/mentor" />
@@ -160,7 +192,7 @@ export default function Profile() {
         />
         {privacy && (
           <Txt size={13} color={c.muted}>
-            {cloudConfigured ? "Les données restent locales sauf lorsque vous utilisez explicitement la sauvegarde Supabase. Une copie de la progression est alors envoyée à votre compte. Les PDF et cours restent sur cet appareil. " : "Aucune sauvegarde Supabase n’est configurée. "}
+            {cloudConfigured ? "Des archives automatiques peuvent être envoyées à votre compte Supabase lorsque vous êtes connecté et que le navigateur est actif. Vérifiez la dernière sauvegarde dans « Compte et sauvegardes » : les fichiers volumineux peuvent dépasser les limites. " : "Aucune sauvegarde Supabase n’est configurée. "}
             Le stockage local n’est pas chiffré. Effacer les données du navigateur peut supprimer les données qui n’ont pas été sauvegardées.
           </Txt>
         )}
