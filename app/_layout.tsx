@@ -1,3 +1,4 @@
+import AutoCloudBackup from "../src/components/AutoCloudBackup";
 import { LearningProvider } from "../src/state/LearningProvider";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,6 +11,7 @@ export default function Root() {
       <PreparationProvider>
         <LearningProvider><DemoProvider>
           <SafeAreaView style={{ flex: 1, backgroundColor: "#F8F9F5" }}>
+            <AutoCloudBackup />
             <StatusBar style="dark" />
             <Stack
               screenOptions={{
