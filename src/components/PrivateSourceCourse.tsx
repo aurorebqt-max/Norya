@@ -71,7 +71,7 @@ function Part({ chapterId, part, printed, pdf, original, showAsText, frozen, val
       <Txt size={11} color={c.muted}>{roles[part.role] ?? 'Élément source'} · p. {printed} · {showAsText ? (presentation.imageOnly ? 'Illustration médicale' : (merge ? 'Texte fusionné' : 'Texte')) : (part.kind === 'visual' ? 'Visuel original' : 'Texte extrait')}</Txt>
       <Pressable accessibilityRole="button" accessibilityLabel={`PDF ${pdf}, ${part.id}`} onPress={original}><Txt size={11} color={c.primary}>Voir dans le PDF ↗</Txt></Pressable>
     </View>
-    {showImage ? <OriginalVisual image={part.image} ratio={(part.bbox[3] - part.bbox[1]) / (part.bbox[2] - part.bbox[0])}
+    {showImage ? <OriginalVisual image={part.image} ratio={part.id.startsWith('manual-') && part.kind === 'visual' ? 0.7 : (part.bbox[3] - part.bbox[1]) / Math.max(1, part.bbox[2] - part.bbox[0])}
       wide={['table', 'contents', 'box'].includes(part.role)} label={`${roles[part.role]} original, page ${printed}`} />
       : <View>
         {showAsText ? <CourseReadingText presentation={presentation} printedPage={printed} blockId={part.id}

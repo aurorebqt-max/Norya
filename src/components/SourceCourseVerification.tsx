@@ -4,6 +4,7 @@
  * de domaine, partagés avec « Cours reconstitué » et la finalisation.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import * as DocumentPicker from 'expo-document-picker';
 import { Image, Platform, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { Button, Card, Chip, Txt } from './ui';
 import { SourcePresentationText } from './SourcePresentationText';
@@ -115,6 +116,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
   const [batchPlan, setBatchPlan] = useState<NormalizationPlan | null>(null);
   const [bracePlan, setBracePlan] = useState<BracePlan | null>(null);
   const [manualText, setManualText] = useState('');
+  const [manualImage, setManualImage] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [anchorOccurrence, setAnchorOccurrence] = useState('0');
   const [associationTarget, setAssociationTarget] = useState<string | null>(null);
@@ -385,6 +387,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
   function openManualBlock() {
     if (!ref || !part) return;
     setManualText('');
+    setManualImage('');
     setPanel('add-manual');
     setError(null);
     setNotice(null);
@@ -420,7 +423,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
   async function confirmManualBlock() {
     if (!ref) return;
     try {
-      const next = createManualBlock(base(), packet, ref, manualText);
+      const next = createManualBlock(base(), packet, ref, manualText, new Date().toISOString(), manualImage || undefined);
       if (await commit(next, 'Bloc manuel ajouté après le bloc sélectionné. Il reste à vérifier et le paquet source est inchangé.')) {
         const added = next.manualBlocks?.[next.manualBlocks.length - 1];
         setPanel('none');
@@ -600,12 +603,33 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
           <Txt size={12} color={c.muted}>Aperçu avant enregistrement : ce texte sera un nouveau bloc indépendant, ancré après « {part?.id} » et rattaché à sa page PDF. Le paquet source reste inchangé.</Txt>
           <TextInput multiline value={manualText} onChangeText={setManualText} accessibilityLabel="Texte du nouveau bloc manuel"
             style={{ borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 12, minHeight: 120, color: c.ink, backgroundColor: c.paper }} />
+          <Button title="Ajouter une image (Photos ou Fichiers)" secondary disabled={busy} onPress={async () => {
+            try {
+              const picked = await DocumentPicker.getDocumentAsync({ type: 'image/*', copyToCacheDirectory: true });
+              if (picked.canceled) return;
+              const asset = picked.assets[0];
+              const blob = asset.file ?? await (await fetch(asset.uri)).blob();
+              if (!['image/png', 'image/jpeg', 'image/webp'].includes(blob.type)) throw new Error('Choisissez une image PNG, JPEG ou WebP.');
+              if (blob.size > 4 * 1024 * 1024) throw new Error('Image trop volumineuse (maximum 4 Mo).');
+              const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result));
+                reader.onerror = () => reject(new Error('Lecture de l’image impossible.'));
+                reader.readAsDataURL(blob);
+              });
+              setManualImage(dataUrl);
+            } catch (e) { setError(String(e)); }
+          }} />
+          {!!manualImage && <View style={{ gap: 6 }}>
+            <Image source={{ uri: manualImage }} resizeMode="contain" style={{ width: '100%', height: 230 }} />
+            <Button title="Retirer l’image" secondary onPress={() => setManualImage('')} />
+          </View>}
           {!!manualText.trim() && <View style={{ gap: 4 }}>
             <Txt size={12} color={c.primary}>Aperçu du nouveau bloc</Txt>
             <Text selectable style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 8, padding: 10 }}>{manualText}</Text>
           </View>}
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            <Button title="Confirmer l’ajout du bloc" disabled={busy || !manualText.trim()} onPress={confirmManualBlock} />
+            <Button title="Confirmer l’ajout du bloc" disabled={busy || (!manualText.trim() && !manualImage)} onPress={confirmManualBlock} />
             <Button title="Annuler" secondary onPress={() => setPanel('none')} />
           </View>
         </View>
@@ -711,6 +735,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
         {normalization?.decisions.some(change => change.status === 'ambiguous') && <Txt size={12} color="#b45309">
           Retour de ligne ambigu conservé : vérifiez la séparation de paragraphe avec le PDF.
         </Txt>}
+        {currentLogical?.manual?.imageDataUrl && <Image source={{ uri: currentLogical.manual.imageDataUrl }} resizeMode="contain" style={{ width: '100%', height: 280 }} />}
         {kind === 'table' ? null : imageOnly
           ? <Txt size={12} color={c.muted}>Figure ou tableau complexe : conservé en image originale (à droite). Jamais remplacé par du texte.</Txt>
           : <ScrollView nestedScrollEnabled style={{ maxHeight: wide ? 460 : 300 }}>
