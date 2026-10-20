@@ -39,7 +39,7 @@ export default function QuestionBank(){
    <Button title="Exporter le modèle pour ChatGPT (39 chapitres)" secondary disabled={busy} onPress={()=>downloadPrivateJson('norya-modele-qcm.json',qcmExportTemplate())}/>
    <Button title="Charger un JSON de QCM" secondary disabled={busy} onPress={()=>void run(async()=>{const raw=await pickPrivateJson();if(raw){parseBatch(raw);setDraft(raw);}})}/>
    <Txt size={12}>Le PDF est extrait localement et produit un brouillon : le texte et les réponses sont à vérifier. Les 39 chapitres figurent dans le JSON exporté. ChatGPT peut ensuite classer les questions. Vous pouvez enregistrer des QCM sans chapitre (chapterIds: []). Vous les classerez plus tard. verified:true uniquement après votre relecture.</Txt>
-   <Txt size={12}>Vous pouvez aussi corriger le JSON ci-dessous avant de l’enregistrer. Les questions restent en brouillon jusqu’à la publication explicite.</Txt>
+   <Txt size={12}>Vous pouvez corriger le JSON ci-dessous avant enregistrement. Pour des annales sans corrigé, omettez correct et laissez verified:false : l’import conserve les questions en brouillon, sans inventer de bonnes réponses.</Txt>
    <TextInput multiline value={draft} onChangeText={setDraft} accessibilityLabel="Questions JSON" style={[s.input,{minHeight:115,textAlignVertical:'top'}]} />
    <Button title="Enregistrer les QCM en brouillon" disabled={!draft||busy} onPress={()=>void run(async()=>{await saveQcm(parseBatch(draft),false);await refresh();setDraft('');})}/>
    <Button title="Finaliser et publier les QCM vérifiés" disabled={!draft||busy} onPress={()=>void run(async()=>{await saveQcm(parseBatch(draft),true);await refresh();setDraft('');})}/>
