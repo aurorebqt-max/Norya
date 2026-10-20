@@ -1,3 +1,4 @@
+import { RevisionCardJsonActions } from './RevisionCardJsonActions';
 import { ManualTranslationActions } from './ManualTranslationActions';
 import { ChapterBackupActions } from './ChapterBackupActions';
 import { ChapterPdfActions } from './ChapterPdfActions';
@@ -79,6 +80,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
       <View style={{ gap: 6, padding: 10 }}>
         <ManualTranslationActions final={current} />
       <ChapterBackupActions chapterId={chapterId} onRestored={restored} />
+      <RevisionCardJsonActions chapterId={chapterId} archive={archive} />
       <Button title="Modifier le cours" secondary disabled={busy}
         onPress={() => void run(async () => { changed(await reopenCourse(chapterId, archive.revision)); setTarget({ nonce: Date.now() }); })} />
       </View>
