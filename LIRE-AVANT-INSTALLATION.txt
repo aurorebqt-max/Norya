@@ -1,0 +1,7 @@
+Correctif partiel : interface du profil, retrait filtre Finalises, fiches en tirets conservant les phrases, reprise audio Safari tentee. Aucune synchronisation inter-appareils du prenom ajoutee. Aucune IA de reformulation medicale ajoutee. Remplacer les six fichiers suivant leurs chemins. Conserver des exports JSON et verifier une archive Supabase avant toute suppression.
+src/screens/Profile.tsx
+app/account.tsx
+src/screens/Library.tsx
+src/domain/sourceCourse/revisionCards.ts
+src/components/RevisionCardsViewer.tsx
+src/services/readingSpeech.ts
