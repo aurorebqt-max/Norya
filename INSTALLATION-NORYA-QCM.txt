@@ -1,0 +1,39 @@
+NORYA — LOT QCM SUPABASE (BASE FONCTIONNELLE, TEST VERCEL REQUIS)
+
+INSTALLATION SUR IPAD
+1. Supabase > SQL Editor : exécuter supabase/norya-qcm-library.sql.
+2. Toujours dans SQL Editor, attribuer le rôle éditeur uniquement à ton utilisateur Supabase :
+   insert into public.norya_content_editors(user_id)
+   select id from auth.users where email = 'TON_EMAIL_DE_CONNEXION'
+   on conflict do nothing;
+   Remplacer TON_EMAIL_DE_CONNEXION par le mail du compte déjà créé.
+3. GitHub : copier les 5 fichiers applicatifs fournis, aux chemins exacts. Ne pas supprimer les fichiers existants non listés.
+4. Attendre Vercel Ready. N'utiliser que https://norya-app.vercel.app/.
+5. Se connecter dans Mon compte Norya puis Entraînement > Ouvrir la banque de QCM.
+6. Télécharger le modèle JSON. Les identifiants des 39 chapitres viennent de la Thematica existante.
+7. Compléter/corriger les QCM dans le JSON; verified=true seulement APRÈS vérification des réponses. Importer le JSON et enregistrer d'abord en BROUILLON. Publier seulement des QCM qu'on a le droit de diffuser.
+8. Une fois les données contrôlées, réimporter le même JSON et utiliser « Finaliser et publier ».
+
+CE QUI EST FAIT
+- Une banque Supabase QCM avec RLS : tout compte connecté peut consulter les questions publiées; seul le compte désigné éditeur peut créer/modifier/publier.
+- Import JSON depuis l’iPad + éditeur JSON, stockage brouillons/pubs, export du modèle et titres exacts des 39 chapitres, séances basiques multi-réponses et liens de retour au chapitre.
+- Aucun changement destructif des QCM existants, de Safari, des PDF, des sauvegardes de progression.
+
+CE QUI N’EST PAS ENCORE LIVRÉ / NE PAS SUPPOSER FINI
+- Import PDF des QCM, extraction OCR/texte et interface de vérification question par question : pas développés.
+- Liens par proposition jusqu'au bloc précis : les métadonnées chapterId/printedPage/blockId sont acceptées mais les boutons ouvrent le chapitre; pas de positionnement automatique ni de surlignage précis.
+- Synchronisation des cours/fiches/traductions via bibliothèque commune : pas développée; aucune publication automatique des manuels.
+- Statistiques individuelles des nouvelles séances : non encore raccordées à la progression historique.
+- Audio Safari et traduction FR des fiches : non modifiés dans ce lot.
+- Pas de build complet réussi dans ce conteneur (dépendances Expo non installées). Vérifier Vercel avant d’ajouter des données.
+- La RLS est nécessaire même pour usage personnel, car la clé publique Supabase est dans les fichiers du navigateur.
+
+FORMAT QCM JSON
+{
+ "format": "norya-qcm-batch", "schemaVersion": 1, "questions": [
+  {"id":"qcm-exemple-001","chapterIds":["kum-08"],"stem":"Question exemple à remplacer",
+   "choices":[{"id":"A","text":"Affirmation A","correct":true,"chapterId":"kum-08","printedPage":154,"blockId":"part-15"},{"id":"B","text":"Affirmation B","correct":false}],
+   "explanation":"Référence relue à préciser", "verified":false}
+ ]
+}
+Le JSON peut comporter en plus un tableau chapters et des instructions ChatGPT (générés automatiquement dans l’application).
