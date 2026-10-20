@@ -193,6 +193,7 @@ export function RevisionCardsViewer({ chapterId, archive, structure }: {
         </View>}
         {!cards && <>
           <Txt>Aucune fiche enregistrée pour ce chapitre.</Txt>
+          <Txt size={12}>Mise en tirets hors ligne, sans reformulation intelligente : relisez et modifiez la fiche. Aucune information médicale ne doit être supprimée automatiquement.</Txt>
           <Button title="Créer la fiche depuis le cours finalisé" disabled={busy || archive?.status !== 'finalized'} onPress={() => void regenerate()} />
         </>}
         {cards && !editing && <>
