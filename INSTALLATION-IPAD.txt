@@ -1,0 +1,31 @@
+NORYA - Correctif 1 : comptes et sauvegarde de progression (phase non destructive)
+
+FICHIERS A IMPORTER DANS GITHUB (en respectant les dossiers) :
+ app/account.tsx (nouveau)
+ src/services/cloud/account.ts (nouveau)
+ src/screens/Profile.tsx (remplace l'existant)
+
+NE PAS importer le fichier .sql dans un dossier de code au hasard.
+Sur Supabase > SQL Editor : coller le contenu de supabase/norya-progress.sql puis Run.
+
+Sur Supabase > Project Settings > API Keys (ou Connect selon la version) :
+ - Copier l'URL du projet et la clé PUBLIQUE anon/publishable.
+ - NE PAS utiliser service_role ni secret key.
+
+Sur Vercel > projet norya-app > Settings > Environment Variables :
+ - EXPO_PUBLIC_SUPABASE_URL = URL du projet Supabase
+ - EXPO_PUBLIC_SUPABASE_ANON_KEY = clé publique anon (ou clé publishable compatible)
+ - Environment = Production ; relancer un déploiement après enregistrement.
+
+Sur Supabase > Authentication > URL Configuration : mettre l'URL HTTPS Vercel dans Site URL.
+Ne jamais envoyer mot de passe, tokens, ou clé secrète dans le chat ou GitHub.
+
+IMPORTANT : cette première phase n'est PAS la synchronisation intégrale ni automatique.
+Elle synchronise MANUELLEMENT trois espaces : préparation, apprentissage, suivi médical.
+Les PDF, cours finalisés, vérifications, figures, traductions et annotations restent sur chaque appareil.
+La récupération est additive et ne remplace jamais des données locales présentes.
+Avant de tester, exporter la sauvegarde actuelle du chapitre 8 depuis Norya.
+
+NETTOYAGE : AUCUNE SUPPRESSION DANS CE CORRECTIF.
+Les anciens cours Kumar et scripts Translate sont encore liés à des imports et à des tests.
+Ils feront l'objet d'un correctif séparé après vérification fonctionnelle des comptes.
