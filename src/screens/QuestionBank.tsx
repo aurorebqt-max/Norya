@@ -38,7 +38,7 @@ export default function QuestionBank(){
    <Button title="Exporter le brouillon PDF/JSON pour ChatGPT" secondary disabled={!draft||busy} onPress={()=>{try{downloadPrivateJson('norya-qcm-a-classer.json',JSON.parse(draft));}catch(e){setError('Le JSON doit être valide pour être exporté.');}}}/>
    <Button title="Exporter le modèle pour ChatGPT (39 chapitres)" secondary disabled={busy} onPress={()=>downloadPrivateJson('norya-modele-qcm.json',qcmExportTemplate())}/>
    <Button title="Charger un JSON de QCM" secondary disabled={busy} onPress={()=>void run(async()=>{const raw=await pickPrivateJson();if(raw){parseBatch(raw);setDraft(raw);}})}/>
-   <Txt size={12}>Le PDF est extrait localement et produit un brouillon : le texte et les réponses sont à vérifier. Les 39 chapitres figurent dans le JSON exporté. ChatGPT peut ensuite classer les questions. Pour importer dans Supabase, chaque QCM doit contenir au moins un chapterId valide, et verified:true uniquement après votre relecture.</Txt>
+   <Txt size={12}>Le PDF est extrait localement et produit un brouillon : le texte et les réponses sont à vérifier. Les 39 chapitres figurent dans le JSON exporté. ChatGPT peut ensuite classer les questions. Vous pouvez enregistrer des QCM sans chapitre (chapterIds: []). Vous les classerez plus tard. verified:true uniquement après votre relecture.</Txt>
    <Txt size={12}>Vous pouvez aussi corriger le JSON ci-dessous avant de l’enregistrer. Les questions restent en brouillon jusqu’à la publication explicite.</Txt>
    <TextInput multiline value={draft} onChangeText={setDraft} accessibilityLabel="Questions JSON" style={[s.input,{minHeight:115,textAlignVertical:'top'}]} />
    <Button title="Enregistrer les QCM en brouillon" disabled={!draft||busy} onPress={()=>void run(async()=>{await saveQcm(parseBatch(draft),false);await refresh();setDraft('');})}/>
@@ -46,7 +46,7 @@ export default function QuestionBank(){
   </Card>}
   <Card><Txt bold>{visible.length} question(s) accessibles</Txt><Txt size={12}>Les corrections et liens doivent être vérifiés. Aucun PDF privé n'est publié automatiquement.</Txt></Card>
   {active&&<Card style={{gap:10}}>
-   <Txt size={12}>{index+1}/{visible.length} · {active.q.chapterIds.map(id=>examChapters.find(c=>c.id===id)?.chapter||id).join(' / ')} · {active.published?'Publiée':'Brouillon'}</Txt>
+   <Txt size={12}>{index+1}/{visible.length} · {(active.q.chapterIds.length?active.q.chapterIds.map(id=>examChapters.find(c=>c.id===id)?.chapter||id).join(' / '):'À classer')} · {active.published?'Publiée':'Brouillon'}</Txt>
    <Txt bold size={20}>{active.q.stem}</Txt>
    {active.q.choices.map(c=><Chip key={c.id} label={`${c.id}. ${c.text}`} selected={choices.includes(c.id)} onPress={()=>{if(!showCorrect)setChoices(prev=>prev.includes(c.id)?prev.filter(id=>id!==c.id):[...prev,c.id]);}}/>)}
    <Button title="Corriger" disabled={showCorrect||!choices.length} onPress={()=>setShowCorrect(true)}/>
