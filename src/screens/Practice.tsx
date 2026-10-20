@@ -8,6 +8,11 @@ export default function Practice() {
   return (
     <Screen title="S’entraîner" subtitle="Questions Norya, résultats sauvegardés et erreurs révisables.">
       <Card>
+        <Txt bold size={20}>Banque de QCM Supabase</Txt>
+        <Txt>Consulter les questions validées ou, en tant qu’administrateur, importer et publier une banque classée par chapitre.</Txt>
+        <Button title="Ouvrir la banque de QCM" onPress={() => router.push("/question-bank")} />
+      </Card>
+      <Card>
         <Txt size={12}>QCM ORIGINAUX NORYA</Txt>
         <Txt bold size={24}>Une question à la fois, sans chronomètre.</Txt>
         <Txt>{questionBank.length} questions originales disponibles. Elles sont distinctes des annales officielles ; leurs contenus attendent encore une relecture médicale.</Txt>

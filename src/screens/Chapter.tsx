@@ -77,6 +77,7 @@ export default function Chapter() {
     if (finalArchive === undefined) return <Screen title="Cours" back><Txt>Chargement…</Txt></Screen>;
     return <Screen title={id} back>
       <View style={s.wrap}><Chip label="Cours" selected={mode !== 'FICHES'} onPress={() => setMode('COURS SOURCE')} /><Chip label="Fiches" selected={mode === 'FICHES'} onPress={() => setMode('FICHES')} /></View>
+      <Button title="QCM de ce chapitre" secondary onPress={() => router.push({pathname:'/question-bank',params:{chapterId:id}})} />
       {mode === 'FICHES' ? <RevisionCardsViewer key={id} chapterId={id} archive={finalArchive ?? null} structure={structure} /> : <CourseWorkspace key={id} chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} />}
     </Screen>;
   }
@@ -443,6 +444,7 @@ export default function Chapter() {
           ? `${lesson.questions.length} QCM disponibles liés au chapitre. Leur relecture médicale n’est pas documentée ; le test est facultatif et ne bloque pas la validation de lecture.`
           : 'Aucun QCM disponible pour le moment. Ta lecture reste enregistrée et tu peux terminer sans entraînement.'}</Txt>
         {!!lesson?.questions.length && <Button title="Faire les QCM" onPress={() => router.push({ pathname: '/quiz', params: { chapter: id } })} />}
+        <Button title="Banque de QCM de ce chapitre" secondary onPress={() => router.push({pathname:'/question-bank',params:{chapterId:id}})} />
         <Button title="Faire plus tard" secondary onPress={() => router.replace('/library')} />
       </Card>}
     </>}
