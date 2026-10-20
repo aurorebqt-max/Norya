@@ -33,7 +33,10 @@ function validateParts(page: SourcePage) {
       || !png(part.image) || typeof part.text !== 'string' || !Array.isArray(part.lines)
       || !part.lines.every(line => Array.isArray(line) && line.every(run => run && typeof run.text === 'string'
         && typeof run.bold === 'boolean' && typeof run.italic === 'boolean'))
-      || part.lines.length !== part.sourceLineIds.length
+      // A reconstructed display line may represent several original PDF source-line IDs.
+      // Keep full source coverage checks below instead of imposing a 1:1 count.
+      || part.sourceLineIds.length === 0
+      || part.lines.length === 0
       || part.lines.map(line => line.map(run => run.text).join('')).join('\n') !== part.text
       || !Array.isArray(part.bbox) || part.bbox.length !== 4 || !part.bbox.every(Number.isFinite)
       || part.bbox[0] < 0 || part.bbox[1] < 0 || part.bbox[2] > page.width || part.bbox[3] > page.height
