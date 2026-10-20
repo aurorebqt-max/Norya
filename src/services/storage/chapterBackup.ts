@@ -5,7 +5,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { parseChapterBackup, type ChapterBackup } from '../../domain/sourceCourse/chapterBackup';
 import { loadPrivateCourse } from './privateCourse';
 import { browserPdf } from './privatePdfs';
-import { loadValidation } from '../../domain/sourceCourse/verification';
+import { loadValidation, saveValidation, deleteValidation } from '../../domain/sourceCourse/verification';
 import { loadChapterAnomalies } from '../../domain/sourceCourse/anomalies';
 import { loadFinalCourse, restoreFinalArchive } from '../../domain/sourceCourse/finalizedStorage';
 import { loadReadingData, updateReadingData } from '../../domain/sourceCourse/readingStorage';
@@ -78,6 +78,25 @@ export async function restoreChapterBackup(data: ChapterBackup): Promise<void> {
   }
 }
 
+/** Replace only an unfinished local draft, preserving an independent backup. */
+export async function replaceDraftChapterBackup(data: ChapterBackup): Promise<void> {
+  if (Platform.OS !== 'web') throw new Error('Disponible uniquement dans le navigateur.');
+  parseChapterBackup(JSON.stringify(data), data.chapterId);
+  const id = data.chapterId;
+  const [archive, reading, current] = await Promise.all([loadFinalCourse(id), loadReadingData(id), loadPrivateCourse(id)]);
+  if (archive || data.archive) throw new Error('Archive finalisée présente : remplacement refusé.');
+  if (reading.annotations.length || reading.translations.length) throw new Error('Annotations ou traductions existantes : remplacement refusé pour éviter de les perdre.');
+  if (!current) throw new Error('Aucun brouillon existant : utilisez la restauration normale.');
+  const before = await exportChapterBackup(id);
+  downloadPrivateJson(`norya-AVANT-remplacement-${id}-${Date.now()}.json`, before);
+  await inspectBackupImages(data);
+  await browserPdf(`pre-replacement:${id}:${Date.now()}`, new Blob([JSON.stringify(before)], { type: 'application/json' }));
+  const key = id === 'kum-08' ? 'norya-private-source-course-kum08-v1' : `norya-private-source-course-${encodeURIComponent(id)}-v1`;
+  await browserPdf(key, new Blob([JSON.stringify(data.packet)], { type: 'application/json' }));
+  if (data.validation) await saveValidation(data.validation); else await deleteValidation(id);
+  const check = await loadPrivateCourse(id);
+  if (JSON.stringify(check) !== JSON.stringify(data.packet)) throw new Error('Relecture différente : conservez le fichier de sauvegarde téléchargé.');
+}
 function addOnly(database: string, store: string, key: string, value: unknown): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(database, 1);
