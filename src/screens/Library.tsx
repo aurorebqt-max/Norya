@@ -62,7 +62,7 @@ export default function Library() {
         onChangeText={setQuery}
       />
       <View style={s.wrap}>
-        {["Tous", "Finalisés", "Kumar", "Lawrence", "Sinopsis"].map((label) => (
+        {["Tous", "Kumar", "Lawrence", "Sinopsis"].map((label) => (
           <Chip
             key={label}
             label={label}

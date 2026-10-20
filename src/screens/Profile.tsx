@@ -45,38 +45,6 @@ export default function Profile() {
       back
     >
       <Card>
-        <Button
-          title={editing ? "Fermer les réglages" : "Disponibilités et dates"}
-          secondary
-          onPress={() => {
-            setDraft(profile);
-            setEditing(!editing);
-            setSaved(false);
-          }}
-        />
-        {editing && (
-          <>
-            <AvailabilityFields profile={draft} onChange={setDraft} />
-            <DateFields profile={draft} onChange={setDraft} />
-            <PassFields profile={draft} onChange={setDraft} />
-            <Button
-              title={busy ? "Enregistrement…" : "Enregistrer et recalculer"}
-              disabled={
-                busy ||
-                validateProfile({ ...draft, name: name.trim() }).length > 0
-              }
-              onPress={() => void persist()}
-            />
-            {validateProfile({ ...draft, name: name.trim() }).map((p) => (
-              <Txt key={p} color="#9A513C">
-                {p}
-              </Txt>
-            ))}
-          </>
-        )}
-        {!!error && <Txt color="#9A513C">{error}</Txt>}
-      </Card>
-      <Card>
         <View style={s.row}>
           <View
             style={[
@@ -97,7 +65,6 @@ export default function Profile() {
             </Txt>
           </View>
         </View>
-        <RowLink title="Compte et sauvegardes" subtitle="Connexion et archives automatiques" icon="cloud-outline" href="/account" />
         <Txt size={13}>Prénom</Txt>
         <TextInput
           accessibilityLabel="Prénom du profil"
@@ -114,26 +81,7 @@ export default function Profile() {
           disabled={busy || !name.trim()}
           onPress={() => void persist()}
         />
-        <Txt size={13}>
-          Concours : {formatDay(plan.examOn)} ·{" "}
-          {profile.examDate.official
-            ? "date déclarée officielle"
-            : "date provisoire"}
-        </Txt>
-        <Txt size={13}>{profile.goal}</Txt>
-        <Button
-          title="Modifier mon parcours"
-          secondary
-          onPress={() => router.push("/onboarding")}
-        />
-      </Card>
-      <PlanStatus plan={plan} profile={profile} editable={false} />
-      <Card>
-        <RowLink title="Coach Norya" subtitle="Conseils de préparation en démonstration, sans réponses médicales générées." icon="sparkles-outline" href="/mentor" />
-        <RowLink title="Écoute des cours" subtitle="Lecture vocale locale des contenus roumains." icon="headset-outline" href="/podcasts" />
-        <RowLink title="Mes erreurs" subtitle="Questions ratées et prochaines révisions." icon="layers-outline" href="/errors" />
-      </Card>
-      <Card>
+        <RowLink title="Compte et sauvegardes" subtitle="Connexion et archives automatiques" icon="cloud-outline" href="/account" />
         <Button
           title={editing ? "Fermer les réglages" : "Disponibilités et dates"}
           secondary
@@ -164,6 +112,24 @@ export default function Profile() {
           </>
         )}
         {!!error && <Txt color="#9A513C">{error}</Txt>}
+        <Txt size={13}>
+          Concours : {formatDay(plan.examOn)} ·{" "}
+          {profile.examDate.official
+            ? "date déclarée officielle"
+            : "date provisoire"}
+        </Txt>
+        <Txt size={13}>{profile.goal}</Txt>
+        <Button
+          title="Modifier mon parcours"
+          secondary
+          onPress={() => router.push("/onboarding")}
+        />
+      </Card>
+      <PlanStatus plan={plan} profile={profile} editable={false} />
+      <Card>
+        <RowLink title="Coach Norya" subtitle="Conseils de préparation en démonstration, sans réponses médicales générées." icon="sparkles-outline" href="/mentor" />
+        <RowLink title="Écoute des cours" subtitle="Lecture vocale locale des contenus roumains." icon="headset-outline" href="/podcasts" />
+        <RowLink title="Mes erreurs" subtitle="Questions ratées et prochaines révisions." icon="layers-outline" href="/errors" />
       </Card>
       <Card>
         <Txt bold size={20}>
