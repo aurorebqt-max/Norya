@@ -1,0 +1,5 @@
+Correctif Norya fiches: ajoutez/remplacez les trois fichiers en respectant les chemins.
+Masque uniquement les sections techniques H1/auteurs dans le lecteur de fiches, sans les supprimer du JSON.
+Réutilise les images ou tableaux numériques du cours finalisé, et affiche les renvois disponibles vers le PDF source.
+IMPORTANT: mêmes données Safari et même domaine Vercel nécessaires pour voir les visuels; les images ne sont pas dans le JSON fiche.
+Le code n’a pas pu être compilé intégralement dans cet environnement (dépendances npm indisponibles); vérifier Vercel Ready et tester un chapitre.
