@@ -9,6 +9,7 @@ export type ManualBlock = {
   /** Stable user-generated ID; it is never derived from a mutable position. */
   id: string;
   text: string;
+  imageDataUrl?: string;
   sourceRef: ManualSourceRef;
   /** The source or manual block immediately preceding this block in the reconstruction. */
   after: ManualBlockRef;
@@ -38,8 +39,9 @@ export function activeManualBlocks(validation: ChapterValidation | null | undefi
 }
 
 export function createManualBlock(validation: ChapterValidation, packet: SourcePacket, after: ManualBlockRef,
-  text: string, now = new Date().toISOString()): ChapterValidation {
-  if (!text.trim()) throw new Error('Le texte du nouveau bloc ne peut pas être vide.');
+  text: string, now = new Date().toISOString(), imageDataUrl?: string): ChapterValidation {
+  if (!text.trim() && !imageDataUrl) throw new Error('Ajoutez un texte ou une image.');
+  if (imageDataUrl && !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(imageDataUrl)) throw new Error('Image invalide.');
   const source = packet.pages.find(page => page.printedPage === after.printedPage)?.parts?.find(part => part.id === after.blockId);
   const existing = activeManualBlocks(validation).find(block => block.id === after.blockId);
   const sourceRef = existing?.sourceRef ?? (source ? {
@@ -48,7 +50,7 @@ export function createManualBlock(validation: ChapterValidation, packet: SourceP
   } : null);
   if (!sourceRef) throw new Error('Bloc d’insertion introuvable dans cette source.');
   const id = manualId(validation, now);
-  const manual: ManualBlock = { id, text, sourceRef, after, createdAt: now };
+  const manual: ManualBlock = { id, text, ...(imageDataUrl ? { imageDataUrl } : {}), sourceRef, after, createdAt: now };
   const pageIndex = validation.pages.findIndex(page => page.printedPage === sourceRef.printedPage);
   if (pageIndex < 0) throw new Error('Page de validation introuvable.');
   const pages = validation.pages.map((page, index) => index !== pageIndex ? page : {
@@ -79,9 +81,9 @@ export function undoManualBlockCreation(validation: ChapterValidation, blockId: 
 
 function partForManual(block: ManualBlock, source: SourcePart): SourcePart {
   return {
-    id: block.id, kind: 'text', role: 'paragraph', bbox: source.bbox, status: 'unverified',
+    id: block.id, kind: block.imageDataUrl ? 'visual' : 'text', role: block.imageDataUrl ? 'figure' : 'paragraph', bbox: source.bbox, status: 'unverified',
     sourceLineIds: [], text: block.text, lines: [[{ text: block.text, bold: false, italic: false }]],
-    reasons: [], image: source.image,
+    reasons: [], image: block.imageDataUrl ?? source.image,
   };
 }
 
