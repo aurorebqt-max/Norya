@@ -157,10 +157,10 @@ export function RevisionCardsViewer({ chapterId, archive, structure }: {
     }
   }
 
-  if (!loaded) return <Card><Txt>Chargement de la fiche…</Txt></Card>;
   const readingStructure = cards ? revisionCardStructure(cards) : { authors: [], intro: [], sections: [], outline: [] };
   const sourceVersion = archive?.versions.find(v => v.version === archive.activeVersion);
   const sourceStructure = useMemo(() => sourceVersion ? buildCourseStructure(sourceVersion.packet, sourceVersion.validation, sourceVersion.presentations) : null, [sourceVersion]);
+  if (!loaded) return <Card><Txt>Chargement de la fiche…</Txt></Card>;
   const index = Math.min(sectionIndex, Math.max(0, readingStructure.sections.length - 1));
   const shown = readingStructure.sections.length
     ? [...(index === 0 ? readingStructure.intro : []), ...readingStructure.sections[index].items] : readingStructure.intro;
