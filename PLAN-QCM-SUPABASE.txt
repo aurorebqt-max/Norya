@@ -1,0 +1,14 @@
+NORYA — PLAN DES MODIFICATIONS (version Norya-main 9)
+
+CORRECTIF INCLUS MAINTENANT
+- src/components/CourseWorkspace.tsx : menu du crayon regroupé visuellement par traduction, sauvegarde du chapitre, fiche, modification. Aucun stockage ni import/export modifié.
+
+PROCHAINES PHASES À CODER ET TESTER — NON INCLUSES
+1. FICHES : sélectionner FR et lancer la traduction complète sans page intermédiaire ; supprimer bannière bêta ; revoir audio sur Safari avec essais réels.
+2. SUPABASE : tables de rôles administrateur, bibliothèque de contenus autorisés, versions publiées et brouillons ; politiques RLS ; stockage d'images/fichiers autorisés ; progression personnelle privée. Aucun document sous droits d'auteur ne doit être diffusé sans autorisation.
+3. QCM : importer PDF localement, extraire, corriger manuellement puis exporter JSON avec les identifiants des 39 chapitres de la Thematica. Import avec validation forte, classement, correction, sessions et progrès personnels.
+4. LIENS DE SOURCES : associer questions et réponses à chapterId, sectionId et blockId ; liens seulement si association vérifiée.
+5. PUBLICATION : bouton « Finaliser et publier » commun aux contenus validés ; seule l'administratrice peut publier, les autres comptes lecture seule. Ne jamais rendre public dès l'import.
+6. Synchronisation des données et des cours : sauvegarde préalable indépendante, reprise après erreurs, tests sur deux appareils et deux origines Vercel.
+
+ATTENTION : ce ZIP ne contient PAS de code pour les phases 1 à 6 ni de SQL. N'exécuter aucun SQL supplémentaire pour ce correctif d'interface.
