@@ -12,6 +12,7 @@ import { PlanStatus } from "../components/PreparationSummary";
 import { validateProfile } from "../domain/preparation/profile";
 import { formatDay } from "../domain/preparation/dates";
 import { colors as c } from "../design/theme";
+import { cloudConfigured } from "../services/cloud/account";
 export default function Profile() {
   const { profile, state, plan, saveProfile, busy, setNotifications } =
     usePreparation();
@@ -93,6 +94,7 @@ export default function Profile() {
           onPress={() => router.push("/onboarding")}
         />
       </Card>
+      <Card><RowLink title="Mon compte et mes sauvegardes" subtitle="Connexion Supabase et sauvegarde de progression" icon="cloud-outline" href="/account" /></Card>
       <PlanStatus plan={plan} profile={profile} editable={false} />
       <Card>
         <RowLink title="Coach Norya" subtitle="Conseils de préparation en démonstration, sans réponses médicales générées." icon="sparkles-outline" href="/mentor" />
@@ -158,11 +160,8 @@ export default function Profile() {
         />
         {privacy && (
           <Txt size={13} color={c.muted}>
-            Aucune donnée n’est envoyée à un serveur. Le profil, les notes et le
-            travail enregistré sont conservés sur cet appareil. Le stockage
-            local n’est pas chiffré. Supprimer les données de l’application ou
-            du navigateur les efface. Aucun compte, traceur ou microphone n’est
-            connecté.
+            {cloudConfigured ? "Les données restent locales sauf lorsque vous utilisez explicitement la sauvegarde Supabase. Une copie de la progression est alors envoyée à votre compte. Les PDF et cours restent sur cet appareil. " : "Aucune sauvegarde Supabase n’est configurée. "}
+            Le stockage local n’est pas chiffré. Effacer les données du navigateur peut supprimer les données qui n’ont pas été sauvegardées.
           </Txt>
         )}
       </Card>
