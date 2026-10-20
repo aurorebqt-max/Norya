@@ -1,0 +1,5 @@
+1. Dans Supabase > SQL Editor, executer supabase/norya-device-backups.sql.
+2. Dans GitHub, ajouter/remplacer uniquement les fichiers de cette archive, aux chemins indiques. Ne pas importer INSTALLATION.txt.
+3. Attendre le deploiement Vercel. Se connecter a Norya > Mon compte. Tester Sauvegarder maintenant, puis Voir les archives.
+4. Ne supprimer aucune donnee Safari. Les archives cloud sont propres a chaque appareil; la recuperation est manuelle et ne remplace pas les donnees deja presentes.
+5. ATTENTION : les snapshots au-dela de 45 Mo echouent; ne pas considerer un PDF lourd comme protege sans confirmation. La sauvegarde ne s execute que si le site est ouvert, la session active, et une connexion disponible.
