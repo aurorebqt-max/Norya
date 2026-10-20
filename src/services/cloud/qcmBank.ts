@@ -16,11 +16,11 @@ export function validateQcm(value:unknown):NoryaQcm {
  if(!value||typeof value!=='object')throw new Error('Question JSON invalide.');
  const q=value as NoryaQcm;
  if(typeof q.id!=='string'||!q.id.trim()||q.id.length>160||typeof q.stem!=='string'||!q.stem.trim())throw new Error('Identifiant ou énoncé manquant.');
- if(!Array.isArray(q.chapterIds)||!q.chapterIds.length||q.chapterIds.some(id=>!chapterSet.has(id)))throw new Error(`Chapitre inconnu pour ${q.id}.`);
- if(!Array.isArray(q.choices)||q.choices.length<2||q.choices.length>8||q.choices.some(c=>!c||typeof c.id!=='string'||typeof c.text!=='string'||!c.text.trim()||typeof c.correct!=='boolean'||(c.chapterId!==undefined&&!chapterSet.has(c.chapterId))))throw new Error(`Propositions invalides pour ${q.id}.`);
+ if(q.chapterIds!==undefined&&(!Array.isArray(q.chapterIds)||q.chapterIds.some(id=>typeof id!=='string')))throw new Error(`Liste des chapitres invalide pour ${q.id}.`);
+ if(!Array.isArray(q.choices)||q.choices.length<2||q.choices.length>8||q.choices.some(c=>!c||typeof c.id!=='string'||typeof c.text!=='string'||!c.text.trim()||typeof c.correct!=='boolean'||(c.chapterId!==undefined&&typeof c.chapterId!=='string')))throw new Error(`Propositions invalides pour ${q.id}.`);
  if(new Set(q.choices.map(c=>c.id)).size!==q.choices.length)throw new Error('Identifiants des propositions en double.');
  if(typeof q.verified!=='boolean')throw new Error('Le champ verified doit être vrai ou faux.');
- return {id:q.id,chapterIds:q.chapterIds,stem:q.stem,choices:q.choices,explanation:q.explanation||'',verified:q.verified};
+ return {id:q.id,chapterIds:(q.chapterIds??[]).filter(id=>chapterSet.has(id)),stem:q.stem,choices:q.choices,explanation:q.explanation||'',verified:q.verified};
 }
 export async function isContentEditor():Promise<boolean>{const {data}=await call('/rest/v1/norya_content_editors?select=user_id&limit=1');return Array.isArray(data)&&data.length>0;}
 export async function listSharedQcm():Promise<{q:NoryaQcm;published:boolean}[]> {
@@ -38,5 +38,5 @@ export async function saveQcm(items:NoryaQcm[],publish:boolean):Promise<number>{
  await call('/rest/v1/norya_qcm?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});
  return rows.length;
 }
-export const qcmExportTemplate=()=>({format:'norya-qcm-batch',schemaVersion:1,chapters:examChapters.map(c=>({id:c.id,title:c.chapter,pages:c.pages})),instructions:'Conserver exactement id, stem, choices et les corrections. Affecter chapterIds parmi les IDs fournis. Pour chaque proposition, ajouter chapterId, printedPage, blockId uniquement si une correspondance fiable est présente dans les cours fournis. Ne pas inventer des références. Laisser verified=false jusqu’à relecture. Retourner un JSON valide avec questions.',questions:[] as NoryaQcm[]});
+export const qcmExportTemplate=()=>({format:'norya-qcm-batch',schemaVersion:1,chapters:examChapters.map(c=>({id:c.id,title:c.chapter,pages:c.pages})),instructions:'Conserver exactement id, stem, choices et les corrections. chapterIds peut rester vide en attendant un classement manuel. Affecter chapterIds parmi les IDs fournis si connus. Pour chaque proposition, ajouter chapterId, printedPage, blockId uniquement si une correspondance fiable est présente dans les cours fournis. Ne pas inventer des références. Laisser verified=false jusqu’à relecture. Retourner un JSON valide avec questions.',questions:[] as NoryaQcm[]});
 export function parseBatch(raw:string):NoryaQcm[]{const obj=JSON.parse(raw);if(obj?.format!=='norya-qcm-batch'||obj?.schemaVersion!==1||!Array.isArray(obj.questions))throw new Error('Format attendu : norya-qcm-batch, schemaVersion 1, questions[].');return obj.questions.map(validateQcm);}
