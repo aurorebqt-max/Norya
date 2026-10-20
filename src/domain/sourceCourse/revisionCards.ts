@@ -42,29 +42,22 @@ function presentText(item: CourseItem, validation: ChapterValidation | null | un
 
 
 
+/** Conservative offline outline. It retains all clauses and numeric details, without AI paraphrasing. */
 function condenseItem(text: string): string[] {
   const lines = text.replace(/\r\n/g, '\n').split('\n');
-  const out: string[] = [];
+  const result: string[] = [];
   for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    if (/^[-•*+]\s+/u.test(trimmed)) {
-      out.push(trimmed);
-      continue;
+    const value = line.trim().replace(/\s+/g, ' ');
+    if (!value) continue;
+    if (/^(?:[-•*+]\s+|\d+[.)]\s+)/u.test(value)) { result.push(value); continue; }
+    // Break at sentence boundaries only. Never split decimal values, abbreviations or measurements.
+    const sentences = value.split(/(?<=[.!?])\s+(?=[A-ZÀÂĂÎȘȚÉÈÊËÇÎÔÙÛÜ])/u);
+    for (const sentence of sentences) {
+      const content = sentence.trim();
+      if (content) result.push(`• ${content}`);
     }
-    if (/\t/.test(trimmed)) {
-      out.push(trimmed);
-      continue;
-    }
-    if (/^[0-9]+\.\s+/u.test(trimmed)) {
-      out.push(trimmed);
-      continue;
-    }
-    // keep as coherent phrase; don't split mid-unit
-    const normalized = trimmed.replace(/\s+/g, ' ');
-    out.push(normalized);
   }
-  return out;
+  return result;
 }
 
 export function buildRevisionCardSet(
