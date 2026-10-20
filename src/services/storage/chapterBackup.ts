@@ -34,15 +34,27 @@ export async function exportChapterBackup(chapterId: string): Promise<ChapterBac
     packet: source, validation: validation && !validation.anomalies && anomalies.length ? { ...validation, anomalies } : validation, archive, reading, learningReading: learning.reading[chapterId] ?? null };
   return parseChapterBackup(JSON.stringify(backup), chapterId);
 }
+/** Check image payloads without decoding hundreds of full-page PNGs in Safari.
+ * Safari can reject Image() decoding under memory pressure even for valid data URIs.
+ * Actual image rendering remains the responsibility of the course reader.
+ */
 export async function inspectBackupImages(data: ChapterBackup): Promise<void> {
   const packets = [data.packet, ...(data.archive?.versions.map(v => v.packet) ?? [])];
   const images = new Set(packets.flatMap(p => p.pages.flatMap(page => [page.image, ...(page.parts ?? []).map(b => b.image)])));
-  for (const src of images) await new Promise<void>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => image.naturalWidth > 0 ? resolve() : reject(new Error('Image vide.'));
-    image.onerror = () => reject(new Error('Une illustration ne peut pas être décodée. Import refusé.'));
-    image.src = src;
-  });
+  for (const src of images) {
+    if (typeof src !== 'string' || !src) throw new Error('Illustration manquante : import refusé.');
+    if (src.startsWith('data:image/png;base64,')) {
+      const payload = src.slice('data:image/png;base64,'.length);
+      if (!payload.startsWith('iVBORw0KGgo') || payload.length < 100 || !/^[A-Za-z0-9+/]*={0,2}$/.test(payload) || payload.length % 4 !== 0)
+        throw new Error('Illustration PNG mal encodée : import refusé.');
+    } else if (src.startsWith('data:image/jpeg;base64,')) {
+      const payload = src.slice('data:image/jpeg;base64,'.length);
+      if (!payload.startsWith('/9j/') || payload.length < 100 || !/^[A-Za-z0-9+/]*={0,2}$/.test(payload) || payload.length % 4 !== 0)
+        throw new Error('Illustration JPEG mal encodée : import refusé.');
+    } else if (!src.startsWith('blob:') && !src.startsWith('https://')) {
+      throw new Error('Format d’illustration non reconnu : import refusé.');
+    }
+  }
 }
 /** Fresh destination only: no existing review/annotations/version is ever replaced. */
 export async function restoreChapterBackup(data: ChapterBackup): Promise<void> {
