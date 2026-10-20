@@ -1,0 +1,1 @@
+Remplacez les deux fichiers aux chemins indiques. Commit sur main et attendez Production. Importez le JSON du chapitre 9 puis cliquez Remplacer le brouillon existant. Une sauvegarde est telechargee avant remplacement. Ne pas effacer les donnees Safari. Ne finalisez pas sans verification.
