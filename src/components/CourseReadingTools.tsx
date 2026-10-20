@@ -357,7 +357,7 @@ export function CourseReadingToolbar() {
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <ReadingAction label="RO" onPress={() => context.changeLanguage('ro')} selected={context.language === 'ro'} />
-      <ReadingAction label="FR" onPress={() => { context.changeLanguage('fr'); context.openPanel('translation'); }} selected={context.language === 'fr'} />
+      <ReadingAction label="FR" onPress={() => context.changeLanguage('fr')} selected={context.language === 'fr'} />
     </View>
   </View>;
 }

@@ -18,7 +18,7 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
   const [page, setPage] = useState(1); const [preview, setPreview] = useState<PdfPreview | null>(null);
   const [layouts, setLayouts] = useState<Record<number, PdfLayout>>({}); const [confirmed, setConfirmed] = useState<Record<number, boolean>>({});
   const [role, setRole] = useState<PdfRegion['role']>('figure'); const [corner, setCorner] = useState<number[] | null>(null);
-  const [width, setWidth] = useState(600); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
+  const [advanced, setAdvanced] = useState(false); const [width, setWidth] = useState(600); const [busy, setBusy] = useState(false); const [message, setMessage] = useState('');
   useEffect(() => () => { alive.current = false; void session.current?.close(); }, []);
   const layout = layouts[page] ?? { columns: 1 as const, regions: [] };
   const update = (next: PdfLayout) => { setLayouts(v => ({ ...v, [page]: next })); setConfirmed(v => ({ ...v, [page]: false })); };
@@ -39,12 +39,12 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
     const asset = result.assets[0]; const blob = asset.file ?? await (await fetch(asset.uri)).blob();
     if (!(await blob.slice(0, 1024).text()).includes('%PDF-')) throw new Error('Sélectionnez un PDF valide.');
     await session.current?.close(); session.current = await openPdfImport(blob); file.current = blob;
-    setPages(session.current.pages); setLayouts({}); setConfirmed({}); setFirst('1'); setLast('1'); await show(1);
+    setPages(session.current.pages); setLayouts({}); setConfirmed({}); setFirst('1'); setLast(String(Math.min(session.current.pages, 40))); setFolio('1'); setAdvanced(false); await show(1);
   }
   const range = Array.from({ length: Math.max(0, Math.min(40, Number(last) - Number(first) + 1)) }, (_, i) => Number(first) + i);
   const validRange = [Number(first), Number(last), Number(folio)].every(Number.isInteger) && Number(first) >= 1 && Number(last) >= Number(first) && Number(last) <= pages && Number(last) - Number(first) < 40 && Number(folio) >= 1;
   async function extract() {
-    if (!session.current || !file.current || !validRange || !range.every(p => confirmed[p])) throw new Error('Contrôlez les zones de chaque page choisie avant extraction.');
+    if (!session.current || !file.current || !validRange) throw new Error('Vérifiez les bornes du PDF avant extraction.');
     const packet = await session.current.extract(chapterId, Number(first), Number(last), Number(folio), layouts, p => setMessage(`Extraction locale : page PDF ${p}`));
     const metadata = examChapters.find(chapter => chapter.id === chapterId);
     if (metadata) packet.chapter = { title: metadata.chapter, bookId: metadata.bookId, thematicPages: metadata.pages, scope: metadata.scope };
@@ -56,12 +56,14 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
       <Txt bold>Importer un cours privé · {chapterId}</Txt>
       <Txt>{examChapters.find(chapter => chapter.id === chapterId)?.chapter}</Txt>
       <Txt>Pages Thematica : {examChapters.find(chapter => chapter.id === chapterId)?.pages ?? "à préciser"}. Vérifiez la correspondance avec les pages PDF.</Txt>
-      <Txt>PDF traité dans ce navigateur. Choisissez les pages du chapitre, les colonnes et les zones originales. Aucun passage ne sera validé automatiquement.</Txt>
+      <Txt>PDF traité localement. Les pages et les colonnes sont préparées automatiquement : vérifiez et corrigez ensuite le cours. Aucun passage médical n’est validé automatiquement.</Txt>
       <Button title="Choisir le PDF" disabled={busy} onPress={() => void run(pick)} />
       <Button title="Fermer l’import PDF" secondary disabled={busy} onPress={onClose} />
       {!!message && <Txt>{message}</Txt>}
       {!!pages && <>
-        <Txt>{pages} pages dans le PDF. Au maximum 40 pages par import de chapitre.</Txt>
+        <Txt>{pages} pages dans le PDF. {pages > 40 ? 'Ce PDF dépasse 40 pages : indiquez la plage du chapitre dans les réglages.' : 'Toutes les pages seront utilisées automatiquement.'}</Txt>
+        <Button secondary title={advanced ? 'Masquer les réglages PDF' : 'Corriger les pages, colonnes ou visuels (facultatif)'} disabled={busy} onPress={() => setAdvanced(v => !v)} />
+        {advanced && <>
         {[['Première page PDF', first, setFirst], ['Dernière page PDF', last, setLast], ['Premier numéro de page imprimé', folio, setFolio]].map(([label, value, setter]) =>
           <View key={label as string}><Txt>{label as string}</Txt><TextInput accessibilityLabel={label as string} value={value as string} onChangeText={setter as (v: string) => void} keyboardType="number-pad" editable={!busy} style={s.input} /></View>)}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -94,7 +96,8 @@ export function PrivatePdfImport({ chapterId, onImported, onClose }: {
           {!preview.spans.length && <Txt>Cette page ne contient aucun texte extractible. OCR non disponible : import numérique bloqué pour une page scannée.</Txt>}
           <Button title="J’ai délimité les visuels et éléments éditoriaux de cette page" disabled={busy || !preview.spans.length} onPress={() => { setLayouts(v => ({ ...v, [page]: layout })); setConfirmed(v => ({ ...v, [page]: true })); }} />
         </>}
-        <Button title="Extraire ces pages et ouvrir la vérification manuelle" disabled={busy || !validRange || !range.every(p => confirmed[p])} onPress={() => void run(extract)} />
+        </>}
+        <Button title="Extraire et ouvrir la vérification manuelle" disabled={busy || !validRange || (pages > 40 && Number(first) === 1 && Number(last) === 40)} onPress={() => void run(extract)} />
       </>}
     </ScrollView>
   </Modal>;
