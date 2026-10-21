@@ -1,6 +1,6 @@
 import { getSession } from './account';
 import { examChapters } from '../../data/rezidentiat2026';
-export type NoryaQcm = {id:string; chapterIds:string[]; stem:string; choices:{id:string;text:string;correct:boolean;explanation?:string;chapterId?:string;printedPage?:number;blockId?:string}[]; explanation?:string; verified:boolean};
+export type NoryaQcm = {id:string; chapterIds:string[]; stem:string; choices:{id:string;text:string;correct?:boolean;explanation?:string;chapterId?:string;printedPage?:number;blockId?:string}[]; explanation?:string; verified:boolean};
 const base=(process.env.EXPO_PUBLIC_SUPABASE_URL||'').replace(/\/$/,'');
 const apiKey=process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY||'';
 const chapterSet=new Set(examChapters.map(c=>c.id));
@@ -26,7 +26,7 @@ export function validateQcm(value:unknown):NoryaQcm {
    if(!id||typeof txt!=='string'||!txt.trim())throw new Error(`Proposition ${index+1} incomplète pour ${q.id} : identifiant ou texte manquant.`);
    if(choice.chapterId!==undefined&&typeof choice.chapterId!=='string')throw new Error(`Chapitre de proposition invalide pour ${q.id}, ${id}.`);
    if(choice.correct!==undefined&&typeof choice.correct!=='boolean')throw new Error(`Correction invalide pour ${q.id}, ${id}.`);
-   return {...choice,id,text:txt,correct:choice.correct===true};
+   return {...choice,id,text:txt,...(typeof choice.correct==='boolean'?{correct:choice.correct}:{correct:undefined})};
  });
  if(new Set(choices.map(c=>c.id)).size!==choices.length)throw new Error(`Identifiants des propositions en double pour ${q.id}.`);
  // Jamais de publication si les corrections sont absentes ou non relues.
