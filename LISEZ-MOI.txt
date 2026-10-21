@@ -1,15 +1,12 @@
-Correctif menu Partie du chapitre pour les QCM.
+Correctif Norya — fichiers modifiés uniquement
 
-Fichier modifié :
-src/screens/QuestionBank.tsx
+1. Remplacer les fichiers du ZIP dans GitHub en respectant exactement leurs chemins.
+2. Commit sur main puis attendre le déploiement Vercel Production.
+3. Vérifier :
+   - Banque QCM : H2, H3, H4 et H5 proposés avec indentation progressive.
+   - Titres H1 à H5 affichés en majuscules dans le cours.
+   - Vérification manuelle : le choix « Sommaire original » n'est plus proposé ; un bouton « Cacher » le remplace.
+   - Un bloc caché disparaît du cours reconstitué ET de la vérification manuelle, mais reste conservé dans les données source.
+   - Cacher un bloc le marque comme vérifié pour qu'un bloc vide/parasite ne bloque pas la finalisation.
 
-Remplacer uniquement ce fichier dans GitHub puis commit sur main.
-
-Nouveau comportement :
-- le menu ne reprend plus le simple scope Thematica/H1 ;
-- il lit le cours réellement enregistré du chapitre ;
-- affiche les H2 comme grandes parties ;
-- affiche les H3 en retrait sous les H2 ;
-- le choix enregistre la page et le blockId exacts ;
-- « Voir dans le cours » ouvre le passage choisi quand il existe ;
-- si aucun cours/H2/H3 n'est disponible localement, le QCM peut rester associé au chapitre entier.
+Aucun SQL Supabase requis.
