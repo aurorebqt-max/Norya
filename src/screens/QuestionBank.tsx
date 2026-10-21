@@ -25,7 +25,7 @@ export default function QuestionBank() {
   const [chapterInput, setChapterInput] = useState('');
   const [chapterMenuOpen, setChapterMenuOpen] = useState(false);
   const [scopeMenuOpen, setScopeMenuOpen] = useState(false);
-  const [courseHeadings, setCourseHeadings] = useState<{ level: 'h2' | 'h3'; title: string; printedPage: number; blockId: string; sectionId: string }[]>([]);
+  const [courseHeadings, setCourseHeadings] = useState<{ level: 'h2' | 'h3' | 'h4'; title: string; printedPage: number; blockId: string; sectionId: string }[]>([]);
   const [courseHeadingsLoading, setCourseHeadingsLoading] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -52,11 +52,14 @@ export default function QuestionBank() {
         const structure = finalVersion
           ? buildCourseStructure(finalVersion.packet, finalVersion.validation, finalVersion.presentations)
           : buildCourseStructure(packet, validation);
-        const headings: { level: 'h2' | 'h3'; title: string; printedPage: number; blockId: string; sectionId: string }[] = [];
+        const headings: { level: 'h2' | 'h3' | 'h4'; title: string; printedPage: number; blockId: string; sectionId: string }[] = [];
         for (const section of structure.sections) {
           const h2 = section.items.find(item => item.kind === 'h2');
           if (h2) headings.push({ level: 'h2', title: h2.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: h2.printedPage, blockId: h2.blockId, sectionId: section.id });
-          for (const item of section.items) if (item.kind === 'h3') headings.push({ level: 'h3', title: item.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: item.printedPage, blockId: item.blockId, sectionId: section.id });
+          for (const item of section.items) {
+            if (item.kind === 'h3') headings.push({ level: 'h3', title: item.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: item.printedPage, blockId: item.blockId, sectionId: section.id });
+            if (item.kind === 'h4') headings.push({ level: 'h4', title: item.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: item.printedPage, blockId: item.blockId, sectionId: section.id });
+          }
         }
         setCourseHeadings(headings.filter(item => item.title));
       })
@@ -187,15 +190,15 @@ export default function QuestionBank() {
       <Button secondary title={questionDraft.courseReference?.scopeTitle || 'Choisir la partie du cours'} onPress={() => setScopeMenuOpen(value => !value)} />
       {scopeMenuOpen && <View style={{ gap: 7 }}>
         <Chip label="Chapitre entier / à préciser plus tard" selected={!questionDraft.courseReference?.scopeTitle} onPress={() => { setQuestionDraft(prev => prev ? { ...prev, courseReference: { chapterId: selectedChapter.id } } : prev); setScopeMenuOpen(false); }} />
-        {courseHeadingsLoading && <Txt size={12}>Chargement des titres H2/H3 du cours…</Txt>}
-        {!courseHeadingsLoading && !courseHeadings.length && <Txt size={12}>Aucun titre H2/H3 n’est encore disponible dans le cours enregistré de ce chapitre. Vous pouvez laisser « chapitre entier » et préciser plus tard.</Txt>}
-        {courseHeadings.map((part, partIndex) => <View key={`${selectedChapter.id}-${part.blockId}`} style={{ paddingLeft: part.level === 'h3' ? 22 : 0 }}>
+        {courseHeadingsLoading && <Txt size={12}>Chargement des titres H2/H3/H4 du cours…</Txt>}
+        {!courseHeadingsLoading && !courseHeadings.length && <Txt size={12}>Aucun titre H2/H3/H4 n’est encore disponible dans le cours enregistré de ce chapitre. Vous pouvez laisser « chapitre entier » et préciser plus tard.</Txt>}
+        {courseHeadings.map((part, partIndex) => <View key={`${selectedChapter.id}-${part.blockId}`} style={{ paddingLeft: part.level === 'h4' ? 42 : part.level === 'h3' ? 22 : 0 }}>
           <Pressable accessibilityRole="button" onPress={() => chooseScope(partIndex)} style={{ paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: questionDraft.courseReference?.blockId === part.blockId ? c.primary : c.line, borderRadius: 12, backgroundColor: questionDraft.courseReference?.blockId === part.blockId ? c.mint : '#fff' }}>
-            <Txt bold={part.level === 'h2'} size={part.level === 'h2' ? 14 : 13}>{part.level === 'h2' ? part.title : `↳ ${part.title}`}</Txt>
+            <Txt bold={part.level === 'h2'} size={part.level === 'h2' ? 14 : part.level === 'h3' ? 13 : 12}>{part.level === 'h2' ? part.title : part.level === 'h3' ? `↳ ${part.title}` : `↳↳ ${part.title}`}</Txt>
           </Pressable>
         </View>)}
       </View>}
-      <Txt size={12}>H2 = grande partie · H3 = sous-partie décalée. Après correction, « Voir dans le cours » ouvrira directement le passage choisi.</Txt>
+      <Txt size={12}>H2 = grande partie · H3 = sous-partie · H4 = sous-sous-partie encore plus décalée. Après correction, « Voir dans le cours » ouvrira directement le passage choisi.</Txt>
     </>}
 
     <Button title="Enregistrer en brouillon" disabled={busy} onPress={() => void run(() => saveEdit(false))} />
