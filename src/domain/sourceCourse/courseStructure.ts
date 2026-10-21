@@ -14,7 +14,7 @@ export type CourseSection = { id: string; title: string; items: CourseItem[] };
 export type CourseOutlineItem = {
   key: string;
   sectionId: string;
-  level: 'h2' | 'h3' | 'h4';
+  level: 'h2' | 'h3' | 'h4' | 'h5';
   title: string;
 };
 export type CourseStructure = {
@@ -30,6 +30,7 @@ export type CourseStructure = {
 };
 
 const HEADER_KINDS: BlockKind[] = ['h1', 'authors', 'toc', 'bibliography'];
+const headingTitle = (text: string) => text.replace(/\s+/gu, ' ').trim().toLocaleUpperCase('ro-RO');
 const key = (page: number, block: string) => JSON.stringify([page, block]);
 
 /**
@@ -56,7 +57,7 @@ export function buildCourseStructure(packet: SourcePacket | null | undefined, va
     const item: CourseItem = { key: key(printedPage, blockId), printedPage, pdfPage,
       blockId, part, presentation, kind, table: kind === 'table' ? saved?.table : undefined };
     if (kind === 'h2') {
-      const section = { id: `h2:${item.key}`, title: presentation.text.replace(/\s+/gu, ' ').trim(), items: [item] };
+      const section = { id: `h2:${item.key}`, title: headingTitle(presentation.text), items: [item] };
       result.sections.push(section);
       if (saved?.status === 'verified' || saved?.status === 'corrected') {
         result.outline.push({ key: item.key, sectionId: section.id, level: 'h2', title: section.title });
@@ -64,13 +65,13 @@ export function buildCourseStructure(packet: SourcePacket | null | undefined, va
     } else if (result.sections.length) {
       const section = result.sections[result.sections.length - 1];
       section.items.push(item);
-      if ((kind === 'h3' || kind === 'h4') && (saved?.status === 'verified' || saved?.status === 'corrected')) {
-        result.outline.push({ key: item.key, sectionId: section.id, level: kind, title: presentation.text.replace(/\s+/gu, ' ').trim() });
+      if ((kind === 'h3' || kind === 'h4' || kind === 'h5') && (saved?.status === 'verified' || saved?.status === 'corrected')) {
+        result.outline.push({ key: item.key, sectionId: section.id, level: kind, title: headingTitle(presentation.text) });
       }
     }
     else result.intro.push(item);
   }
-  if (titles.length) result.title = titles.join(' ');
+  if (titles.length) result.title = titles.join(' ').toLocaleUpperCase('ro-RO');
   return result;
 }
 

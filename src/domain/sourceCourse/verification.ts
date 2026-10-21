@@ -51,6 +51,8 @@ export interface BlockValidation {
   kindHistory?: KindEntry[];
   /** Reconstruction numérique d'un bloc classé « Tableau » ; la source n'est jamais modifiée. */
   table?: BlockTable;
+  /** Bloc volontairement masqué du cours et de la vérification manuelle. */
+  hidden?: boolean;
 }
 
 /** Données de validation pour une page */

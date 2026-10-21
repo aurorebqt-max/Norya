@@ -23,15 +23,34 @@ export function workingPresentation(printedPage: number, part: SourcePart,
   let base: CoursePresentation = chapterId === 'kum-08' ? sourcePresentation(printedPage, part) : {
     text: part.text, imageOnly: part.role === 'figure' || part.role === 'table', hide: part.role === 'page-header',
   };
-  const correction = savedBlock(validation, printedPage, part.id)?.correction;
+  const saved = savedBlock(validation, printedPage, part.id);
+  const correction = saved?.correction;
   if (correction !== undefined && !base.imageOnly && !base.hide) {
     base = { ...base, text: correction, heading: undefined, contents: undefined };
   }
-  base = applyClassification(base, savedBlock(validation, printedPage, part.id));
+  base = applyClassification(base, saved);
+  if (saved?.hidden) base = { ...base, hide: true };
   return presentationAfterMerges(printedPage, part, base, validation?.merges, validation?.splits);
 }
 
 const now = () => new Date().toISOString();
+
+/** Masque explicitement un ou plusieurs blocs de la lecture et de la vérification.
+ * Le bloc source reste conservé dans le paquet. Masquer vaut décision humaine et
+ * marque le bloc comme vérifié afin qu'un bloc vide/parasite ne bloque pas la finalisation.
+ */
+export function hideBlocks(validation: ChapterValidation, refs: MergeBlockRef[], at = now()): ChapterValidation {
+  let next = validation;
+  for (const ref of refs) {
+    next = reviewBlock(next, next.anomalies ?? [], ref.printedPage, ref.blockId, 'verified');
+  }
+  const wanted = new Set(refs.map(ref => `${ref.printedPage}:${ref.blockId}`));
+  const pages = next.pages.map(page => ({
+    ...page,
+    blocks: page.blocks.map(block => wanted.has(`${page.printedPage}:${block.id}`) ? { ...block, hidden: true } : block),
+  }));
+  return { ...next, pages, lastUpdatedAt: at };
+}
 
 /** Enregistre une correction sans changer le statut de vérification ni la source. */
 export function saveBlockCorrection(validation: ChapterValidation, printedPage: number, blockId: string,

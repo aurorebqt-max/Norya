@@ -35,7 +35,7 @@ export function reviewTargets(packet: SourcePacket, validation: ChapterValidatio
   const any = new Set(anomalies.map(a => reviewKey(a.chapterId, a.printedPage, a.blockId)));
   const saved = (page: number, id: string) => validation?.pages.find(p => p.printedPage === page)?.blocks.find(b => b.id === id);
   return logicalBlocks(packet, validation)
-    .filter(block => block.part.role !== 'page-header' && !isAbsorbedByMerge(merges, block.printedPage, block.blockId))
+    .filter(block => block.part.role !== 'page-header' && !isAbsorbedByMerge(merges, block.printedPage, block.blockId) && !saved(block.printedPage, block.blockId)?.hidden)
     .map((block, blockIndex) => {
       const pageIndex = packet.pages.findIndex(page => page.printedPage === block.printedPage);
       const merge = mergeAtAnchor(merges, block.printedPage, block.blockId);
