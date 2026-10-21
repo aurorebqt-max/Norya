@@ -7,6 +7,10 @@ import { Screen, Card, Txt, Button, Chip, s } from '../components/ui';
 import { colors as c } from '../design/theme';
 import { downloadPrivateJson, pickPrivateJson } from '../services/storage/chapterBackup';
 import { examChapters } from '../data/rezidentiat2026';
+import { loadPrivateCourse } from '../services/storage/privateCourse';
+import { loadValidation } from '../domain/sourceCourse/verification';
+import { loadFinalCourse } from '../domain/sourceCourse/finalizedStorage';
+import { buildCourseStructure } from '../domain/sourceCourse/courseStructure';
 import { isContentEditor, listSharedQcm, parseBatch, qcmExportTemplate, saveQcm, deleteQcm, type NoryaQcm } from '../services/cloud/qcmBank';
 
 export default function QuestionBank() {
@@ -21,6 +25,8 @@ export default function QuestionBank() {
   const [chapterInput, setChapterInput] = useState('');
   const [chapterMenuOpen, setChapterMenuOpen] = useState(false);
   const [scopeMenuOpen, setScopeMenuOpen] = useState(false);
+  const [courseHeadings, setCourseHeadings] = useState<{ level: 'h2' | 'h3'; title: string; printedPage: number; blockId: string; sectionId: string }[]>([]);
+  const [courseHeadingsLoading, setCourseHeadingsLoading] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -34,6 +40,30 @@ export default function QuestionBank() {
     setEditor(admin);
   };
   useEffect(() => { void refresh().catch(e => setError(String(e))); }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (!chapterInput) { setCourseHeadings([]); return () => { active = false; }; }
+    setCourseHeadingsLoading(true);
+    Promise.all([loadPrivateCourse(chapterInput), loadValidation(chapterInput), loadFinalCourse(chapterInput)])
+      .then(([packet, validation, archive]) => {
+        if (!active) return;
+        const finalVersion = archive?.versions.find(version => version.version === archive.activeVersion);
+        const structure = finalVersion
+          ? buildCourseStructure(finalVersion.packet, finalVersion.validation, finalVersion.presentations)
+          : buildCourseStructure(packet, validation);
+        const headings: { level: 'h2' | 'h3'; title: string; printedPage: number; blockId: string; sectionId: string }[] = [];
+        for (const section of structure.sections) {
+          const h2 = section.items.find(item => item.kind === 'h2');
+          if (h2) headings.push({ level: 'h2', title: h2.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: h2.printedPage, blockId: h2.blockId, sectionId: section.id });
+          for (const item of section.items) if (item.kind === 'h3') headings.push({ level: 'h3', title: item.presentation.text.replace(/\s+/gu, ' ').trim(), printedPage: item.printedPage, blockId: item.blockId, sectionId: section.id });
+        }
+        setCourseHeadings(headings.filter(item => item.title));
+      })
+      .catch(() => { if (active) setCourseHeadings([]); })
+      .finally(() => { if (active) setCourseHeadingsLoading(false); });
+    return () => { active = false; };
+  }, [chapterInput]);
 
   const visible = rows.filter(r => !chapterId || r.q.chapterIds.includes(chapterId));
   const safeIndex = visible.length ? Math.min(index, visible.length - 1) : 0;
@@ -91,19 +121,18 @@ export default function QuestionBank() {
   const toggleCorrect = (id: string) => setQuestionDraft(prev => prev ? { ...prev, choices: prev.choices.map(choice => choice.id === id ? { ...choice, correct: !choice.correct } : choice) } : prev);
 
   const selectedChapter = examChapters.find(ch => ch.id === chapterInput);
-  const parseScopePage = (scope: string) => {
-    const match = scope.match(/(?:·|\s)(\d{1,4})(?:[–-]\d{1,4})?/);
-    return match ? Number(match[1]) : undefined;
-  };
   const chooseChapter = (id: string) => {
     setChapterInput(id); setChapterMenuOpen(false); setScopeMenuOpen(false);
     setQuestionDraft(prev => prev ? { ...prev, chapterIds: id ? [id] : [], courseReference: id ? { chapterId: id } : undefined } : prev);
   };
-  const chooseScope = (scopeIndex: number) => {
+  const chooseScope = (headingIndex: number) => {
+    const heading = courseHeadings[headingIndex];
     const chapter = examChapters.find(ch => ch.id === chapterInput);
-    if (!chapter) return;
-    const scopeTitle = chapter.scope[scopeIndex];
-    setQuestionDraft(prev => prev ? { ...prev, courseReference: { chapterId: chapter.id, scopeIndex, scopeTitle, printedPage: parseScopePage(scopeTitle) } } : prev);
+    if (!chapter || !heading) return;
+    setQuestionDraft(prev => prev ? { ...prev, courseReference: {
+      chapterId: chapter.id, scopeIndex: headingIndex, scopeTitle: heading.title,
+      printedPage: heading.printedPage, blockId: heading.blockId,
+    } } : prev);
     setScopeMenuOpen(false);
   };
 
@@ -158,9 +187,15 @@ export default function QuestionBank() {
       <Button secondary title={questionDraft.courseReference?.scopeTitle || 'Choisir la partie du cours'} onPress={() => setScopeMenuOpen(value => !value)} />
       {scopeMenuOpen && <View style={{ gap: 7 }}>
         <Chip label="Chapitre entier / à préciser plus tard" selected={!questionDraft.courseReference?.scopeTitle} onPress={() => { setQuestionDraft(prev => prev ? { ...prev, courseReference: { chapterId: selectedChapter.id } } : prev); setScopeMenuOpen(false); }} />
-        {selectedChapter.scope.map((part, partIndex) => <Chip key={`${selectedChapter.id}-${partIndex}`} label={part} selected={questionDraft.courseReference?.scopeIndex === partIndex} onPress={() => chooseScope(partIndex)} />)}
+        {courseHeadingsLoading && <Txt size={12}>Chargement des titres H2/H3 du cours…</Txt>}
+        {!courseHeadingsLoading && !courseHeadings.length && <Txt size={12}>Aucun titre H2/H3 n’est encore disponible dans le cours enregistré de ce chapitre. Vous pouvez laisser « chapitre entier » et préciser plus tard.</Txt>}
+        {courseHeadings.map((part, partIndex) => <View key={`${selectedChapter.id}-${part.blockId}`} style={{ paddingLeft: part.level === 'h3' ? 22 : 0 }}>
+          <Pressable accessibilityRole="button" onPress={() => chooseScope(partIndex)} style={{ paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: questionDraft.courseReference?.blockId === part.blockId ? c.primary : c.line, borderRadius: 12, backgroundColor: questionDraft.courseReference?.blockId === part.blockId ? c.mint : '#fff' }}>
+            <Txt bold={part.level === 'h2'} size={part.level === 'h2' ? 14 : 13}>{part.level === 'h2' ? part.title : `↳ ${part.title}`}</Txt>
+          </Pressable>
+        </View>)}
       </View>}
-      <Txt size={12}>Après correction, « Voir dans le cours » ouvrira ce chapitre et, si possible, la page de cette partie.</Txt>
+      <Txt size={12}>H2 = grande partie · H3 = sous-partie décalée. Après correction, « Voir dans le cours » ouvrira directement le passage choisi.</Txt>
     </>}
 
     <Button title="Enregistrer en brouillon" disabled={busy} onPress={() => void run(() => saveEdit(false))} />
