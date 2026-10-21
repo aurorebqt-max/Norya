@@ -27,7 +27,7 @@ import {
   type MergeDraft, type MergeItem, type MergeJunction,
 } from '../domain/sourceCourse/merges';
 import {
-  hasActiveCorrection, hasCorrectionRecord, logicalSources, reviewLogicalBlock, saveDisplayedCorrection, undoDisplayedCorrection,
+  hasActiveCorrection, hasCorrectionRecord, hideBlocks, logicalSources, reviewLogicalBlock, saveDisplayedCorrection, undoDisplayedCorrection,
   savedBlock, workingPresentation,
 } from '../domain/sourceCourse/blockEdits';
 import {
@@ -231,6 +231,13 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
       if (saved && value === 'table') setPanel('table');
     } catch (reason) { setError(String(reason)); }
   }
+  async function hideCurrentBlock() {
+    if (!ref || locked.current) return;
+    try {
+      await commit(hideBlocks(base(), sources), 'Bloc caché. Il reste conservé dans la source mais disparaît du cours reconstitué et de la vérification manuelle.');
+    } catch (reason) { setError(String(reason)); }
+  }
+
   async function saveTable(next: BlockTable) {
     if (!ref) return;
     try {
@@ -739,7 +746,7 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
         {kind === 'table' ? null : imageOnly
           ? <Txt size={12} color={c.muted}>Figure ou tableau complexe : conservé en image originale (à droite). Jamais remplacé par du texte.</Txt>
           : <ScrollView nestedScrollEnabled style={{ maxHeight: wide ? 460 : 300 }}>
-              <SourcePresentationText presentation={presentation} size={16} heading={part.role === 'heading'} />
+              <SourcePresentationText presentation={presentation} size={16} heading={part.role === 'heading' || kind === 'h1' || kind === 'h2' || kind === 'h3' || kind === 'h4' || kind === 'h5'} />
             </ScrollView>}
         {panel === 'none' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           <Button title="À vérifier" secondary={status !== 'pending'} disabled={busy} onPress={() => setStatus('pending')} />
@@ -758,7 +765,8 @@ export function SourceCourseVerification({ packet, onClose, initialTarget }: Sou
           <Txt size={11} color={c.muted}>Classification du bloc</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             <Chip label="Texte normal" selected={!kind} onPress={() => changeKind(null)} />
-            {BLOCK_KINDS.map(k => <Chip key={k.id} label={k.label} selected={kind === k.id} onPress={() => changeKind(k.id)} />)}
+            {BLOCK_KINDS.filter(k => k.id !== 'toc').map(k => <Chip key={k.id} label={k.label} selected={kind === k.id} onPress={() => changeKind(k.id)} />)}
+            <Chip label="Cacher" selected={false} onPress={hideCurrentBlock} />
           </View>
           {kind === 'table' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <Button title={table ? 'Modifier le tableau numérique' : 'Reconstruire le tableau'} secondary onPress={() => setPanel('table')} />

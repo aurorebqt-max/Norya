@@ -9,7 +9,7 @@ import { useCourseReading, ReadingAction } from './CourseReadingTools';
 /** Only text spans change. Original characters, line breaks and link anchors stay intact. */
 export function CourseReadingText({ presentation, printedPage, blockId, heading = false, level, segment, associations = [], onAssociation }: {
   presentation: CoursePresentation; printedPage: number; blockId: string; heading?: boolean;
-  segment?: { start: number; end: number }; level?: 'h1' | 'h2' | 'h3' | 'h4'; associations?: ManualAssociation[]; onAssociation?: (link: ManualAssociation) => void;
+  segment?: { start: number; end: number }; level?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5'; associations?: ManualAssociation[]; onAssociation?: (link: ManualAssociation) => void;
 }) {
   const context = useCourseReading();
   const [nativeSelect, setNativeSelect] = useState(false);
@@ -43,14 +43,14 @@ export function CourseReadingText({ presentation, printedPage, blockId, heading 
       textDecorationStyle: hasNote && !link ? 'dotted' : 'solid',
       fontWeight: inlineHeading ? '600' : undefined, fontSize: inlineHeading ? 22 : undefined }}>{content}</Text>;
   });
-  const size = level === 'h1' ? 30 : level === 'h2' ? 26 : level === 'h3' ? 20 : level === 'h4' ? 17 : heading ? 23 : 17;
-  if (context?.language === 'fr' && !french) return <Text selectable style={{ color: c.ink, fontSize: size, lineHeight: size + 12, fontWeight: heading || level ? '600' : '400' }}>{french ?? 'Traduction française indisponible pour ce bloc.'}</Text>;
+  const size = level === 'h1' ? 30 : level === 'h2' ? 26 : level === 'h3' ? 20 : level === 'h4' ? 17 : level === 'h5' ? 15 : heading ? 23 : 17;
+  if (context?.language === 'fr' && !french) return <Text selectable style={{ color: c.ink, fontSize: size, lineHeight: size + 12, fontWeight: heading || level ? '600' : '400', textTransform: heading || level ? 'uppercase' : 'none' }}>{french ?? 'Traduction française indisponible pour ce bloc.'}</Text>;
   return <>
     <Text selectable accessibilityRole={heading || level ? 'header' : undefined} testID={level ? `course-${level}` : 'source-original-text'}
       {...(context?.enabled ? { dataSet: { readingKey: JSON.stringify([printedPage, blockId]), readingChapter: ref!.chapterId, readingStart: String(startAt) } } : {})}
       onLongPress={Platform.OS !== 'web' && context?.enabled ? () => setNativeSelect(true) : undefined}
       style={{ color: c.ink, fontSize: size, lineHeight: size + 12, fontWeight: heading || level ? '600' : '400',
-        marginTop: level ? 12 : 0, marginBottom: level ? 6 : 0 }}>
+        textTransform: heading || level ? 'uppercase' : 'none', marginTop: level ? 12 : 0, marginBottom: level ? 6 : 0 }}>
       {pieces.length === 1 ? pieces[0] : pieces}
     </Text>
     {context?.language === 'fr' && associations.filter(a => a.state === 'active').map(link =>

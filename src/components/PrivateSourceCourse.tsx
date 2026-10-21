@@ -238,7 +238,7 @@ export function PrivateSourceCourse({ managementAction, managementMenu, chapterI
             {mode==='Pages originales'&&<OriginalVisual image={page.image} ratio={page.height/page.width} wide={false} label={`Page originale ${page.printedPage}`} />}
             {mode==='Cours reconstitué'&&!shown.length&&<Txt>{packet.schemaVersion===2?'Aucun contenu à afficher pour cette section.':'Importez le paquet structuré pour afficher le cours.'}</Txt>}
             {mode==='Cours reconstitué'&&shown.map(item=>{
-              const heading=item.kind==='h2'||item.kind==='h3'||item.kind==='h4' ? item.kind : undefined;
+              const heading=item.kind==='h2'||item.kind==='h3'||item.kind==='h4'||item.kind==='h5' ? item.kind : undefined;
               const digital=item.kind==='table'&&item.table?.validated&&!item.table.keepOriginal ? item.table : undefined;
               return <View key={item.key} testID={`course-item-${item.blockId}`} onLayout={event=>registerItemOffset(item,event.nativeEvent.layout.y)}>
                 {heading && !associationList.some(value => value.source.printedPage === item.printedPage && value.source.blockId === item.blockId) ? <CourseReadingText level={heading} presentation={item.presentation} printedPage={item.printedPage} blockId={item.blockId} />

@@ -7,14 +7,15 @@ const HEADING = {
   h2: { size: 26, top: 18, weight: '700' as const, color: c.ink },
   h3: { size: 20, top: 12, weight: '600' as const, color: c.ink },
   h4: { size: 17, top: 8, weight: '600' as const, color: c.muted },
+  h5: { size: 15, top: 6, weight: '600' as const, color: c.muted },
 };
 
 /** Titres de section : H2 espacé, H3 intermédiaire, H4 plus discret ; texte exact et sélectionnable. */
-export function CourseHeading({ level, text }: { level: 'h2' | 'h3' | 'h4'; text: string }) {
+export function CourseHeading({ level, text }: { level: 'h2' | 'h3' | 'h4' | 'h5'; text: string }) {
   const style = HEADING[level];
   return <Text selectable accessibilityRole="header" testID={`course-${level}`}
     style={{ fontSize: style.size, lineHeight: style.size + 10, fontWeight: style.weight, color: style.color, marginTop: style.top, marginBottom: 6 }}>
-    {text}
+    {text.toLocaleUpperCase('ro-RO')}
   </Text>;
 }
 

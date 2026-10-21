@@ -19,11 +19,11 @@ export function SourcePresentationText({ presentation, size = 17, heading = fals
     ? presentation.text.slice(presentation.heading.length).trimStart() : presentation.text;
   return <View style={{ gap: 12 }}>
     {presentation.heading && <Text selectable accessibilityRole="header"
-      style={{ fontSize: size + 5, lineHeight: size + 13, color: c.ink, fontWeight: '600' }}>
+      style={{ fontSize: size + 5, lineHeight: size + 13, color: c.ink, fontWeight: '600', textTransform: 'uppercase' }}>
       {presentation.heading}
     </Text>}
     {body.split(/\n{2,}/u).filter(Boolean).map((paragraph, index) => <Text key={index} selectable accessibilityRole={heading ? 'header' : undefined}
-      testID="source-original-text" style={{ fontSize: heading ? size + 6 : size, lineHeight: size + 12, color: c.ink, fontWeight: heading ? '600' : '400' }}>
+      testID="source-original-text" style={{ fontSize: heading ? size + 6 : size, lineHeight: size + 12, color: c.ink, fontWeight: heading ? '600' : '400', textTransform: heading ? 'uppercase' : 'none' }}>
       {paragraph}
     </Text>)}
   </View>;
