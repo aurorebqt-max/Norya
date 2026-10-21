@@ -15,8 +15,8 @@ import { loadPrivateCourse } from '../services/storage/privateCourse';
 import type { SourcePacket } from '../domain/sourceCourse/packet';
 import type { CourseStructure } from '../domain/sourceCourse/courseStructure';
 
-export function CourseWorkspace({ chapterId, initialReview = false, onArchiveChange, onStructure }: {
-  chapterId: string; initialReview?: boolean; onArchiveChange?: (archive: FinalCourseArchive) => void;
+export function CourseWorkspace({ chapterId, initialReview = false, initialTarget, onArchiveChange, onStructure }: {
+  chapterId: string; initialReview?: boolean; initialTarget?: { printedPage?: number; blockId?: string }; onArchiveChange?: (archive: FinalCourseArchive) => void;
   onStructure?: (structure: CourseStructure) => void;
 }) {
   const [restorationNotice, setRestorationNotice] = useState('');
@@ -30,7 +30,7 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
   const [blockages, setBlockages] = useState<Blockage[]>([]);
   const [showBlockageDetails, setShowBlockageDetails] = useState(false);
   const [confirmation, setConfirmation] = useState<FinalizationEvidence | null>(null);
-  const [target, setTarget] = useState<{ printedPage?: number; blockId?: string; nonce: number }>();
+  const [target, setTarget] = useState<{ printedPage?: number; blockId?: string; nonce: number }>(initialTarget && (initialTarget.printedPage || initialTarget.blockId) ? { ...initialTarget, nonce: Date.now() } : undefined);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     let active = true;
@@ -38,6 +38,9 @@ export function CourseWorkspace({ chapterId, initialReview = false, onArchiveCha
     loadFinalCourse(chapterId).then(a => { if (active) setArchive(a); }).catch(e => { if (active) setError(String(e)); });
     return () => { active = false; };
   }, [chapterId, restoration]);
+  useEffect(() => {
+    if (initialTarget && (initialTarget.printedPage || initialTarget.blockId)) setTarget({ ...initialTarget, nonce: Date.now() });
+  }, [initialTarget?.printedPage, initialTarget?.blockId]);
   function changed(a: FinalCourseArchive) { setArchive(a); setConfirmation(null); setMenuOpen(false); onArchiveChange?.(a); }
   async function run(action: () => Promise<void>) {
     if (lock.current) return;

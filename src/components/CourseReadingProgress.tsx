@@ -45,11 +45,7 @@ export function CourseReadingProgress({ chapterId, structure, index, next }: {
         sourceSections: done, sourceSection: sections[Math.min(index + 1, sections.length - 1)]?.id,
         courseCompleted: true, updatedOn: today,
       } });
-      {
-        const questions = documentaryMap.find(c => c.id === chapterId)?.lesson?.questions;
-        if (questions?.length) router.push({ pathname: '/quiz', params: { chapter: chapterId } });
-        else setMessage('QCM bientôt disponibles');
-      }
+router.push({ pathname: '/quiz', params: { chapter: chapterId } });
     } catch (e) { setMessage(String(e)); } finally { lock.current = false; setBusy(false); }
   }
   if (!sections.length || index !== sections.length - 1) return null;
