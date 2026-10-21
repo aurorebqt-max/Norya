@@ -1,1 +1,22 @@
-Remplacez les deux fichiers aux chemins indiques. Commit sur main et attendez Production. Importez le JSON du chapitre 9 puis cliquez Remplacer le brouillon existant. Une sauvegarde est telechargee avant remplacement. Ne pas effacer les donnees Safari. Ne finalisez pas sans verification.
+Correctif Norya — QCM Supabase / entraînement / chapitres
+
+Fichiers modifiés uniquement :
+src/screens/QuestionBank.tsx
+src/services/cloud/qcmBank.ts
+src/screens/Quiz.tsx
+src/screens/Practice.tsx
+src/screens/Chapter.tsx
+src/components/CourseWorkspace.tsx
+src/components/CourseReadingProgress.tsx
+
+Fonctions :
+- conserve les modifications précédentes chapitre + partie
+- les QCM publiés/classés alimentent directement les entraînements
+- les anciens QCM statiques Norya ne sont plus utilisés dans les séances
+- les QCM publiés apparaissent depuis le chapitre correspondant
+- import de nouveaux PDF cumulatif dans Supabase (IDs dérivés du nom/année)
+- menu de navigation des questions : vert = publiée/classée, beige = brouillon
+- ajout manuel de questions toujours disponible
+- lien Voir dans le cours ouvre la page associée quand connue
+
+Aucun SQL nouveau.
