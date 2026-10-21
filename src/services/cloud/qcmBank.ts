@@ -52,5 +52,10 @@ export async function saveQcm(items:NoryaQcm[],publish:boolean):Promise<number>{
  await call('/rest/v1/norya_qcm?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});
  return rows.length;
 }
+export async function deleteQcm(id:string):Promise<void>{
+ if(!await isContentEditor())throw new Error('Seul un administrateur peut supprimer des QCM.');
+ if(!id.trim())throw new Error('Identifiant manquant.');
+ await call(`/rest/v1/norya_qcm?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{Prefer:'return=minimal'}});
+}
 export const qcmExportTemplate=()=>({format:'norya-qcm-batch',schemaVersion:1,chapters:examChapters.map(c=>({id:c.id,title:c.chapter,pages:c.pages})),instructions:'Conserver exactement id, stem, choices et les corrections. chapterIds peut rester vide en attendant un classement manuel. Affecter chapterIds parmi les IDs fournis si connus. Pour chaque proposition, ajouter chapterId, printedPage, blockId uniquement si une correspondance fiable est présente dans les cours fournis. Ne pas inventer des références. Laisser verified=false jusqu’à relecture. Retourner un JSON valide avec questions.',questions:[] as NoryaQcm[]});
 export function parseBatch(raw:string):NoryaQcm[]{const obj=JSON.parse(raw);if(obj?.format!=='norya-qcm-batch'||obj?.schemaVersion!==1||!Array.isArray(obj.questions))throw new Error('Format attendu : norya-qcm-batch, schemaVersion 1, questions[].');return obj.questions.map(validateQcm);}
