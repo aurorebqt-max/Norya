@@ -6,12 +6,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Screen, Card, Txt, Button, Chip, s } from '../components/ui';
 import { downloadPrivateJson, pickPrivateJson } from '../services/storage/chapterBackup';
 import { examChapters } from '../data/rezidentiat2026';
-import { isContentEditor, listSharedQcm, parseBatch, qcmExportTemplate, saveQcm, type NoryaQcm } from '../services/cloud/qcmBank';
+import { isContentEditor, listSharedQcm, parseBatch, qcmExportTemplate, saveQcm, deleteQcm, type NoryaQcm } from '../services/cloud/qcmBank';
 export default function QuestionBank(){
  const {chapterId}=useLocalSearchParams<{chapterId?:string}>();
  const [rows,setRows]=useState<{q:NoryaQcm;published:boolean}[]>([]),[editor,setEditor]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [pdfProgress,setPdfProgress]=useState('');
  const [editingId,setEditingId]=useState<string|null>(null),[questionDraft,setQuestionDraft]=useState('');
+ const [confirmDeleteId,setConfirmDeleteId]=useState<string|null>(null);
  const [draft,setDraft]=useState(''),[choices,setChoices]=useState<string[]>([]),[index,setIndex]=useState(0),[showCorrect,setShowCorrect]=useState(false);
  const refresh=async()=>{const [q,admin]=await Promise.all([listSharedQcm(),isContentEditor()]);setRows(q);setEditor(admin);};
  useEffect(()=>{void refresh().catch(e=>setError(String(e)));},[]);
@@ -29,13 +30,21 @@ export default function QuestionBank(){
   setDraft(JSON.stringify(value,null,2));
   setPdfProgress(`${value.questions.length} question(s) détectée(s). Vérifiez le JSON et ses pages brutes avant import : réponses et chapitres ne sont pas devinés.`);
  }
- const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);setEditingId(null);setQuestionDraft('');};
+ const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);setEditingId(null);setQuestionDraft('');setConfirmDeleteId(null);};
  const beginEdit=(q:NoryaQcm)=>{setEditingId(q.id);setQuestionDraft(JSON.stringify(q,null,2));};
- const saveEdit=async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setShowCorrect(false);setChoices([]);};
+ const beginAdd=()=>{setEditingId('__new__');setQuestionDraft(JSON.stringify({id:`manuel-${Date.now()}`,chapterIds:chapterId?[chapterId]:[],stem:'Nouvelle question à compléter',choices:[],verified:false},null,2));setConfirmDeleteId(null);};
+ const saveEdit=async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(editingId!=='__new__'&&item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setShowCorrect(false);setChoices([]);};
  return <Screen title="Banque de QCM" subtitle={chapterId?`QCM du chapitre ${chapterId}`:'Questions partagées validées et brouillons administrateur'} back>
   {!!error&&<Card><Txt>{error}</Txt></Card>}
   {editor&&<Card style={{gap:10}}>
    <Txt bold>Administration des QCM</Txt>
+   <Button title="Ajouter une question" secondary disabled={busy} onPress={beginAdd}/>
+   {editingId==='__new__'&&<View style={{gap:8}}>
+    <Txt size={12}>Complétez le JSON de la nouvelle question. Ajoutez les propositions dans choices ; verified reste false tant que les réponses ne sont pas connues.</Txt>
+    <TextInput multiline value={questionDraft} onChangeText={setQuestionDraft} accessibilityLabel="Nouvelle question JSON" style={[s.input,{minHeight:220,textAlignVertical:'top'}]}/>
+    <Button title="Enregistrer la nouvelle question en brouillon" disabled={busy} onPress={()=>void run(async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(rows.some(r=>r.q.id===item.id))throw new Error('Cet identifiant existe déjà.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setIndex(0);})}/>
+    <Button title="Annuler l’ajout" secondary onPress={()=>{setEditingId(null);setQuestionDraft('');}}/>
+   </View>}
    <Button title="Importer un PDF de QCM (brouillon local)" secondary disabled={busy} onPress={()=>void run(importPdf)}/>
    {!!pdfProgress&&<Txt size={12}>{pdfProgress}</Txt>}
    <Button title="Exporter le brouillon PDF/JSON pour ChatGPT" secondary disabled={!draft||busy} onPress={()=>{try{downloadPrivateJson('norya-qcm-a-classer.json',JSON.parse(draft));}catch(e){setError('Le JSON doit être valide pour être exporté.');}}}/>
@@ -53,6 +62,12 @@ export default function QuestionBank(){
    <Txt bold size={20}>{active.q.stem}</Txt>
    {active.q.choices.map(c=><Chip key={c.id} label={`${c.id}. ${c.text}`} selected={choices.includes(c.id)} onPress={()=>{if(!showCorrect)setChoices(prev=>prev.includes(c.id)?prev.filter(id=>id!==c.id):[...prev,c.id]);}}/>)}
    {editor&&<Button title="Modifier ce QCM (administrateur)" secondary disabled={busy} onPress={()=>editingId===active.q.id?setEditingId(null):beginEdit(active.q)}/>}
+   {editor&&<Button title="Supprimer cette question" secondary disabled={busy} onPress={()=>{setConfirmDeleteId(active.q.id);setEditingId(null);}}/>}
+   {editor&&confirmDeleteId===active.q.id&&<View style={{gap:8}}>
+    <Txt>Confirmer la suppression définitive de {active.q.id} ? Cette action supprimera ce QCM de Supabase pour tous les comptes.</Txt>
+    <Button title="Oui, supprimer définitivement" disabled={busy} onPress={()=>void run(async()=>{await deleteQcm(active.q.id);setConfirmDeleteId(null);await refresh();setIndex(0);})}/>
+    <Button title="Annuler" secondary onPress={()=>setConfirmDeleteId(null)}/>
+   </View>}
    {editor&&editingId===active.q.id&&<View style={{gap:8}}>
     <Txt size={12}>Modifiez l'énoncé (stem), les propositions (choices) et les chapitres (chapterIds). Pour une annale non corrigée, laissez verified à false et n'inventez pas les réponses.</Txt>
     <TextInput multiline value={questionDraft} onChangeText={setQuestionDraft} accessibilityLabel="Modifier le JSON de cette question" style={[s.input,{minHeight:280,textAlignVertical:'top'}]}/>
