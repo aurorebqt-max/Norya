@@ -29,7 +29,7 @@ import { colors as c } from '../design/theme';
 type ChapterMode = 'COURS SOURCE' | 'COURS COMPLET' | 'FICHES' | 'FLASHCARDS';
 
 export default function Chapter() {
-  const { id, section: requestedSection, sectionId: requestedSectionId } = useLocalSearchParams<{ id: string; section?: string; sectionId?: string }>();
+  const { id, section: requestedSection, sectionId: requestedSectionId, page: requestedPage, blockId: requestedBlockId } = useLocalSearchParams<{ id: string; section?: string; sectionId?: string; page?: string; blockId?: string }>();
   const [finalArchive, setFinalArchive] = useState<FinalCourseArchive | null>();
   const [hasPrivate, setHasPrivate] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function Chapter() {
     return <Screen title={id} back>
       <View style={s.wrap}><Chip label="Cours" selected={mode !== 'FICHES'} onPress={() => setMode('COURS SOURCE')} /><Chip label="Fiches" selected={mode === 'FICHES'} onPress={() => setMode('FICHES')} /></View>
       <Button title="QCM de ce chapitre" secondary onPress={() => router.push({pathname:'/question-bank',params:{chapterId:id}})} />
-      {mode === 'FICHES' ? <RevisionCardsViewer key={id} chapterId={id} archive={finalArchive ?? null} structure={structure} /> : <CourseWorkspace key={id} chapterId={id} onArchiveChange={setFinalArchive} onStructure={setStructure} />}
+      {mode === 'FICHES' ? <RevisionCardsViewer key={id} chapterId={id} archive={finalArchive ?? null} structure={structure} /> : <CourseWorkspace key={id} chapterId={id} initialTarget={{ ...(requestedPage ? { printedPage: Number(requestedPage) } : {}), ...(requestedBlockId ? { blockId: requestedBlockId } : {}) }} onArchiveChange={setFinalArchive} onStructure={setStructure} />}
     </Screen>;
   }
 
@@ -88,7 +88,6 @@ export default function Chapter() {
   const cards = romanianFlashcards.filter(card => card.objectiveId === id);
   const activePass = plan.passes.find(pass => pass.completed < pass.total)?.number ?? (profile.targetPasses ?? 2);
   const completedThisPass = reading.completedByPass?.[activePass] ?? [];
-  const sectionQuestions = lesson?.questions.filter(question => question.sectionIndex === index) ?? [];
   const selectedTerm = glossary.find(value => value.id === term);
   const estimate = lesson ? estimateLesson(lesson) : null;
   const sectionTables = section ? revisionTables[section.id ?? ''] ?? [] : [];
@@ -356,7 +355,7 @@ export default function Chapter() {
     ) : null}
 
     {reviewOpen && !hasPrivate && !finalArchive && <Pressable accessibilityRole="button" onPress={() => { setReviewOpen(false); setMode('COURS COMPLET'); }}><Txt size={12} color={c.primary}>Revenir au cours disponible</Txt></Pressable>}
-    {mode === 'FICHES' ? null : (mode === 'COURS SOURCE' || !lesson && mode === 'COURS COMPLET') && showSourceWorkspace ? <CourseWorkspace chapterId={id} initialReview={reviewOpen} onArchiveChange={setFinalArchive} onStructure={setStructure} /> : mode === 'COURS COMPLET' && lesson ? <CatalogCourseReader key={id} lesson={lesson} onReview={() => { setReviewOpen(true); setMode('COURS SOURCE'); }} /> : mode === 'FLASHCARDS' ? <Card>
+    {mode === 'FICHES' ? null : (mode === 'COURS SOURCE' || !lesson && mode === 'COURS COMPLET') && showSourceWorkspace ? <CourseWorkspace chapterId={id} initialReview={reviewOpen} initialTarget={{ ...(requestedPage ? { printedPage: Number(requestedPage) } : {}), ...(requestedBlockId ? { blockId: requestedBlockId } : {}) }} onArchiveChange={setFinalArchive} onStructure={setStructure} /> : mode === 'COURS COMPLET' && lesson ? <CatalogCourseReader key={id} lesson={lesson} onReview={() => { setReviewOpen(true); setMode('COURS SOURCE'); }} /> : mode === 'FLASHCARDS' ? <Card>
       <Txt bold size={21}>Mémoriser les notions du chapitre</Txt>
       <Txt>{cards.length} cartes liées aux cours et fiches. Les cartes sont consultables avant toute validation de partie ; les réponses et échéances restent enregistrées.</Txt>
       <Button title="Commencer les flashcards" disabled={busy || !cards.length} onPress={() => void save(async () => {
@@ -440,11 +439,9 @@ export default function Chapter() {
 
       {allPartsDone && <Card>
         <Txt bold>Chapitre terminé</Txt>
-        <Txt>{lesson?.questions.length
-          ? `${lesson.questions.length} QCM disponibles liés au chapitre. Leur relecture médicale n’est pas documentée ; le test est facultatif et ne bloque pas la validation de lecture.`
-          : 'Aucun QCM disponible pour le moment. Ta lecture reste enregistrée et tu peux terminer sans entraînement.'}</Txt>
-        {!!lesson?.questions.length && <Button title="Faire les QCM" onPress={() => router.push({ pathname: '/quiz', params: { chapter: id } })} />}
-        <Button title="Banque de QCM de ce chapitre" secondary onPress={() => router.push({pathname:'/question-bank',params:{chapterId:id}})} />
+        <Txt>Les QCM publiés et associés à ce chapitre sont récupérés directement depuis la banque Supabase. Les anciens QCM intégrés à l’application ne sont plus utilisés.</Txt>
+        <Button title="Faire les QCM de ce chapitre" onPress={() => router.push({ pathname: '/quiz', params: { chapter: id } })} />
+        <Button title="Voir la banque de QCM de ce chapitre" secondary onPress={() => router.push({pathname:'/question-bank',params:{chapterId:id}})} />
         <Button title="Faire plus tard" secondary onPress={() => router.replace('/library')} />
       </Card>}
     </>}
