@@ -45,16 +45,20 @@ export default function QuestionBank(){
   setChapterInput(chapterId||'');setConfirmDeleteId(null);
  };
  const updateChoice=(id:string,value:string)=>setQuestionDraft(prev=>prev?{...prev,choices:prev.choices.map(c=>c.id===id?{...c,text:value}:c)}:prev);
- const saveEdit=async()=>{
+ const toggleCorrect=(id:string)=>setQuestionDraft(prev=>prev?{...prev,choices:prev.choices.map(c=>c.id===id?{...c,correct:!c.correct}:c)}:prev);
+ const saveEdit=async(publish=false)=>{
   if(!questionDraft)throw new Error('Aucune question à enregistrer.');
   const chapterIds=chapterInput.split(',').map(v=>v.trim()).filter(Boolean);
   const invalid=chapterIds.filter(id=>!examChapters.some(c=>c.id===id));
   if(invalid.length)throw new Error(`Chapitre(s) inconnu(s) : ${invalid.join(', ')}. Laissez le champ vide pour classer plus tard.`);
-  const item={...questionDraft,chapterIds,choices:questionDraft.choices.filter(c=>c.text.trim()),verified:false};
+  const allFive=questionDraft.choices.map(c=>({...c,text:c.text.trim(),correct:!!c.correct}));
+  const item={...questionDraft,chapterIds,choices:publish?allFive:allFive.filter(c=>c.text),verified:publish};
   if(!item.stem.trim())throw new Error('Saisissez l’énoncé de la question.');
+  if(publish&&allFive.some(c=>!c.text))throw new Error('Pour ajouter cette question à la banque d’entraînement, complétez les cinq propositions A, B, C, D et E.');
+  if(publish&&!allFive.some(c=>c.correct))throw new Error('Cochez au moins une bonne réponse avant de valider cette question.');
   if(editingId!=='__new__'&&item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');
   if(editingId==='__new__'&&rows.some(r=>r.q.id===item.id))throw new Error('Cet identifiant existe déjà.');
-  await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft(null);setShowCorrect(false);setChoices([]);
+  await saveQcm([item],publish);await refresh();setEditingId(null);setQuestionDraft(null);setShowCorrect(false);setChoices([]);
   if(editingId==='__new__')setIndex(0);
  };
  const editForm=questionDraft&&<View style={{gap:10}}>
@@ -62,15 +66,18 @@ export default function QuestionBank(){
   <TextInput multiline value={questionDraft.stem} onChangeText={value=>setQuestionDraft(prev=>prev?{...prev,stem:value}:prev)} accessibilityLabel="Énoncé du QCM" placeholder="Saisir la question" style={[s.input,{minHeight:95,textAlignVertical:'top'}]}/>
   <Txt bold>Propositions (A à E)</Txt>
   <Txt size={12}>Les cases restent disponibles même si le PDF n’a pas reconnu les propositions. Laissez vides celles qui sont encore à transcrire.</Txt>
-  {questionDraft.choices.map(c=><View key={c.id} style={{gap:4}}>
+  {questionDraft.choices.map(c=><View key={c.id} style={{gap:6}}>
    <Txt bold>{c.id}</Txt>
    <TextInput multiline value={c.text} onChangeText={value=>updateChoice(c.id,value)} accessibilityLabel={`Proposition ${c.id}`} placeholder={`Texte de la proposition ${c.id}`} style={[s.input,{minHeight:55,textAlignVertical:'top'}]}/>
+   <Chip label={c.correct?'Bonne réponse ✓':'Marquer comme bonne réponse'} selected={!!c.correct} onPress={()=>toggleCorrect(c.id)}/>
   </View>)}
   <Txt bold>Chapitres associés (facultatif)</Txt>
   <TextInput value={chapterInput} onChangeText={setChapterInput} accessibilityLabel="Identifiants des chapitres" placeholder="Laisser vide pour classer plus tard" style={s.input}/>
   <Txt size={12}>Identifiants séparés par des virgules, par exemple kum-08, kum-09. Aucun chapitre n’est obligatoire.</Txt>
-  <Txt size={12}>Enregistrement en brouillon non vérifié : aucune réponse correcte n’est inventée et la question n’est pas publiée.</Txt>
-  <Button title="Enregistrer les modifications en brouillon" disabled={busy} onPress={()=>void run(saveEdit)}/>
+  <Txt size={12}>Les bonnes réponses cochées sont enregistrées même en brouillon. Elles restent privées tant que vous ne validez pas cette question.</Txt>
+  <Button title="Enregistrer en brouillon" disabled={busy} onPress={()=>void run(()=>saveEdit(false))}/>
+  <Button title="Valider et ajouter cette question à la banque" secondary disabled={busy} onPress={()=>void run(()=>saveEdit(true))}/>
+  <Txt size={12}>La validation publie uniquement cette question. Vous n’avez pas besoin de terminer les 200 QCM de l’annale. Il faut un énoncé, les cinq propositions A à E et au moins une bonne réponse.</Txt>
   <Button title="Annuler les modifications" secondary disabled={busy} onPress={()=>{setEditingId(null);setQuestionDraft(null);}}/>
  </View>;
  return <Screen title="Banque de QCM" subtitle={chapterId?`QCM du chapitre ${chapterId}`:'Questions partagées validées et brouillons administrateur'} back>
