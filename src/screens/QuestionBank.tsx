@@ -11,7 +11,8 @@ export default function QuestionBank(){
  const {chapterId}=useLocalSearchParams<{chapterId?:string}>();
  const [rows,setRows]=useState<{q:NoryaQcm;published:boolean}[]>([]),[editor,setEditor]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [pdfProgress,setPdfProgress]=useState('');
- const [editingId,setEditingId]=useState<string|null>(null),[questionDraft,setQuestionDraft]=useState('');
+ const [editingId,setEditingId]=useState<string|null>(null),[questionDraft,setQuestionDraft]=useState<NoryaQcm|null>(null);
+ const [chapterInput,setChapterInput]=useState('');
  const [confirmDeleteId,setConfirmDeleteId]=useState<string|null>(null);
  const [draft,setDraft]=useState(''),[choices,setChoices]=useState<string[]>([]),[index,setIndex]=useState(0),[showCorrect,setShowCorrect]=useState(false);
  const refresh=async()=>{const [q,admin]=await Promise.all([listSharedQcm(),isContentEditor()]);setRows(q);setEditor(admin);};
@@ -30,21 +31,54 @@ export default function QuestionBank(){
   setDraft(JSON.stringify(value,null,2));
   setPdfProgress(`${value.questions.length} question(s) détectée(s). Vérifiez le JSON et ses pages brutes avant import : réponses et chapitres ne sont pas devinés.`);
  }
- const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);setEditingId(null);setQuestionDraft('');setConfirmDeleteId(null);};
- const beginEdit=(q:NoryaQcm)=>{setEditingId(q.id);setQuestionDraft(JSON.stringify(q,null,2));};
- const beginAdd=()=>{setEditingId('__new__');setQuestionDraft(JSON.stringify({id:`manuel-${Date.now()}`,chapterIds:chapterId?[chapterId]:[],stem:'Nouvelle question à compléter',choices:[],verified:false},null,2));setConfirmDeleteId(null);};
- const saveEdit=async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(editingId!=='__new__'&&item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setShowCorrect(false);setChoices([]);};
+ const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);setEditingId(null);setQuestionDraft(null);setConfirmDeleteId(null);};
+ const blankChoices=()=>['A','B','C','D','E'].map(id=>({id,text:''}));
+ const beginEdit=(q:NoryaQcm)=>{
+  const byId=new Map(q.choices.map(c=>[c.id.toUpperCase(),c]));
+  setEditingId(q.id);
+  setQuestionDraft({...q,choices:['A','B','C','D','E'].map(id=>({...byId.get(id),id,text:byId.get(id)?.text||''}))});
+  setChapterInput(q.chapterIds.join(', '));setConfirmDeleteId(null);
+ };
+ const beginAdd=()=>{
+  setEditingId('__new__');
+  setQuestionDraft({id:`manuel-${Date.now()}`,chapterIds:chapterId?[chapterId]:[],stem:'',choices:blankChoices(),verified:false});
+  setChapterInput(chapterId||'');setConfirmDeleteId(null);
+ };
+ const updateChoice=(id:string,value:string)=>setQuestionDraft(prev=>prev?{...prev,choices:prev.choices.map(c=>c.id===id?{...c,text:value}:c)}:prev);
+ const saveEdit=async()=>{
+  if(!questionDraft)throw new Error('Aucune question à enregistrer.');
+  const chapterIds=chapterInput.split(',').map(v=>v.trim()).filter(Boolean);
+  const invalid=chapterIds.filter(id=>!examChapters.some(c=>c.id===id));
+  if(invalid.length)throw new Error(`Chapitre(s) inconnu(s) : ${invalid.join(', ')}. Laissez le champ vide pour classer plus tard.`);
+  const item={...questionDraft,chapterIds,choices:questionDraft.choices.filter(c=>c.text.trim()),verified:false};
+  if(!item.stem.trim())throw new Error('Saisissez l’énoncé de la question.');
+  if(editingId!=='__new__'&&item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');
+  if(editingId==='__new__'&&rows.some(r=>r.q.id===item.id))throw new Error('Cet identifiant existe déjà.');
+  await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft(null);setShowCorrect(false);setChoices([]);
+  if(editingId==='__new__')setIndex(0);
+ };
+ const editForm=questionDraft&&<View style={{gap:10}}>
+  <Txt bold>Énoncé de la question</Txt>
+  <TextInput multiline value={questionDraft.stem} onChangeText={value=>setQuestionDraft(prev=>prev?{...prev,stem:value}:prev)} accessibilityLabel="Énoncé du QCM" placeholder="Saisir la question" style={[s.input,{minHeight:95,textAlignVertical:'top'}]}/>
+  <Txt bold>Propositions (A à E)</Txt>
+  <Txt size={12}>Les cases restent disponibles même si le PDF n’a pas reconnu les propositions. Laissez vides celles qui sont encore à transcrire.</Txt>
+  {questionDraft.choices.map(c=><View key={c.id} style={{gap:4}}>
+   <Txt bold>{c.id}</Txt>
+   <TextInput multiline value={c.text} onChangeText={value=>updateChoice(c.id,value)} accessibilityLabel={`Proposition ${c.id}`} placeholder={`Texte de la proposition ${c.id}`} style={[s.input,{minHeight:55,textAlignVertical:'top'}]}/>
+  </View>)}
+  <Txt bold>Chapitres associés (facultatif)</Txt>
+  <TextInput value={chapterInput} onChangeText={setChapterInput} accessibilityLabel="Identifiants des chapitres" placeholder="Laisser vide pour classer plus tard" style={s.input}/>
+  <Txt size={12}>Identifiants séparés par des virgules, par exemple kum-08, kum-09. Aucun chapitre n’est obligatoire.</Txt>
+  <Txt size={12}>Enregistrement en brouillon non vérifié : aucune réponse correcte n’est inventée et la question n’est pas publiée.</Txt>
+  <Button title="Enregistrer les modifications en brouillon" disabled={busy} onPress={()=>void run(saveEdit)}/>
+  <Button title="Annuler les modifications" secondary disabled={busy} onPress={()=>{setEditingId(null);setQuestionDraft(null);}}/>
+ </View>;
  return <Screen title="Banque de QCM" subtitle={chapterId?`QCM du chapitre ${chapterId}`:'Questions partagées validées et brouillons administrateur'} back>
   {!!error&&<Card><Txt>{error}</Txt></Card>}
   {editor&&<Card style={{gap:10}}>
    <Txt bold>Administration des QCM</Txt>
    <Button title="Ajouter une question" secondary disabled={busy} onPress={beginAdd}/>
-   {editingId==='__new__'&&<View style={{gap:8}}>
-    <Txt size={12}>Complétez le JSON de la nouvelle question. Ajoutez les propositions dans choices ; verified reste false tant que les réponses ne sont pas connues.</Txt>
-    <TextInput multiline value={questionDraft} onChangeText={setQuestionDraft} accessibilityLabel="Nouvelle question JSON" style={[s.input,{minHeight:220,textAlignVertical:'top'}]}/>
-    <Button title="Enregistrer la nouvelle question en brouillon" disabled={busy} onPress={()=>void run(async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(rows.some(r=>r.q.id===item.id))throw new Error('Cet identifiant existe déjà.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setIndex(0);})}/>
-    <Button title="Annuler l’ajout" secondary onPress={()=>{setEditingId(null);setQuestionDraft('');}}/>
-   </View>}
+   {editingId==='__new__'&&editForm}
    <Button title="Importer un PDF de QCM (brouillon local)" secondary disabled={busy} onPress={()=>void run(importPdf)}/>
    {!!pdfProgress&&<Txt size={12}>{pdfProgress}</Txt>}
    <Button title="Exporter le brouillon PDF/JSON pour ChatGPT" secondary disabled={!draft||busy} onPress={()=>{try{downloadPrivateJson('norya-qcm-a-classer.json',JSON.parse(draft));}catch(e){setError('Le JSON doit être valide pour être exporté.');}}}/>
@@ -68,12 +102,7 @@ export default function QuestionBank(){
     <Button title="Oui, supprimer définitivement" disabled={busy} onPress={()=>void run(async()=>{await deleteQcm(active.q.id);setConfirmDeleteId(null);await refresh();setIndex(0);})}/>
     <Button title="Annuler" secondary onPress={()=>setConfirmDeleteId(null)}/>
    </View>}
-   {editor&&editingId===active.q.id&&<View style={{gap:8}}>
-    <Txt size={12}>Modifiez l'énoncé (stem), les propositions (choices) et les chapitres (chapterIds). Pour une annale non corrigée, laissez verified à false et n'inventez pas les réponses.</Txt>
-    <TextInput multiline value={questionDraft} onChangeText={setQuestionDraft} accessibilityLabel="Modifier le JSON de cette question" style={[s.input,{minHeight:280,textAlignVertical:'top'}]}/>
-    <Button title="Enregistrer les modifications en brouillon" disabled={busy} onPress={()=>void run(saveEdit)}/>
-    <Button title="Annuler les modifications" secondary onPress={()=>{setEditingId(null);setQuestionDraft('');}}/>
-   </View>}
+   {editor&&editingId===active.q.id&&editForm}
    <Button title="Corriger" disabled={showCorrect||!choices.length||!active.q.verified||active.q.choices.some(c=>typeof c.correct!=='boolean')} onPress={()=>setShowCorrect(true)}/>
    {!active.q.verified&&<Txt size={12}>Correction indisponible : réponses non vérifiées. L'administrateur peut modifier cette question.</Txt>}
    {showCorrect&&<>
