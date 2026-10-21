@@ -11,6 +11,7 @@ export default function QuestionBank(){
  const {chapterId}=useLocalSearchParams<{chapterId?:string}>();
  const [rows,setRows]=useState<{q:NoryaQcm;published:boolean}[]>([]),[editor,setEditor]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [pdfProgress,setPdfProgress]=useState('');
+ const [editingId,setEditingId]=useState<string|null>(null),[questionDraft,setQuestionDraft]=useState('');
  const [draft,setDraft]=useState(''),[choices,setChoices]=useState<string[]>([]),[index,setIndex]=useState(0),[showCorrect,setShowCorrect]=useState(false);
  const refresh=async()=>{const [q,admin]=await Promise.all([listSharedQcm(),isContentEditor()]);setRows(q);setEditor(admin);};
  useEffect(()=>{void refresh().catch(e=>setError(String(e)));},[]);
@@ -28,7 +29,9 @@ export default function QuestionBank(){
   setDraft(JSON.stringify(value,null,2));
   setPdfProgress(`${value.questions.length} question(s) détectée(s). Vérifiez le JSON et ses pages brutes avant import : réponses et chapitres ne sont pas devinés.`);
  }
- const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);};
+ const move=(next:number)=>{setIndex(next);setChoices([]);setShowCorrect(false);setEditingId(null);setQuestionDraft('');};
+ const beginEdit=(q:NoryaQcm)=>{setEditingId(q.id);setQuestionDraft(JSON.stringify(q,null,2));};
+ const saveEdit=async()=>{const item=parseBatch(JSON.stringify({format:'norya-qcm-batch',schemaVersion:1,questions:[JSON.parse(questionDraft)]}))[0];if(item.id!==editingId)throw new Error('Ne modifiez pas l’identifiant du QCM.');await saveQcm([item],false);await refresh();setEditingId(null);setQuestionDraft('');setShowCorrect(false);setChoices([]);};
  return <Screen title="Banque de QCM" subtitle={chapterId?`QCM du chapitre ${chapterId}`:'Questions partagées validées et brouillons administrateur'} back>
   {!!error&&<Card><Txt>{error}</Txt></Card>}
   {editor&&<Card style={{gap:10}}>
@@ -49,7 +52,15 @@ export default function QuestionBank(){
    <Txt size={12}>{index+1}/{visible.length} · {(active.q.chapterIds.length?active.q.chapterIds.map(id=>examChapters.find(c=>c.id===id)?.chapter||id).join(' / '):'À classer')} · {active.published?'Publiée':'Brouillon'}</Txt>
    <Txt bold size={20}>{active.q.stem}</Txt>
    {active.q.choices.map(c=><Chip key={c.id} label={`${c.id}. ${c.text}`} selected={choices.includes(c.id)} onPress={()=>{if(!showCorrect)setChoices(prev=>prev.includes(c.id)?prev.filter(id=>id!==c.id):[...prev,c.id]);}}/>)}
-   <Button title="Corriger" disabled={showCorrect||!choices.length} onPress={()=>setShowCorrect(true)}/>
+   {editor&&<Button title="Modifier ce QCM (administrateur)" secondary disabled={busy} onPress={()=>editingId===active.q.id?setEditingId(null):beginEdit(active.q)}/>}
+   {editor&&editingId===active.q.id&&<View style={{gap:8}}>
+    <Txt size={12}>Modifiez l'énoncé (stem), les propositions (choices) et les chapitres (chapterIds). Pour une annale non corrigée, laissez verified à false et n'inventez pas les réponses.</Txt>
+    <TextInput multiline value={questionDraft} onChangeText={setQuestionDraft} accessibilityLabel="Modifier le JSON de cette question" style={[s.input,{minHeight:280,textAlignVertical:'top'}]}/>
+    <Button title="Enregistrer les modifications en brouillon" disabled={busy} onPress={()=>void run(saveEdit)}/>
+    <Button title="Annuler les modifications" secondary onPress={()=>{setEditingId(null);setQuestionDraft('');}}/>
+   </View>}
+   <Button title="Corriger" disabled={showCorrect||!choices.length||!active.q.verified||active.q.choices.some(c=>typeof c.correct!=='boolean')} onPress={()=>setShowCorrect(true)}/>
+   {!active.q.verified&&<Txt size={12}>Correction indisponible : réponses non vérifiées. L'administrateur peut modifier cette question.</Txt>}
    {showCorrect&&<>
     <Txt bold>{active.q.choices.every(c=>choices.includes(c.id)===c.correct)?'Réponse correcte':'À revoir'}</Txt>
     {active.q.choices.map(c=><View key={c.id} style={{gap:3}}><Txt>{c.id} : {c.correct?'Vrai':'Faux'}{c.explanation?` — ${c.explanation}`:''}</Txt>
