@@ -1,22 +1,15 @@
-Correctif Norya — QCM Supabase / entraînement / chapitres
+Correctif menu Partie du chapitre pour les QCM.
 
-Fichiers modifiés uniquement :
+Fichier modifié :
 src/screens/QuestionBank.tsx
-src/services/cloud/qcmBank.ts
-src/screens/Quiz.tsx
-src/screens/Practice.tsx
-src/screens/Chapter.tsx
-src/components/CourseWorkspace.tsx
-src/components/CourseReadingProgress.tsx
 
-Fonctions :
-- conserve les modifications précédentes chapitre + partie
-- les QCM publiés/classés alimentent directement les entraînements
-- les anciens QCM statiques Norya ne sont plus utilisés dans les séances
-- les QCM publiés apparaissent depuis le chapitre correspondant
-- import de nouveaux PDF cumulatif dans Supabase (IDs dérivés du nom/année)
-- menu de navigation des questions : vert = publiée/classée, beige = brouillon
-- ajout manuel de questions toujours disponible
-- lien Voir dans le cours ouvre la page associée quand connue
+Remplacer uniquement ce fichier dans GitHub puis commit sur main.
 
-Aucun SQL nouveau.
+Nouveau comportement :
+- le menu ne reprend plus le simple scope Thematica/H1 ;
+- il lit le cours réellement enregistré du chapitre ;
+- affiche les H2 comme grandes parties ;
+- affiche les H3 en retrait sous les H2 ;
+- le choix enregistre la page et le blockId exacts ;
+- « Voir dans le cours » ouvre le passage choisi quand il existe ;
+- si aucun cours/H2/H3 n'est disponible localement, le QCM peut rester associé au chapitre entier.
